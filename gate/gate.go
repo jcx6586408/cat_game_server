@@ -25,7 +25,8 @@ func main() {
 	s.MsgHandler = MsgHandler
 	s.UserHandler = UserHandler
 
-	handler.RankInstance.Run(conf.Rank.Port) // 排行榜注册
+	handler.RankInstance.Run(conf.Rank.Port)       // 排行榜注册
+	handler.StorageInstance.Run(conf.Storage.Port) // 存储注册
 
 	s.Run() // 运行中心服
 }
@@ -41,7 +42,6 @@ func MsgHandler(data []byte, c *client.Client) {
 	msg.Val = subMsg
 	// 获取处理器
 	handler, ok := client.GetHanlder(subMsg.ID)
-	catLog.Log("消息ID", subMsg.ID)
 	if ok {
 		Chan := handler.Chan
 		Chan <- *msg

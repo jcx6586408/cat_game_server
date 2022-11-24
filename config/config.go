@@ -13,6 +13,7 @@ type Config struct {
 	Wx      *Wx      `json:"wx"`      // 微信openid配置
 	Storage *Storage `json:"storage"` // 游戏存储
 	Game    *Game    `json:"game"`    // 游戏逻辑服
+	DB      string   `json:"DB"`      // 数据库连接路径
 }
 
 type Base struct {
@@ -71,7 +72,7 @@ func (c *Config) GetModules() *(map[int]*Base) {
 
 func Read() *Config {
 	conf := &Config{}
-	data, err := ioutil.ReadFile("../server.json")
+	data, err := ioutil.ReadFile("./server.json")
 	if err != nil {
 		panic(err)
 	}

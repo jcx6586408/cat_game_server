@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package msg;
+
+option go_package = "/msg";
+
+service Storage {
+    rpc LoginStorage (LoginStorageRequest) returns (SuccessStateReply) {}           // 登录消息
+    rpc OffLineStorage (OffLineStorageRequest) returns (SuccessStateReply) {}       // 离线消息
+    rpc UpdateStorage (UpdateStorageRequest) returns (SuccessStateReply) {}         // 更新消息
+    rpc PullStorage (PullStorageRequest) returns (PullStorageReply) {}              // 拉取消息
+}
+
+message LoginStorageRequest {
+    string Uuid = 1;
+    string Uid = 2;
+}
+
+message SuccessStateReply {
+    int32 state = 1;
+}
+
+message OffLineStorageRequest {
+    string Uuid = 1;
+}
+
+message UpdateStorageRequest {
+    string Uuid = 1;
+    string Uid = 2;
+    string Key = 3;
+    string Value = 4;
+}
+
+message PullStorageRequest {
+    string Uuid = 1;
+    string Uid = 2;
+    string Key = 3;
+}
+
+message PullStorageReply {
+    string value = 1;
+}

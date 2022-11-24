@@ -12,8 +12,9 @@ import (
 )
 
 type Rank struct {
-	cat  *CatClass
-	Conn *grpc.ClientConn
+	cat         *CatClass
+	Conn        *grpc.ClientConn
+	innerClient msg.HelloClient
 }
 
 func NewRank() *Rank {
@@ -32,7 +33,7 @@ func (s *Rank) Run(port string) {
 		fmt.Println("connect server failed,", err)
 	}
 	s.Conn = conn
-
+	s.innerClient = msg.NewHelloClient(s.Conn)
 	// 注册消息
 	s.cat.Register(remotemsg.RANKUPDATE, update)
 }
