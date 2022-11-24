@@ -1,0 +1,42 @@
+{
+    "gate":{
+        "ID": 1000,
+        "port":":8080",
+        "httpsPort":":8443",
+        "listenerType": [
+            "http"
+        ]
+    },
+    "excel": {
+        "ID": 2000,
+        "port":":50050"
+    },
+    "rank": {
+        "ID": 3000,
+        "port":":50051",
+        "worldRankCount": 1000,
+        "countryRankCount": 1000,
+        "provinceRankCount": 200,
+        "cityRankCount": 50
+    },
+    "crt": {
+        "ID": 4000,
+        "port":":50052",
+        "crt": "./ssl/Nginx/1_kampfiregames.cn_bundle.crt",
+        "crtKey": "./ssl/Nginx/2_kampfiregames.cn.key"
+    },
+    "wx": {
+        "ID": 5000,
+        "port":":50053",
+        "appid": "wx644bf3a4289948c4",
+        "appSecret": "00a4fd27ea763e81625313ce4f0c0527"
+    },
+    "storage": {
+        "ID": 6000,
+        "port":":50054"
+    },
+    "game":{
+        "ID":7000,
+        "port":":50055"
+    }
+}

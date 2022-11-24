@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package msg;
+
+option go_package = "/msg";
+
+service Greeter {
+  rpc DiamondRankUpdate (UpdateRequest) returns (UpdateReply) {}
+}
+
+message UpdateRequest {
+  string name = 1;
+}
+
+message UpdateReply {
+  string message = 1;
+}
+

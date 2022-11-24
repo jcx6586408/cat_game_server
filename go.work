@@ -1,0 +1,14 @@
+go 1.18
+
+use (
+	./excel
+	./gate
+	./rank
+	./storage
+	./catLog
+	./server
+	./config
+	./wx
+	./proto
+	./remotemsg
+)
