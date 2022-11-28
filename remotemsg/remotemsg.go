@@ -33,4 +33,5 @@ const (
 	ROOMPREPARE       = 309 // 准备
 	ROOMPREPARECANCEL = 310 // 取消准备
 	ROOMCHANGEMASTER  = 311 // 转移房主
+	ROOMTIME          = 312 // 计时
 )

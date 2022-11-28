@@ -58,6 +58,27 @@ func CreateRoom() {
 			}
 			// 打印返回值
 			catLog.Log("返回房间消息——", res.RoomID)
+
+			switch res.MsgID {
+			case remotemsg.ROOMADD:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			case remotemsg.ROOMLEAVE:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			case remotemsg.ROOMPREPARE:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			case remotemsg.ROOMPREPARECANCEL:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			case remotemsg.ROOMOVER:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			case remotemsg.ROOMSTARTPLAY:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			case remotemsg.ROOMENDPLAY:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			case remotemsg.ROOMANSWEREND:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			case remotemsg.ROOMTIME:
+				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
+			}
 		}
 	}()
 }

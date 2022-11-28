@@ -73,6 +73,18 @@ func (m *RoomManager) ToUsingRoom(room *Room) {
 	catLog.Log("使用房间数量_", len(m.UsingRooms))
 }
 
+func (m *RoomManager) OverRoom(roomID int, member *msg.Member) error {
+	lock.Lock()
+	for _, v := range m.PrepareRooms {
+		if v.ID == roomID {
+			v.Close()
+			return nil
+		}
+	}
+	lock.Unlock()
+	return errors.New("找不到房间")
+}
+
 // 创建房间
 func (m *RoomManager) CreateRoom(member *msg.Member) *Room {
 	lock.Lock() // 锁住

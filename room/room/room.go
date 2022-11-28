@@ -29,6 +29,7 @@ type Room struct {
 	ChangeMasterChan  chan *msg.Member // 转移房主通知
 	AnswerChan        chan interface{} // 回答消息通知
 	OverChan          chan interface{} // 房间结束解散通知
+	TimeChan          chan int         // 计时通知
 	Lock              sync.RWMutex
 }
 
@@ -80,8 +81,10 @@ func (m *Room) StartPlay() {
 				// 广播时间
 				catLog.Log("房间_", m.ID, "计时_", m.Cur)
 				m.Cur++
+				m.TimeChan <- m.Cur
 				if m.Cur%m.AnswerTime == 0 {
 					catLog.Log("房间_", m.ID, "答题结束，下一题")
+					m.AnswerChan <- 1
 				}
 			}
 
@@ -92,13 +95,7 @@ func (m *Room) StartPlay() {
 // 关闭房间
 func (m *Room) Close() {
 	catLog.Log("房间关闭", len(m.PlayingMembers), len(m.PrepareMembers))
-	// 回收成员
-	for _, v := range m.PlayingMembers {
-		RecycleMember(v)
-	}
-	for _, v := range m.PrepareMembers {
-		RecycleMember(v)
-	}
+	m.OverChan <- 1
 	// 清理房间
 	m.PrepareMembers = m.PrepareMembers[0:0]
 	m.PlayingMembers = m.PlayingMembers[0:0]

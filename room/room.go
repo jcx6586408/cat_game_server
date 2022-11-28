@@ -16,8 +16,11 @@ type MsgRoom struct {
 	msg.RoomServer
 }
 
-func (s *MsgRoom) Over(context.Context, *msg.OverRequest) (*msg.RoomChangeState, error) {
-
+func (s *MsgRoom) Over(ctx context.Context, req *msg.OverRequest) (*msg.RoomChangeState, error) {
+	err := room.Manager.OverRoom(int(req.RoomID), req.Member)
+	if err != nil {
+		return nil, err
+	}
 	return &msg.RoomChangeState{State: 1}, nil
 }
 
@@ -41,16 +44,18 @@ func (s *MsgRoom) Add(ctx context.Context, req *msg.AddRequest) (*msg.RoomChange
 func (s *MsgRoom) Create(req *msg.CreateRoomRequest, srv msg.Room_CreateServer) error {
 	catLog.Log("******************房间创建请求******************")
 	msgMember := req.Member
-	// 创建房主
-	member := room.NewMember(
-		msgMember.Uuid,
-		msgMember.Uid,
-		msgMember.Nickname,
-		msgMember.Icon,
-		true,
-		false,
-	)
-	subRoom := room.Manager.CreateRoom(member)
+	subRoom := room.Manager.CreateRoom(msgMember)
+
+	var send = func(msgID int32, m *msg.Member) {
+		srv.Send(&msg.CreateRoomReply{
+			RoomID:         int32(subRoom.ID),
+			PrepareMembers: subRoom.PlayingMembers,
+			PlayingMembers: subRoom.PlayingMembers,
+			Progress:       int32(subRoom.Cur),
+			ChangeMemeber:  m,
+			MsgID:          msgID,
+		})
+	}
 
 loop:
 	for {
@@ -59,74 +64,24 @@ loop:
 			catLog.Log("房间结束计时")
 			break loop
 		case <-subRoom.StartPlayChan: // 游戏开始通知
-			srv.Send(&msg.CreateRoomReply{
-				RoomID:         int32(subRoom.ID),
-				PrepareMembers: subRoom.PlayingMembers,
-				PlayingMembers: subRoom.PlayingMembers,
-				Progress:       int32(subRoom.Cur),
-				MsgID:          remotemsg.ROOMSTARTPLAY,
-			})
-
+			send(remotemsg.ROOMSTARTPLAY, nil)
 		case <-subRoom.EndPlayChan: // 游戏结束通知
-			srv.Send(&msg.CreateRoomReply{
-				RoomID:         int32(subRoom.ID),
-				PrepareMembers: subRoom.PlayingMembers,
-				PlayingMembers: subRoom.PlayingMembers,
-				Progress:       int32(subRoom.Cur),
-			})
+			send(remotemsg.ROOMOVER, nil)
 		case changeMember := <-subRoom.AddMemberChan: // 加人通知
-			srv.Send(&msg.CreateRoomReply{
-				RoomID:         int32(subRoom.ID),
-				PrepareMembers: subRoom.PlayingMembers,
-				PlayingMembers: subRoom.PlayingMembers,
-				Progress:       int32(subRoom.Cur),
-				ChangeMemeber:  changeMember,
-			})
+			send(remotemsg.ROOMADD, changeMember)
 		case changeMember := <-subRoom.LeaveMemberChan: // 离开人通知
-			srv.Send(&msg.CreateRoomReply{
-				RoomID:         int32(subRoom.ID),
-				PrepareMembers: subRoom.PlayingMembers,
-				PlayingMembers: subRoom.PlayingMembers,
-				Progress:       int32(subRoom.Cur),
-				ChangeMemeber:  changeMember,
-			})
+			send(remotemsg.ROOMLEAVE, changeMember)
 		case changeMember := <-subRoom.PrepareChan: // 准备通知
-			srv.Send(&msg.CreateRoomReply{
-				RoomID:         int32(subRoom.ID),
-				PrepareMembers: subRoom.PlayingMembers,
-				PlayingMembers: subRoom.PlayingMembers,
-				Progress:       int32(subRoom.Cur),
-				ChangeMemeber:  changeMember,
-				MsgID:          remotemsg.ROOMPREPARE,
-			})
+			send(remotemsg.ROOMPREPARE, changeMember)
 		case changeMember := <-subRoom.PrepareCancelChan: // 取消准备通知
-			srv.Send(&msg.CreateRoomReply{
-				RoomID:         int32(subRoom.ID),
-				PrepareMembers: subRoom.PlayingMembers,
-				PlayingMembers: subRoom.PlayingMembers,
-				Progress:       int32(subRoom.Cur),
-				ChangeMemeber:  changeMember,
-				MsgID:          remotemsg.ROOMPREPARECANCEL,
-			})
+			send(remotemsg.ROOMPREPARECANCEL, changeMember)
 		case changeMember := <-subRoom.ChangeMasterChan: // 房主变更通知
-			srv.Send(&msg.CreateRoomReply{
-				RoomID:         int32(subRoom.ID),
-				PrepareMembers: subRoom.PlayingMembers,
-				PlayingMembers: subRoom.PlayingMembers,
-				Progress:       int32(subRoom.Cur),
-				ChangeMemeber:  changeMember,
-				MsgID:          remotemsg.ROOMCHANGEMASTER,
-			})
+			send(remotemsg.ROOMCHANGEMASTER, changeMember)
 		case <-subRoom.AnswerChan: // 回答问题通知
-			srv.Send(&msg.CreateRoomReply{
-				RoomID:         int32(subRoom.ID),
-				PrepareMembers: subRoom.PlayingMembers,
-				PlayingMembers: subRoom.PlayingMembers,
-				Progress:       int32(subRoom.Cur),
-				MsgID:          remotemsg.ROOMANSWEREND,
-			})
+			send(remotemsg.ROOMANSWEREND, nil)
+		case <-subRoom.TimeChan:
+			send(remotemsg.ROOMTIME, nil)
 		}
-
 	}
 	return nil
 }
