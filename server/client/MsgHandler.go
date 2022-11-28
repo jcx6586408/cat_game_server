@@ -13,7 +13,9 @@ var msgHanlders = make(map[int]*MsgHandler)
 // AddHandler 加入消息处理器
 func RegisterHandler(handler *MsgHandler) {
 	catLog.Log("注册消息ID: ", handler.MsgID)
+	lock.Lock()
 	msgHanlders[handler.MsgID] = handler
+	lock.Unlock()
 }
 
 // GetHanlder 获取处理器

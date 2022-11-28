@@ -13,6 +13,7 @@ type Config struct {
 	Wx      *Wx      `json:"wx"`      // 微信openid配置
 	Storage *Storage `json:"storage"` // 游戏存储
 	Game    *Game    `json:"game"`    // 游戏逻辑服
+	Room    *Base    `json:"room"`    // 游戏房间
 	DB      string   `json:"DB"`      // 数据库连接路径
 }
 

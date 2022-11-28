@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package msg;
+
+option go_package = "/msg";
+
+service Room {
+    rpc Create (CreateRoomRequest) returns (stream CreateRoomReply){}       // 创建房间
+    rpc Add (AddRequest) returns (RoomChangeState){}                            // 加入房间
+    rpc Leave (LeaveRequest) returns (RoomChangeState){}                          // 离开房间
+    rpc Over (OverRequest) returns (RoomChangeState){}                           // 解散房间
+}
+
+message CreateRoomRequest {
+    Member member = 1;          // 成员信息
+}
+
+message AddRequest {
+    int32 RoomID = 2;           // 要加入的房间ID
+    Member member = 1;          // 要加入的成员
+}
+
+message LeaveRequest {
+    int32 RoomID = 2;           // 要加入的房间ID
+    Member member = 1;          // 要加入的成员
+}
+
+message OverRequest {
+    int32 RoomID = 2;           // 要加入的房间ID
+    Member member = 1;          // 要加入的成员
+}
+
+message Member {
+    string Uuid = 1;            // 用户服务端uuid
+    string Uid = 2;             // 用户Uid
+    string Nickname =3;         // 用户昵称
+    string Icon = 4;            // 用户头像
+    bool IsMaster = 5;          // 是否房主
+    bool IsRobot = 6;           // 是否是机器人
+    repeated int32 Answer = 7;           // 回答
+}
+
+message CreateRoomReply {
+    int32 RoomID = 1;           // 房间ID
+    repeated Member PrepareMembers = 2;       // 准备成员列表
+    repeated Member PlayingMembers = 3;       // 准备成员列表
+    int32 Progress = 4;         // 当前进程(时间秒)
+    int32 MsgID = 5;    // 消息ID
+    Member ChangeMemeber = 6; // 变更成员
+}
+
+message RoomChangeState {
+    int32 State = 1;
+}
+

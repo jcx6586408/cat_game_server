@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"catLog"
 	"server/client"
 )
 
@@ -9,7 +8,6 @@ var CatModels = []CatModule{}
 
 type CatModule interface {
 	Clear() // 服务器关闭时进行清理
-	SetClient(*client.Client)
 	GetDone() chan interface{}
 	GetOfflineChan() chan string
 }
@@ -22,7 +20,6 @@ type CatClass struct {
 
 func AddModel(m CatModule) {
 	CatModels = append(CatModels, m)
-	catLog.Log("加入模块", len(CatModels))
 }
 
 func (cat *CatClass) New() {
@@ -34,17 +31,12 @@ func (s *CatClass) GetDone() chan interface{} {
 	return s.Done
 }
 
-func (s *CatClass) SetClient(c *client.Client) {
-	s.Client = c
-}
-
 func (s *CatClass) GetOfflineChan() chan string {
 	return s.OffLineChan
 }
 
 func RegisterOffline(c *client.Client) {
 	for _, v := range CatModels {
-		v.SetClient(c)
 		go func(m CatModule) {
 			for {
 				select {

@@ -27,6 +27,7 @@ func main() {
 
 	handler.RankInstance.Run(conf.Rank.Port)       // 排行榜注册
 	handler.StorageInstance.Run(conf.Storage.Port) // 存储注册
+	handler.RoomInstance.Run(conf.Room.Port)       // 房间注册
 
 	s.Run() // 运行中心服
 }

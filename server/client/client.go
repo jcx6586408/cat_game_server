@@ -17,6 +17,8 @@ type Client struct {
 
 var clients = make(map[string]*Client)
 
+var lock sync.RWMutex
+
 func New(uuid string, ws *websocket.Conn, r *http.Request) *Client {
 	c := &Client{}
 	c.Uuid = uuid
@@ -36,7 +38,9 @@ func GetClient(uid string) (c *Client, ok bool) {
 
 // AddClient 添加客户端链接
 func AddClient(client *Client) {
+	lock.Lock()
 	clients[client.Uuid] = client
+	lock.Unlock()
 }
 
 // Dele 删除链接

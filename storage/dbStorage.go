@@ -40,16 +40,19 @@ func CreateTable() {
 
 func SaveToDB(uu *UserStorage) <-chan interface{} {
 	c := make(chan interface{})
+	catLog.Log("玩家下线，开始保存玩家数据")
 	go func() {
 		defer close(c)
 		cc := queryuser(uu.Uid)
 		result := <-cc
+		catLog.Log("查询结果", result)
 		if result == 1 {
 			catLog.Log("开始查询角色")
 			u := toDbUser(uu)
 			ccc := updateuser(uu.Uid, "Forever", u.Forever)
 			<-ccc
 		} else {
+			catLog.Log("开始插入", result)
 			ccc := insectuser(uu)
 			<-ccc
 		}
@@ -125,11 +128,13 @@ func queryuser(uid string) <-chan interface{} {
 	c := make(chan interface{})
 	go func() {
 		defer close(c)
-		row, err := DB.Query("SELECT * FROM user where uid=" + uid)
+		row, err := DB.Query("SELECT id, uid, Forever FROM user where uid='" + uid + "'")
 		if err != nil {
+			catLog.Log("查询不到玩家", err, uid)
 			c <- 2
 			return
 		}
+		catLog.Log("查询玩家数量")
 		for row.Next() {
 			var id int
 			var uid string
