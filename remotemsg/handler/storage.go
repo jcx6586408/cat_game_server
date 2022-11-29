@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"proto/msg"
 	"remotemsg"
+	"server"
 	"server/client"
 
 	"google.golang.org/grpc"
@@ -16,6 +17,7 @@ type Storage struct {
 	cat         *CatClass
 	Conn        *grpc.ClientConn
 	innerClient msg.StorageClient
+	S           *server.Server
 }
 
 func NewStorage() *Storage {
@@ -28,7 +30,8 @@ func NewStorage() *Storage {
 
 var StorageInstance *Storage = NewStorage()
 
-func (s *Storage) Run(port string) {
+func (s *Storage) Run(port string, ss *server.Server) {
+	s.S = ss
 	conn, err := grpc.Dial(port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("connect server failed,", err)
@@ -83,7 +86,11 @@ func updateStorage(data client.Msg) {
 	if err != nil {
 		return
 	}
-	data.Client.Write(remotemsg.STORAGEUPDATE, r.State)
+	data.Client.MsgChan <- &client.BackMsg{
+		MsgID: remotemsg.STORAGEUPDATE,
+		Val:   r.State,
+	}
+	// data.Client.Write(remotemsg.STORAGEUPDATE, r.State)
 }
 
 func pullStorage(data client.Msg) {
@@ -99,6 +106,9 @@ func pullStorage(data client.Msg) {
 		return
 	}
 	catLog.Log("拉取存储信息", r.Value)
-
-	data.Client.Write(remotemsg.STORAGE, r.Value)
+	data.Client.MsgChan <- &client.BackMsg{
+		MsgID: remotemsg.STORAGE,
+		Val:   r.Value,
+	}
+	// data.Client.Write(remotemsg.STORAGE, r.Value)
 }

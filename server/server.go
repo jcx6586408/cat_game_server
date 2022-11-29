@@ -15,25 +15,74 @@ import (
 )
 
 type Server struct {
-	ID           int                                // 服务器ID
-	Name         string                             // 服务器名字
-	Host         string                             // 监听域名
-	ListenerType []string                           // 监听类型
-	Port         string                             // 监听http端口
-	HttpsPort    string                             // 监听https端口
-	CertFile     string                             // 证书crt
-	KeyFile      string                             // 证书key
-	upgrader     websocket.Upgrader                 // websocket升级类
-	UserHandler  func(c *client.Client)             // 用户处理器
-	MsgHandler   func(msg []byte, c *client.Client) // 消息处理器
+	ID             int                                // 服务器ID
+	Name           string                             // 服务器名字
+	Host           string                             // 监听域名
+	ListenerType   []string                           // 监听类型
+	Port           string                             // 监听http端口
+	HttpsPort      string                             // 监听https端口
+	CertFile       string                             // 证书crt
+	KeyFile        string                             // 证书key
+	upgrader       websocket.Upgrader                 // websocket升级类
+	UserHandler    func(c *client.Client)             // 用户处理器
+	MsgHandler     func(msg []byte, c *client.Client) // 消息处理器
+	Clients        map[string]*client.Client          // 接入的客户端
+	ConnectChan    chan *client.Client                // 客户端接入管道
+	DisConnectChan chan *client.Client                // 客户端断开连接管道
+	Done           chan interface{}                   // 关闭服务
+}
+
+func New() *Server {
+	s := &Server{}
+	s.Done = make(chan interface{})
+	s.ConnectChan = make(chan *client.Client)
+	s.DisConnectChan = make(chan *client.Client)
+	s.Clients = make(map[string]*client.Client)
+	return s
+}
+
+// Dele 删除链接
+func (s *Server) Dele(c *client.Client) {
+	s.DisConnectChan <- c
+}
+
+// 获取客户端
+func (s *Server) GetClient(uuid string) (*client.Client, bool) {
+	client, ok := s.Clients[uuid]
+	return client, ok
 }
 
 func (s *Server) Run() {
 	http.HandleFunc("/ws", s.wsEndpoint)
 	s.upgrader = websocket.Upgrader{
-		ReadBufferSize:  4096,
-		WriteBufferSize: 4096,
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
 	}
+
+	// 启动客户端接入处理
+	go func() {
+		for {
+			select {
+			case <-s.Done:
+				return
+			case c := <-s.ConnectChan:
+				s.Clients[c.Uuid] = c
+				catLog.Log("接入连接", c.Uuid)
+				s.UserHandler(c)
+			case c := <-s.DisConnectChan:
+				uuid := c.Uuid
+				catLog.Log("断开连接", uuid)
+				c.Ws.Close()
+				close(c.C) // 通知当前连接已经关闭
+				_, ok := s.Clients[uuid]
+				if ok {
+					delete(s.Clients, uuid)
+				}
+			}
+		}
+	}()
+
+	// 启动监听
 	for _, v := range s.ListenerType {
 		if v == "http" {
 			catLog.Log(s.Name, "启动http", "监听端口", s.Port)
@@ -56,6 +105,7 @@ func (s *Server) wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	s.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	ws, err := s.upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		catLog.Warn("升级失败")
 		return
 	}
 
@@ -63,17 +113,14 @@ func (s *Server) wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	var interrupt = make(chan os.Signal, 1)
 	guid := uuid.New()
 	c := client.New(guid.String(), ws, r) // 创建客户端
-	s.UserHandler(c)                      // 用户处理器
+	s.ConnectChan <- c
 	// 登录成功通知，并且下发uuid作为客户端消息凭证
 	c.Write(remotemsg.LOGIN, c.Uuid)
 	// 通知打断
 	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
 
-	// 关闭连接
-	defer ws.Close()
-
 	// 删除客户端
-	defer client.Dele(c.Uuid)
+	defer s.Dele(c)
 
 	// 启动消息读取
 	go s.reader(done, ws, c)

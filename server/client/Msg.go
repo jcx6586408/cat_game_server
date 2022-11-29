@@ -10,7 +10,12 @@ import (
 // Msg 消息
 type Msg struct {
 	Client *Client
-	Val    *SubMsg
+	Val    *SubMsg // 上传消息信息
+}
+
+type BackMsg struct {
+	MsgID int         // 消息ID
+	Val   interface{} // 返回消息信息
 }
 
 func (c *Client) Write(id int, backInfo interface{}) error {

@@ -13,7 +13,7 @@ type Gate struct {
 }
 
 func main() {
-	s := new(Gate)
+	s := server.New()
 	s.Name = "gate"
 	conf := config.Read()
 	s.ID = conf.Gate.ID
@@ -25,11 +25,10 @@ func main() {
 	s.MsgHandler = MsgHandler
 	s.UserHandler = UserHandler
 
-	handler.RankInstance.Run(conf.Rank.Port)       // 排行榜注册
-	handler.StorageInstance.Run(conf.Storage.Port) // 存储注册
-	handler.RoomInstance.Run(conf.Room.Port)       // 房间注册
-
-	s.Run() // 运行中心服
+	handler.RankInstance.Run(conf.Rank.Port)          // 排行榜注册
+	handler.StorageInstance.Run(conf.Storage.Port, s) // 存储注册
+	handler.RoomInstance.Run(conf.Room.Port, s)       // 房间注册
+	s.Run()                                           // 运行中心服
 }
 
 func UserHandler(c *client.Client) {

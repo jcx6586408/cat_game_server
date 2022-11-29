@@ -1,6 +1,7 @@
 package client
 
 import (
+	"catLog"
 	"net/http"
 	"sync"
 
@@ -8,16 +9,21 @@ import (
 )
 
 type Client struct {
-	Uuid string
-	Ws   *websocket.Conn
-	R    *http.Request
-	C    chan interface{}
-	Lock sync.Mutex
+	Uuid    string
+	Ws      *websocket.Conn
+	R       *http.Request
+	C       chan interface{} // 关闭连接通知通道
+	Lock    sync.Mutex
+	MsgChan chan *BackMsg // 消息写入
 }
 
-var clients = make(map[string]*Client)
-
 var lock sync.RWMutex
+
+var ClientPool = &sync.Pool{
+	New: func() interface{} {
+		return &Client{}
+	},
+}
 
 func New(uuid string, ws *websocket.Conn, r *http.Request) *Client {
 	c := &Client{}
@@ -25,29 +31,18 @@ func New(uuid string, ws *websocket.Conn, r *http.Request) *Client {
 	c.Ws = ws
 	c.R = r
 	c.C = make(chan interface{})
-	// 加入客户端
-	AddClient(c)
+	c.MsgChan = make(chan *BackMsg)
+	// 监听消息写入
+	go func() {
+		for {
+			select {
+			case <-c.C:
+				catLog.Log("关闭消息监听")
+				return
+			case msg := <-c.MsgChan:
+				c.Write(msg.MsgID, msg.Val)
+			}
+		}
+	}()
 	return c
-}
-
-// GetClient 获取客户端
-func GetClient(uid string) (c *Client, ok bool) {
-	c, ok = clients[uid]
-	return c, ok
-}
-
-// AddClient 添加客户端链接
-func AddClient(client *Client) {
-	lock.Lock()
-	clients[client.Uuid] = client
-	lock.Unlock()
-}
-
-// Dele 删除链接
-func Dele(uuid string) {
-	client, ok := clients[uuid]
-	if ok {
-		close(client.C) // 通知当前连接已经关闭
-	}
-	delete(clients, uuid)
 }

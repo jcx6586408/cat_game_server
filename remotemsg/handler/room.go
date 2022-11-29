@@ -9,6 +9,7 @@ import (
 	"proto/msg"
 	"remotemsg"
 	"room/room"
+	"server"
 	"server/client"
 
 	"google.golang.org/grpc"
@@ -19,6 +20,7 @@ type Room struct {
 	cat         *CatClass
 	Conn        *grpc.ClientConn
 	innerClient msg.RoomClient
+	S           *server.Server
 }
 
 var RoomInstance *Room = NewRoom()
@@ -58,7 +60,26 @@ func CreateRoom() {
 			}
 			// 打印返回值
 			catLog.Log("返回房间消息——", res.RoomID)
-
+			// 通知准备的
+			for _, v := range res.PrepareMembers {
+				c, ok := RoomInstance.S.GetClient(v.Uuid)
+				if ok {
+					c.MsgChan <- &client.BackMsg{
+						MsgID: int(res.MsgID),
+						Val:   res,
+					}
+				}
+			}
+			// 通知正在玩的
+			for _, v := range res.PlayingMembers {
+				c, ok := RoomInstance.S.GetClient(v.Uuid)
+				if ok {
+					c.MsgChan <- &client.BackMsg{
+						MsgID: int(res.MsgID),
+						Val:   res,
+					}
+				}
+			}
 			switch res.MsgID {
 			case remotemsg.ROOMADD:
 				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
@@ -83,7 +104,8 @@ func CreateRoom() {
 	}()
 }
 
-func (s *Room) Run(port string) {
+func (s *Room) Run(port string, ss *server.Server) {
+	s.S = ss
 	conn, err := grpc.Dial(port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("connect server failed,", err)

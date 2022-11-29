@@ -33,7 +33,7 @@ type Room struct {
 	Lock              sync.RWMutex
 }
 
-func NewRoom(id int, t int) *Room {
+func NewRoom(id int) *Room {
 	r := &Room{}
 	r.ID = id
 	catLog.Log("创建了房间_ID: ", r.ID, "房间类型_", r.Type)
@@ -43,7 +43,6 @@ func NewRoom(id int, t int) *Room {
 	r.PrepareTime = conf.PrepareTime
 	r.AnswerTime = conf.AnswerTime
 	r.QuestionCount = conf.QuestionCount
-	r.Type = t
 	r.MaxMember = conf.MaxMember
 	return r
 }
@@ -140,11 +139,9 @@ func (m *Room) AddMember(member *msg.Member) {
 	m.AddMemberChan <- member // 成员加入通知
 	m.Lock.Unlock()
 	// 判断是否达到最大的数量
-	if m.Type == MATCHROOM {
-		if m.IsFull() {
-			// 开始准备
-			m.StartPrepare()
-		}
+	if m.IsFull() {
+		// 开始准备
+		m.StartPrepare()
 	}
 }
 
