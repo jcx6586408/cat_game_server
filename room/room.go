@@ -17,11 +17,49 @@ type MsgRoom struct {
 	msg.RoomServer
 }
 
+// 离线
+func (s *MsgRoom) Offline(ctx context.Context, req *msg.OfflineRequest) (*msg.RoomChangeState, error) {
+	room.Manager.OfflineChan <- req.Uuid
+	return &msg.RoomChangeState{State: 1}, nil
+}
+
+// 个人匹配取消
+func (s *MsgRoom) MatchMemberCancel(ctx context.Context, req *msg.LeaveRequest) (*msg.RoomChangeState, error) {
+	room.Manager.MatchMemberCancelChan <- req
+	return &msg.RoomChangeState{State: 1}, nil
+}
+
+// 取消匹配房间
+func (s *MsgRoom) MatchRoomCancel(ctx context.Context, req *msg.MatchRoomRequest) (*msg.RoomChangeState, error) {
+	room.Manager.MatchRoomCancelChan <- int(req.RoomID)
+	return &msg.RoomChangeState{State: 1}, nil
+}
+
+// 匹配房间
+func (s *MsgRoom) MatchRoom(ctx context.Context, req *msg.MatchRoomRequest) (*msg.RoomChangeState, error) {
+	room.Manager.MathRoomChan <- int(req.RoomID)
+	return &msg.RoomChangeState{State: 1}, nil
+}
+
+// 匹配单人
+func (s *MsgRoom) MatchMember(ctx context.Context, req *msg.MatchMemberRequest) (*msg.RoomChangeState, error) {
+	room.Manager.MathMemberChan <- req.Member
+	return &msg.RoomChangeState{State: 1}, nil
+}
+
+// 回答问题
+func (s *MsgRoom) AnswerQuestion(ctx context.Context, req *msg.Answer) (*msg.RoomChangeState, error) {
+	room.Manager.AnswerChan <- req
+	return &msg.RoomChangeState{State: 1}, nil
+}
+
+// 结束房间
 func (s *MsgRoom) Over(ctx context.Context, req *msg.OverRequest) (*msg.RoomChangeState, error) {
 	room.Manager.OverRoomChan <- int(req.RoomID)
 	return &msg.RoomChangeState{State: 1}, nil
 }
 
+// 离开房间
 func (s *MsgRoom) Leave(ctx context.Context, req *msg.LeaveRequest) (*msg.RoomChangeState, error) {
 	room.Manager.LeaveChan <- &room.ChangeRoom{
 		RoomID: int(req.RoomID),
@@ -30,6 +68,7 @@ func (s *MsgRoom) Leave(ctx context.Context, req *msg.LeaveRequest) (*msg.RoomCh
 	return &msg.RoomChangeState{State: 1}, nil
 }
 
+// 加入房间
 func (s *MsgRoom) Add(ctx context.Context, req *msg.AddRequest) (*msg.RoomChangeState, error) {
 	// 获得要加入的房间
 	room.Manager.AddFriendChan <- &room.ChangeRoom{
@@ -39,8 +78,8 @@ func (s *MsgRoom) Add(ctx context.Context, req *msg.AddRequest) (*msg.RoomChange
 	return &msg.RoomChangeState{State: 1}, nil
 }
 
+// 创建房间
 func (s *MsgRoom) Create(req *msg.CreateRoomRequest, srv msg.Room_CreateServer) error {
-	catLog.Log("******************房间创建请求******************")
 	msgMember := req.Member
 	subRoom := room.Manager.CreateRoom(msgMember)
 
@@ -51,6 +90,7 @@ func (s *MsgRoom) Create(req *msg.CreateRoomRequest, srv msg.Room_CreateServer) 
 			PlayingMembers: subRoom.PlayingMembers,
 			Progress:       int32(subRoom.Cur),
 			ChangeMemeber:  m,
+			Question:       subRoom.LibAnswer.Answers[subRoom.LibAnswer.Progress],
 			MsgID:          msgID,
 		})
 	}
@@ -102,7 +142,7 @@ func main() {
 		log.Fatalf("net.Listen err: %v", err)
 		return
 	}
-	log.Println(Address + " net.Listing...")
+	catLog.Log(Address + " net.Listing...")
 	// 新建gRPC服务器实例
 	// 默认单次接收最大消息长度为`1024*1024*4`bytes(4M)，单次发送消息最大长度为`math.MaxInt32`bytes
 	// grpcServer := grpc.NewServer(grpc.MaxRecvMsgSize(1024*1024*4), grpc.MaxSendMsgSize(math.MaxInt32))

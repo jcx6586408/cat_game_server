@@ -8,7 +8,6 @@ import (
 	"log"
 	"proto/msg"
 	"remotemsg"
-	"room/room"
 	"server"
 	"server/client"
 
@@ -33,15 +32,9 @@ func NewRoom() *Room {
 	return &s
 }
 
-func CreateRoom() {
-	var member = room.NewMember("dafafa", "cat", "小猫", "icon", true, false)
-	// 创建发送结构体
-	req := msg.CreateRoomRequest{
-		Member: member,
-	}
-
+func CreateRoom(req *msg.CreateRoomRequest) {
 	// 调用我们的服务(ListValue方法)
-	stream, err := RoomInstance.innerClient.Create(context.Background(), &req)
+	stream, err := RoomInstance.innerClient.Create(context.Background(), req)
 	if err != nil {
 		log.Fatalf("Call ListStr err: %v", err)
 	}
@@ -112,13 +105,24 @@ func (s *Room) Run(port string, ss *server.Server) {
 	}
 	s.Conn = conn
 	s.innerClient = msg.NewRoomClient(conn)
-	CreateRoom()
 
 	// 注册消息
-	s.cat.Register(remotemsg.ROOMCREATE, roomCreate)
-	s.cat.Register(remotemsg.ROOMSTARTPLAY, roomStartPlay)
-	s.cat.Register(remotemsg.ROOMADD, roomAdd)
+	s.cat.Register(remotemsg.ROOMCREATE, roomCreate)          // 房间创建
+	s.cat.Register(remotemsg.ROOMMATCHROOM, roomStartMatch)   // 房间开始匹配
+	s.cat.Register(remotemsg.ROOMMATCH, roomStartMemberMatch) // 房间个人开始匹配
+	s.cat.Register(remotemsg.ROOMADD, roomAdd)                // 房间加入玩家
 	s.cat.Register(remotemsg.ROOMLEAVE, roomLeave)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
 	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
 
 	go func() {
@@ -135,40 +139,47 @@ func (s *Room) Run(port string, ss *server.Server) {
 				// 	return
 				// }
 				// catLog.Log("离线成功_", state.State)
+
 			}
 
 		}
 	}()
 }
 
-type RoomBaseRequest struct {
-	Uid      string // 用户Uid
-	Nickname string // 用户昵称
-	Icon     string // 用户头像
-}
-
 func roomCreate(data client.Msg) {
-	u := &RoomBaseRequest{}
+	u := &msg.CreateRoomRequest{}
 	data.Val.ParseData(u)
-	CreateRoom()
+	CreateRoom(u)
 }
 
-func roomStartPlay(data client.Msg) {
-	u := &RoomBaseRequest{}
+// 房间匹配
+func roomStartMatch(data client.Msg) {
+	u := &msg.MatchRoomRequest{}
 	data.Val.ParseData(u)
+	RoomInstance.innerClient.MatchRoom(context.Background(), u)
 }
 
+// 个人匹配
+func roomStartMemberMatch(data client.Msg) {
+	// u := &RoomBaseRequest{}
+	// data.Val.ParseData(u)
+}
+
+// 加入准备房间
 func roomAdd(data client.Msg) {
-	u := &RoomBaseRequest{}
+	u := &msg.AddRequest{}
 	data.Val.ParseData(u)
+	RoomInstance.innerClient.Add(context.Background(), u)
 }
 
 func roomLeave(data client.Msg) {
-	u := &RoomBaseRequest{}
+	u := &msg.LeaveRequest{}
 	data.Val.ParseData(u)
+	RoomInstance.innerClient.Leave(context.Background(), u)
 }
 
 func roomAnswer(data client.Msg) {
-	u := &RoomBaseRequest{}
+	u := &msg.Answer{}
 	data.Val.ParseData(u)
+	RoomInstance.innerClient.AnswerQuestion(context.Background(), u)
 }

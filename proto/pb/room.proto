@@ -5,14 +5,33 @@ package msg;
 option go_package = "/msg";
 
 service Room {
-    rpc Create (CreateRoomRequest) returns (stream CreateRoomReply){}       // 创建房间
+    rpc Create (CreateRoomRequest) returns (stream CreateRoomReply){}           // 创建房间
     rpc Add (AddRequest) returns (RoomChangeState){}                            // 加入房间
-    rpc Leave (LeaveRequest) returns (RoomChangeState){}                          // 离开房间
-    rpc Over (OverRequest) returns (RoomChangeState){}                           // 解散房间
+    rpc Leave (LeaveRequest) returns (RoomChangeState){}                        // 离开房间
+    rpc Over (OverRequest) returns (RoomChangeState){}                          // 解散房间
+    rpc AnswerQuestion (Answer) returns (RoomChangeState) {}                    // 回答问题
+    rpc MatchRoom (MatchRoomRequest) returns (RoomChangeState) {}               // 匹配房间
+    rpc MatchMember (MatchMemberRequest) returns (RoomChangeState) {}           // 匹配单人
+    rpc MatchRoomCancel (MatchRoomRequest) returns (RoomChangeState) {}         // 房间匹配取消
+    rpc MatchMemberCancel (LeaveRequest) returns (RoomChangeState) {}           // 个人匹配取消
+    rpc Offline (OfflineRequest) returns (RoomChangeState) {}                   // 离线
 }
 
 message CreateRoomRequest {
     Member member = 1;          // 成员信息
+}
+
+message MatchRoomRequest {
+    int32 RoomID = 1;
+}
+
+
+message OfflineRequest {
+    string Uuid  = 1;            // 离线玩家的uuid信息
+}
+
+message MatchMemberRequest {
+    Member Member = 1;          // 匹配人信息
 }
 
 message AddRequest {
@@ -30,6 +49,23 @@ message OverRequest {
     Member member = 1;          // 要加入的成员
 }
 
+message Answer {
+    int32 RoomID = 1;           // 对应的房间ID
+    Member Member = 2;          // 回答问题的人
+    int32 QuestionID = 3;       // 问题ID
+    string Result = 4;          // 回答结果
+}
+
+message Question {
+    int32 ID = 1;           // 题库ID
+    string Question = 2;    // 问题
+    string AnswerA = 3;     // 答案A
+    string AnswerB = 4;     // 答案B
+    string AnswerC = 5;     // 答案C
+    string AnswerD = 6;     // 答案D
+    string RightAnswer = 7; // 正确答案
+}
+
 message Member {
     string Uuid = 1;            // 用户服务端uuid
     string Uid = 2;             // 用户Uid
@@ -37,7 +73,7 @@ message Member {
     string Icon = 4;            // 用户头像
     bool IsMaster = 5;          // 是否房主
     bool IsRobot = 6;           // 是否是机器人
-    repeated int32 Answer = 7;           // 回答
+    repeated Answer Answer = 7;           // 回答
 }
 
 message CreateRoomReply {
@@ -47,6 +83,8 @@ message CreateRoomReply {
     int32 Progress = 4;         // 当前进程(时间秒)
     int32 MsgID = 5;    // 消息ID
     Member ChangeMemeber = 6; // 变更成员
+    Question Question=7;    // 问题
+    
 }
 
 message RoomChangeState {
