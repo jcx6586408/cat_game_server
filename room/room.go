@@ -117,8 +117,10 @@ loop:
 			send(remotemsg.ROOMCHANGEMASTER, changeMember)
 		case <-subRoom.AnswerChan: // 回答问题通知
 			send(remotemsg.ROOMANSWEREND, nil)
-		case <-subRoom.TimeChan:
+		case <-subRoom.TimeChan: // 计时通知
 			send(remotemsg.ROOMTIME, nil)
+		case changeMember := <-subRoom.OfflineChan: // 离线通知
+			send(remotemsg.ROOMTIME, changeMember)
 		}
 	}
 	return nil

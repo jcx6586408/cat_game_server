@@ -79,7 +79,7 @@ message Member {
 message CreateRoomReply {
     int32 RoomID = 1;           // 房间ID
     repeated Member PrepareMembers = 2;       // 准备成员列表
-    repeated Member PlayingMembers = 3;       // 准备成员列表
+    repeated Member PlayingMembers = 3;       // 正在游戏成员列表
     int32 Progress = 4;         // 当前进程(时间秒)
     int32 MsgID = 5;    // 消息ID
     Member ChangeMemeber = 6; // 变更成员

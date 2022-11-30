@@ -27,8 +27,10 @@ message OffLineStorageRequest {
 message UpdateStorageRequest {
     string Uuid = 1;
     string Uid = 2;
-    string Key = 3;
-    string Value = 4;
+    string Nickname = 3;
+    string Icon = 4;
+    string Key = 5;
+    string Value = 6;
 }
 
 message PullStorageRequest {

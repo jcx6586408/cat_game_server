@@ -27,9 +27,17 @@ type RoomManager struct {
 	MathMemberChan        chan *msg.Member       // 匹配个人管道
 	MatchRoomCancelChan   chan int               // 房间匹配取消
 	MatchMemberCancelChan chan *msg.LeaveRequest // 匹配个人取消管道
-	Done                  chan interface{}       // 停用通道
+
+	SequenceChan chan *innerMsg // 顺序进程通信，保证所有变更内容按顺序进行
+
+	Done chan interface{} // 停用通道
 
 	TableManager *excel.ExcelManager // 表格管理器
+}
+
+type innerMsg struct {
+	data interface{}
+	id   int
 }
 
 type ChangeRoom struct {
@@ -79,39 +87,149 @@ func (m *RoomManager) Run() {
 			case <-m.Done:
 				return
 			case member := <-m.CreateChan:
-				m.CreateRoom(member)
-			case r := <-m.RecyleChan:
-				m.RecycleRoom(r)
-			case data := <-m.AddFriendChan:
-				m.AddFriendMember(data.RoomID, data.Member)
-			case data := <-m.LeaveChan:
-				m.LeavePrepareMemeber(data.RoomID, data.Member)
-			case uuid := <-m.OfflineChan:
-				m.OfflineMemeber(uuid)
-			case r := <-m.UseChan:
-				m.ToUsingRoom(r)
-			case roomID := <-m.OverRoomChan:
-				m.OverRoom(roomID)
-			case a := <-m.AnswerChan:
-				m.AnswerQuestion(a)
-			case req := <-m.MatchMemberCancelChan:
-				m.MatchMemberCancel(req)
-			case member := <-m.MathMemberChan:
-				m.AddMatchMember(member)
-			case roomID := <-m.MatchRoomCancelChan:
-				m.MatchRoomCancel(roomID)
-			case roomID := <-m.MathRoomChan: // 将房间拉入匹配
-				var room *Room
-				for _, v := range m.PrepareRooms {
-					if v.ID == roomID {
-						room = v
-						m.Delete(m.PrepareRooms, v)
-						break
-					}
+				m.SequenceChan <- &innerMsg{
+					data: member,
+					id:   1,
 				}
-				m.MatchRoom(room)
+			case r := <-m.RecyleChan:
+				m.SequenceChan <- &innerMsg{
+					data: r,
+					id:   2,
+				}
+			case data := <-m.AddFriendChan:
+				m.SequenceChan <- &innerMsg{
+					data: data,
+					id:   3,
+				}
+			case data := <-m.LeaveChan:
+				m.SequenceChan <- &innerMsg{
+					data: data,
+					id:   4,
+				}
+			case uuid := <-m.OfflineChan:
+				m.SequenceChan <- &innerMsg{
+					data: uuid,
+					id:   5,
+				}
+			case r := <-m.UseChan:
+				m.SequenceChan <- &innerMsg{
+					data: r,
+					id:   6,
+				}
+			case roomID := <-m.OverRoomChan:
+				m.SequenceChan <- &innerMsg{
+					data: roomID,
+					id:   7,
+				}
+			case a := <-m.AnswerChan:
+				m.SequenceChan <- &innerMsg{
+					data: a,
+					id:   8,
+				}
+			case req := <-m.MatchMemberCancelChan:
+				m.SequenceChan <- &innerMsg{
+					data: req,
+					id:   9,
+				}
+			case member := <-m.MathMemberChan:
+				m.SequenceChan <- &innerMsg{
+					data: member,
+					id:   10,
+				}
+			case roomID := <-m.MatchRoomCancelChan:
+				m.SequenceChan <- &innerMsg{
+					data: roomID,
+					id:   11,
+				}
+			case roomID := <-m.MathRoomChan: // 将房间拉入匹配
+				m.SequenceChan <- &innerMsg{
+					data: roomID,
+					id:   11,
+				}
+
 			}
 
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			case <-m.Done:
+				return
+			case data := <-m.SequenceChan:
+				switch data.id {
+				case 1:
+					member, ok := data.data.(*msg.Member)
+					if ok {
+						m.CreateRoom(member)
+					}
+				case 2:
+					r, ok := data.data.(*Room)
+					if ok {
+						m.RecycleRoom(r)
+					}
+				case 3:
+					subMsg, ok := data.data.(*ChangeRoom)
+					if ok {
+						m.AddFriendMember(subMsg.RoomID, subMsg.Member)
+					}
+				case 4:
+					subMsg, ok := data.data.(*ChangeRoom)
+					if ok {
+						m.LeavePrepareMemeber(subMsg.RoomID, subMsg.Member)
+					}
+				case 5:
+					subMsg, ok := data.data.(string)
+					if ok {
+						m.OfflineMemeber(subMsg)
+					}
+				case 6:
+					r, ok := data.data.(*Room)
+					if ok {
+						m.ToUsingRoom(r)
+					}
+				case 7:
+					r, ok := data.data.(int)
+					if ok {
+						m.OverRoom(r)
+					}
+				case 8:
+					r, ok := data.data.(*msg.Answer)
+					if ok {
+						m.AnswerQuestion(r)
+					}
+				case 9:
+					r, ok := data.data.(*msg.LeaveRequest)
+					if ok {
+						m.MatchMemberCancel(r)
+					}
+
+				case 10:
+					r, ok := data.data.(*msg.Member)
+					if ok {
+						m.AddMatchMember(r)
+					}
+				case 11:
+					r, ok := data.data.(int)
+					if ok {
+						m.MatchRoomCancel(r)
+					}
+				case 12:
+					roomID, ok := data.data.(int)
+					if ok {
+						var room *Room
+						for _, v := range m.PrepareRooms {
+							if v.ID == roomID {
+								room = v
+								m.Delete(m.PrepareRooms, v)
+								break
+							}
+						}
+						m.MatchRoom(room)
+					}
+				}
+			}
 		}
 	}()
 }
@@ -271,21 +389,24 @@ func (m *RoomManager) LeavePrepareMemeber(roomID int, member *msg.Member) error 
 }
 
 func (m *RoomManager) OfflineMemeber(uuid string) error {
-
-	// for _, v := range m.PrepareRooms {
-	// 	if v.ID == roomID {
-	// 		// 通知离开房间
-	// 		v.LeavePrepareMember(member)
-	// 		return nil
-	// 	}
-	// }
-	// for _, v := range m.UsingRooms {
-	// 	if v.ID == roomID {
-	// 		// 通知离开房间
-	// 		v.LeavePlayingMember(member)
-	// 		return nil
-	// 	}
-	// }
+	for _, v := range m.UsingRooms {
+		bo := v.OfflinHanlder(uuid)
+		if bo {
+			return nil
+		}
+	}
+	for _, v := range m.MatchingRooms {
+		bo := v.OfflinHanlder(uuid)
+		if bo {
+			return nil
+		}
+	}
+	for _, v := range m.PrepareRooms {
+		bo := v.OfflinHanlder(uuid)
+		if bo {
+			return nil
+		}
+	}
 	return errors.New("没有找到房间")
 }
 

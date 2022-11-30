@@ -107,23 +107,21 @@ func (s *Room) Run(port string, ss *server.Server) {
 	s.innerClient = msg.NewRoomClient(conn)
 
 	// 注册消息
-	s.cat.Register(remotemsg.ROOMCREATE, roomCreate)          // 房间创建
-	s.cat.Register(remotemsg.ROOMMATCHROOM, roomStartMatch)   // 房间开始匹配
-	s.cat.Register(remotemsg.ROOMMATCH, roomStartMemberMatch) // 房间个人开始匹配
-	s.cat.Register(remotemsg.ROOMADD, roomAdd)                // 房间加入玩家
-	s.cat.Register(remotemsg.ROOMLEAVE, roomLeave)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	s.cat.Register(remotemsg.ROOMCREATE, roomCreate)    // 房间创建
+	s.cat.Register(remotemsg.ROOMADD, roomAdd)          // 房间加入玩家
+	s.cat.Register(remotemsg.ROOMLEAVE, roomLeave)      // 离开房间
+	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer) // 答题注册
 
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
-	s.cat.Register(remotemsg.ROOMANSWEREND, roomAnswer)
+	// 解散房间注册
+	s.cat.Register(remotemsg.ROOMOVER, roomOver)
+
+	// 单人匹配与取消注册
+	s.cat.Register(remotemsg.ROOMMATCHROOMCANCEL, roomMatchCanel)
+	s.cat.Register(remotemsg.ROOMMATCHROOM, roomMatch)
+
+	// 房间准备与取消匹配注册
+	s.cat.Register(remotemsg.ROOMMATCH, roomMatchMember)
+	s.cat.Register(remotemsg.ROOMMATCHMEMBERCANCEL, roomMatchMemberCanel)
 
 	go func() {
 		for {
@@ -132,37 +130,19 @@ func (s *Room) Run(port string, ss *server.Server) {
 				return
 			case uuid := <-s.cat.GetOfflineChan():
 				catLog.Log("玩家离线, uuid:", uuid)
-				// state, err := s.innerClient.OffLineStorage(context.Background(), &msg.OffLineStorageRequest{
-				// 	Uuid: uuid,
-				// })
-				// if err != nil {
-				// 	return
-				// }
-				// catLog.Log("离线成功_", state.State)
-
+				u := &msg.OfflineRequest{Uuid: uuid}
+				RoomInstance.innerClient.Offline(context.Background(), u)
 			}
 
 		}
 	}()
 }
 
+// 房间创建
 func roomCreate(data client.Msg) {
 	u := &msg.CreateRoomRequest{}
 	data.Val.ParseData(u)
 	CreateRoom(u)
-}
-
-// 房间匹配
-func roomStartMatch(data client.Msg) {
-	u := &msg.MatchRoomRequest{}
-	data.Val.ParseData(u)
-	RoomInstance.innerClient.MatchRoom(context.Background(), u)
-}
-
-// 个人匹配
-func roomStartMemberMatch(data client.Msg) {
-	// u := &RoomBaseRequest{}
-	// data.Val.ParseData(u)
 }
 
 // 加入准备房间
@@ -172,14 +152,51 @@ func roomAdd(data client.Msg) {
 	RoomInstance.innerClient.Add(context.Background(), u)
 }
 
+// 离开准备房间
 func roomLeave(data client.Msg) {
 	u := &msg.LeaveRequest{}
 	data.Val.ParseData(u)
 	RoomInstance.innerClient.Leave(context.Background(), u)
 }
 
+// 答题
 func roomAnswer(data client.Msg) {
 	u := &msg.Answer{}
 	data.Val.ParseData(u)
 	RoomInstance.innerClient.AnswerQuestion(context.Background(), u)
+}
+
+// 房间解散
+func roomOver(data client.Msg) {
+	u := &msg.OverRequest{}
+	data.Val.ParseData(u)
+	RoomInstance.innerClient.Over(context.Background(), u)
+}
+
+// 房间匹配
+func roomMatch(data client.Msg) {
+	u := &msg.MatchRoomRequest{}
+	data.Val.ParseData(u)
+	RoomInstance.innerClient.MatchRoom(context.Background(), u)
+}
+
+// 个人匹配
+func roomMatchMember(data client.Msg) {
+	u := &msg.MatchMemberRequest{}
+	data.Val.ParseData(u)
+	RoomInstance.innerClient.MatchMember(context.Background(), u)
+}
+
+// 房间匹配取消
+func roomMatchCanel(data client.Msg) {
+	u := &msg.MatchRoomRequest{}
+	data.Val.ParseData(u)
+	RoomInstance.innerClient.MatchRoomCancel(context.Background(), u)
+}
+
+// 个人匹配取消
+func roomMatchMemberCanel(data client.Msg) {
+	u := &msg.LeaveRequest{}
+	data.Val.ParseData(u)
+	RoomInstance.innerClient.MatchMemberCancel(context.Background(), u)
 }

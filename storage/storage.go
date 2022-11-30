@@ -78,14 +78,18 @@ func (s *Storage) Run() {
 }
 
 type UserStorageDB struct {
-	Uid     string `json:"uid"`
-	Forever string `json:"forever"`
+	Uid      string `json:"uid"`
+	Nickname string `json:"nickname"`
+	Icon     string `json:"icon"`
+	Forever  string `json:"forever"`
 }
 
 type UserStorage struct {
-	Uuid    string            `json:"uuid"`
-	Uid     string            `json:"uid"`
-	Forever map[string]string `json:"forever"`
+	Uuid     string            `json:"uuid"`
+	Uid      string            `json:"uid"`
+	Nickname string            `json:"nickname"`
+	Icon     string            `json:"icon"`
+	Forever  map[string]string `json:"forever"`
 }
 
 func NewUserStorage(uid string, uuid string) *UserStorage {

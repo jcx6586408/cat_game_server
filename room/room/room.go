@@ -31,6 +31,7 @@ type Room struct {
 	AnswerChan        chan interface{} // 回答消息通知
 	OverChan          chan interface{} // 房间结束解散通知
 	TimeChan          chan int         // 计时通知
+	OfflineChan       chan *msg.Member // 离线通知
 
 	LibAnswer *LibAnswer // 当前题库
 	Lock      sync.RWMutex
@@ -57,6 +58,7 @@ func NewRoom(id int) *Room {
 	r.AnswerChan = make(chan interface{})
 	r.OverChan = make(chan interface{})
 	r.TimeChan = make(chan int)
+	r.OfflineChan = make(chan *msg.Member)
 	return r
 }
 
@@ -195,9 +197,23 @@ func (m *Room) LeavePlayingMember(member *msg.Member) {
 	m.Lock.Unlock()
 }
 
-// 广播满员
-func (m *Room) BroadcastFull() {
+func (m *Room) OfflinHanlder(uuid string) bool {
+	for _, v := range m.PrepareMembers {
+		if v.Uuid == uuid {
+			m.Delete(m.PrepareMembers, v)
+			m.OfflineChan <- v
+			return true
+		}
+	}
 
+	for _, v := range m.PlayingMembers {
+		if v.Uuid == uuid {
+			m.Delete(m.PlayingMembers, v)
+			m.OfflineChan <- v
+			return true
+		}
+	}
+	return false
 }
 
 // 判断房间是否满员

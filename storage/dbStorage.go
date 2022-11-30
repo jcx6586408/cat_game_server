@@ -63,6 +63,8 @@ func SaveToDB(uu *UserStorage) <-chan interface{} {
 func toDbUser(uu *UserStorage) *UserStorageDB {
 	u := &UserStorageDB{}
 	u.Uid = uu.Uid
+	u.Nickname = uu.Nickname
+	u.Icon = uu.Icon
 	data, _ := json.Marshal(uu.Forever)
 	u.Forever = string(data)
 	return u
@@ -86,9 +88,9 @@ func insectuser(uu *UserStorage) <-chan interface{} {
 			fmt.Println("tx fail")
 		}
 		u := toDbUser(uu)
-		stmt, err := tx.Prepare("INSERT user SET uid=?,Forever=?")
+		stmt, err := tx.Prepare("INSERT user SET uid=?,nickname=?,icon=?,Forever=?")
 		checkErr(err)
-		res, err := stmt.Exec(u.Uid, u.Forever)
+		res, err := stmt.Exec(u.Uid, u.Nickname, u.Icon, u.Forever)
 		checkErr(err)
 		//将事务提交
 		tx.Commit()
