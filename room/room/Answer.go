@@ -31,6 +31,7 @@ func ToAnswerLib(table string) *LibAnswer {
 					obj.RightAnswer = cell[index].(string)
 				}
 			}
+			arr = append(arr, obj)
 		}
 	}
 	return &LibAnswer{

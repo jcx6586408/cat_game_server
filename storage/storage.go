@@ -31,8 +31,8 @@ func (s *Storage) OffLineStorage(ctx context.Context, r *msg.OffLineStorageReque
 }
 
 func (s *Storage) UpdateStorage(ctx context.Context, r *msg.UpdateStorageRequest) (*msg.SuccessStateReply, error) {
-	catLog.Log("用户更新存储", r.Uid, r.Key, r.Value)
-	backInfo := NewUserStorage(r.Uid, r.Uuid)
+	catLog.Log("用户更新存储", r.Uid, r.Nickname, r.Icon, r.Key, r.Value)
+	backInfo := NewUserStorage(r.Uid, r.Uuid, r.Nickname, r.Icon)
 	backInfo.Forever[r.Key] = r.Value
 	catLog.Log("存储信息展示")
 	for k, v := range backInfo.Forever {
@@ -42,7 +42,7 @@ func (s *Storage) UpdateStorage(ctx context.Context, r *msg.UpdateStorageRequest
 }
 
 func (s *Storage) PullStorage(ctx context.Context, r *msg.PullStorageRequest) (*msg.PullStorageReply, error) {
-	user := NewUserStorage(r.Uid, r.Uuid)
+	user := NewUserStorage(r.Uid, r.Uuid, r.Nickname, r.Icon)
 	backInfo, ok := user.Forever[r.Key]
 	catLog.Log("用户拉取存储", r.Uid, "存储内容", backInfo)
 	if ok {
@@ -92,13 +92,15 @@ type UserStorage struct {
 	Forever  map[string]string `json:"forever"`
 }
 
-func NewUserStorage(uid string, uuid string) *UserStorage {
+func NewUserStorage(uid string, uuid string, nickname string, icon string) *UserStorage {
 	_, ok := users[uid]
 	if !ok {
 		users[uid] = &UserStorage{
-			Uuid:    uuid,
-			Uid:     uid,
-			Forever: make(map[string]string),
+			Uuid:     uuid,
+			Uid:      uid,
+			Nickname: nickname,
+			Icon:     icon,
+			Forever:  make(map[string]string),
 		}
 		// forever
 		c := userFromDb(uid, users[uid])

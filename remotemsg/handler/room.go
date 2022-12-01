@@ -38,13 +38,14 @@ func CreateRoom(req *msg.CreateRoomRequest) {
 	if err != nil {
 		log.Fatalf("Call ListStr err: %v", err)
 	}
+	catLog.Log("开始房间监听", stream)
 	go func() {
 		for {
 			//Recv() 方法接收服务端消息，默认每次Recv()最大消息长度为`1024*1024*4`bytes(4M)
 			res, err := stream.Recv()
 			// 判断消息流是否已经结束
 			if err == io.EOF {
-				catLog.Log("房间结束", res.RoomID)
+				catLog.Log("房间结束")
 				break
 			}
 			if err != nil {
@@ -55,6 +56,7 @@ func CreateRoom(req *msg.CreateRoomRequest) {
 			catLog.Log("返回房间消息——", res.RoomID)
 			// 通知准备的
 			for _, v := range res.PrepareMembers {
+				catLog.Log("返回准备成员消息----", v.Uid)
 				c, ok := RoomInstance.S.GetClient(v.Uuid)
 				if ok {
 					c.MsgChan <- &client.BackMsg{
@@ -65,33 +67,23 @@ func CreateRoom(req *msg.CreateRoomRequest) {
 			}
 			// 通知正在玩的
 			for _, v := range res.PlayingMembers {
+				catLog.Log("返回正在玩成员消息----", v.Uid)
 				c, ok := RoomInstance.S.GetClient(v.Uuid)
 				if ok {
-					c.MsgChan <- &client.BackMsg{
-						MsgID: int(res.MsgID),
-						Val:   res,
+					switch res.MsgID {
+					case remotemsg.ROOMANSWER:
+						c.MsgChan <- &client.BackMsg{
+							MsgID: int(res.MsgID),
+							Val:   res.ChangeMemeber.Answer,
+						}
+					default:
+						c.MsgChan <- &client.BackMsg{
+							MsgID: int(res.MsgID),
+							Val:   res,
+						}
+
 					}
 				}
-			}
-			switch res.MsgID {
-			case remotemsg.ROOMADD:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
-			case remotemsg.ROOMLEAVE:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
-			case remotemsg.ROOMPREPARE:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
-			case remotemsg.ROOMPREPARECANCEL:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
-			case remotemsg.ROOMOVER:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
-			case remotemsg.ROOMSTARTPLAY:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
-			case remotemsg.ROOMENDPLAY:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
-			case remotemsg.ROOMANSWEREND:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
-			case remotemsg.ROOMTIME:
-				catLog.Log("玩家加入_", res.ChangeMemeber.Uid)
 			}
 		}
 	}()
@@ -142,6 +134,7 @@ func (s *Room) Run(port string, ss *server.Server) {
 func roomCreate(data client.Msg) {
 	u := &msg.CreateRoomRequest{}
 	data.Val.ParseData(u)
+	catLog.Log("房间创建监听============", u.Member)
 	CreateRoom(u)
 }
 

@@ -16,6 +16,7 @@ type CatClass struct {
 	Done        chan interface{} // 关闭chan
 	OffLineChan chan string      // 玩家下线通知
 	Client      *client.Client   // 每个模块都存有客户端连接引用
+	MsgChan     chan interface{} // 消息通道
 }
 
 func AddModel(m CatModule) {
@@ -25,6 +26,17 @@ func AddModel(m CatModule) {
 func (cat *CatClass) New() {
 	cat.Done = make(chan interface{})
 	cat.OffLineChan = make(chan string)
+	// 模块接收消息
+	// go func() {
+	// 	for {
+	// 		select {
+	// 		case <-cat.Done:
+	// 			return
+	// 		case <-cat.MsgChan:
+
+	// 		}
+	// 	}
+	// }()
 }
 
 func (s *CatClass) GetDone() chan interface{} {

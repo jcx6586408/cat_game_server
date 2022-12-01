@@ -16,6 +16,7 @@ type RoomManager struct {
 	GenRoomID     chan int // 房间生成器
 
 	CreateChan            chan *msg.Member       // 创建房间管道
+	CreateCompleteChan    chan *Room             // 房间创建完成通知
 	RecyleChan            chan *Room             // 房间回收管道
 	AddFriendChan         chan *ChangeRoom       // 加入好友管道
 	AnswerChan            chan *msg.Answer       // 回答请求
@@ -65,6 +66,7 @@ func NewManager() *RoomManager {
 	m.PrepareRooms = []*Room{}
 	m.UsingRooms = []*Room{}
 	m.CreateChan = make(chan *msg.Member)
+	m.CreateCompleteChan = make(chan *Room)
 	m.RecyleChan = make(chan *Room)
 	m.AddFriendChan = make(chan *ChangeRoom)
 	m.LeaveChan = make(chan *ChangeRoom)
@@ -76,6 +78,7 @@ func NewManager() *RoomManager {
 	m.MatchMemberCancelChan = make(chan *msg.LeaveRequest)
 	m.MatchRoomCancelChan = make(chan int)
 	m.AnswerChan = make(chan *msg.Answer)
+	m.SequenceChan = make(chan *innerMsg)
 	m.TableManager = excel.Read()
 	return m
 }
@@ -85,8 +88,10 @@ func (m *RoomManager) Run() {
 		for {
 			select {
 			case <-m.Done:
+				catLog.Log("----------退出监听")
 				return
 			case member := <-m.CreateChan:
+				catLog.Log("--------------------------100", member, m.SequenceChan)
 				m.SequenceChan <- &innerMsg{
 					data: member,
 					id:   1,
@@ -97,6 +102,7 @@ func (m *RoomManager) Run() {
 					id:   2,
 				}
 			case data := <-m.AddFriendChan:
+				catLog.Log("加入房间++++++++++++++++++++++", data.RoomID)
 				m.SequenceChan <- &innerMsg{
 					data: data,
 					id:   3,
@@ -144,7 +150,7 @@ func (m *RoomManager) Run() {
 			case roomID := <-m.MathRoomChan: // 将房间拉入匹配
 				m.SequenceChan <- &innerMsg{
 					data: roomID,
-					id:   11,
+					id:   12,
 				}
 
 			}
@@ -156,8 +162,10 @@ func (m *RoomManager) Run() {
 		for {
 			select {
 			case <-m.Done:
+				catLog.Warn("=============退出监听")
 				return
 			case data := <-m.SequenceChan:
+				catLog.Warn("--------------------------1001", data.id, data)
 				switch data.id {
 				case 1:
 					member, ok := data.data.(*msg.Member)
@@ -247,10 +255,8 @@ func (m *RoomManager) Delete(a []*Room, elem *Room) []*Room {
 
 // 回收房间
 func (m *RoomManager) RecycleRoom(room *Room) {
-	lock.Lock()                                 // 锁住
 	m.UsingRooms = m.Delete(m.UsingRooms, room) // 移除正在使用房间
 	m.Rooms = append(m.Rooms, room)             // 加入闲置房间
-	lock.Unlock()                               // 解锁
 	catLog.Log("使用房间数量_", len(m.UsingRooms))
 	catLog.Log("闲置房间数量_", len(m.Rooms))
 }
@@ -275,30 +281,27 @@ func (m *RoomManager) AnswerQuestion(a *msg.Answer) {
 
 // 移动到玩的房间
 func (m *RoomManager) ToUsingRoom(room *Room) {
-	lock.Lock()                                     // 锁住
 	m.PrepareRooms = m.Delete(m.PrepareRooms, room) // 移除正在使用房间
 	m.UsingRooms = append(m.UsingRooms, room)       // 加入闲置房间
-	lock.Unlock()                                   // 解锁
 	catLog.Log("准备房间数量_", len(m.PrepareRooms))
 	catLog.Log("使用房间数量_", len(m.UsingRooms))
 }
 
 // 关闭房间
 func (m *RoomManager) OverRoom(roomID int) error {
-	lock.Lock()
+	done := make(chan interface{})
 	for _, v := range m.PrepareRooms {
 		if v.ID == roomID {
-			v.Close()
+			v.Close(done)
 			return nil
 		}
 	}
-	lock.Unlock()
 	return errors.New("找不到房间")
 }
 
 // 创建房间
-func (m *RoomManager) CreateRoom(member *msg.Member) *Room {
-	lock.Lock() // 锁住
+func (m *RoomManager) CreateRoom(member *msg.Member) {
+	catLog.Log("--------------------------1")
 	var room *Room
 	// 判断是否还有闲置房间
 	if len(m.Rooms) > 0 {
@@ -307,11 +310,12 @@ func (m *RoomManager) CreateRoom(member *msg.Member) *Room {
 	} else {
 		room = NewRoom(<-m.GenRoomID)
 	}
+	catLog.Log("--------------------------2")
 	m.PrepareRooms = append(m.PrepareRooms, room) // 加入准备列表
-	lock.Unlock()                                 // 解锁
-	room.AddMember(member)
+	room.AddMasterMember(member)
+	catLog.Log("--------------------------3")
+	m.CreateCompleteChan <- room
 	// 通知创建房间成功, 返回房间ID
-	return room
 }
 
 // 匹配个人，搜索正在匹配的房间
@@ -371,7 +375,13 @@ func (m *RoomManager) MatchRoomCancel(roomID int) error {
 func (m *RoomManager) MatchRoom(room *Room) error {
 	// 加入匹配列表
 	if room != nil {
-		m.MatchingRooms = append(m.MatchingRooms, room)
+		// 检测是否满员
+		if room.IsFull() {
+			m.UsingRooms = append(m.UsingRooms, room)
+			room.StartPrepare()
+		} else {
+			m.MatchingRooms = append(m.MatchingRooms, room)
+		}
 		return nil
 	}
 	return errors.New("没有找到准备房间")
@@ -439,7 +449,6 @@ func (m *RoomManager) AddMatchMember(member *msg.Member) {
 
 	if room == nil {
 		// 判断是否还有闲置房间
-		lock.Lock()
 		if len(m.Rooms) > 0 {
 			room = m.Rooms[len(m.Rooms)-1]    // 取最末尾房间
 			m.Rooms = m.Delete(m.Rooms, room) // 脱离闲置列表
@@ -447,7 +456,6 @@ func (m *RoomManager) AddMatchMember(member *msg.Member) {
 			room = NewRoom(<-m.GenRoomID)
 		}
 		m.PrepareRooms = append(m.PrepareRooms, room) // 加入准备列表
-		lock.Unlock()
 	}
 	room.AddMember(member)
 }

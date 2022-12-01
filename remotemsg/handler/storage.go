@@ -62,27 +62,10 @@ func (s *Storage) Run(port string, ss *server.Server) {
 	}()
 }
 
-type StorageUpdateRequest struct {
-	Uid   string `json:"uid"`
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-type StoragePullRequest struct {
-	Uid string `json:"uid"`
-	Key string `json:"key"`
-}
-
 func updateStorage(data client.Msg) {
-	sr := &StorageUpdateRequest{}
+	sr := &msg.UpdateStorageRequest{}
 	data.Val.ParseData(sr)
-	catLog.Log("更新存储信息", sr.Uid, sr.Key, sr.Value)
-	r, err := StorageInstance.innerClient.UpdateStorage(context.Background(), &msg.UpdateStorageRequest{
-		Uuid:  StorageInstance.cat.Client.Uuid,
-		Uid:   sr.Uid,
-		Key:   sr.Key,
-		Value: sr.Value,
-	})
+	r, err := StorageInstance.innerClient.UpdateStorage(context.Background(), sr)
 	if err != nil {
 		return
 	}
@@ -90,17 +73,12 @@ func updateStorage(data client.Msg) {
 		MsgID: remotemsg.STORAGEUPDATE,
 		Val:   r.State,
 	}
-	// data.Client.Write(remotemsg.STORAGEUPDATE, r.State)
 }
 
 func pullStorage(data client.Msg) {
-	sr := &StoragePullRequest{}
+	sr := &msg.PullStorageRequest{}
 	data.Val.ParseData(sr)
-	r, err := StorageInstance.innerClient.PullStorage(context.Background(), &msg.PullStorageRequest{
-		Uuid: StorageInstance.cat.Client.Uuid,
-		Uid:  sr.Uid,
-		Key:  sr.Key,
-	})
+	r, err := StorageInstance.innerClient.PullStorage(context.Background(), sr)
 	if err != nil {
 		catLog.Log("获取存储内容失败")
 		return
@@ -110,5 +88,4 @@ func pullStorage(data client.Msg) {
 		MsgID: remotemsg.STORAGE,
 		Val:   r.Value,
 	}
-	// data.Client.Write(remotemsg.STORAGE, r.Value)
 }

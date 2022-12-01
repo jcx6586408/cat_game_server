@@ -70,6 +70,7 @@ func (s *MsgRoom) Leave(ctx context.Context, req *msg.LeaveRequest) (*msg.RoomCh
 
 // 加入房间
 func (s *MsgRoom) Add(ctx context.Context, req *msg.AddRequest) (*msg.RoomChangeState, error) {
+	catLog.Log(req.Member.Uuid, "请求加入房间", req.Member.IsMaster)
 	// 获得要加入的房间
 	room.Manager.AddFriendChan <- &room.ChangeRoom{
 		RoomID: int(req.RoomID),
@@ -80,34 +81,46 @@ func (s *MsgRoom) Add(ctx context.Context, req *msg.AddRequest) (*msg.RoomChange
 
 // 创建房间
 func (s *MsgRoom) Create(req *msg.CreateRoomRequest, srv msg.Room_CreateServer) error {
+	catLog.Log("准备创建房间/////////////////")
 	msgMember := req.Member
-	subRoom := room.Manager.CreateRoom(msgMember)
+	room.Manager.CreateChan <- msgMember
+	subRoom := <-room.Manager.CreateCompleteChan
+	catLog.Log("*************创建房间成功**************", subRoom.ID)
+	// subRoom := room.Manager.CreateRoom(msgMember)
+	// catLog.Log("*************创建房间成功**************", subRoom.ID)
 
 	var send = func(msgID int32, m *msg.Member) {
 		srv.Send(&msg.CreateRoomReply{
 			RoomID:         int32(subRoom.ID),
-			PrepareMembers: subRoom.PlayingMembers,
+			PrepareMembers: subRoom.PrepareMembers,
 			PlayingMembers: subRoom.PlayingMembers,
 			Progress:       int32(subRoom.Cur),
+			TotolQuestion:  int32(subRoom.QuestionCount),
+			CurQuestion:    int32(subRoom.GetProgress()),
 			ChangeMemeber:  m,
-			Question:       subRoom.LibAnswer.Answers[subRoom.LibAnswer.Progress],
+			Question:       subRoom.GetQuestion(),
 			MsgID:          msgID,
+			ToTalTime:      int32(subRoom.GetPlayTime()),
 		})
 	}
+	// catLog.Log("房间创建通知", subRoom.ID)
+	send(remotemsg.ROOMCREATE, nil) // 首次创建通知
 
-loop:
+	// loop:
 	for {
 		select {
 		case <-subRoom.OverChan: // 房主解散房间
-			catLog.Log("房间结束计时")
-			break loop
+			catLog.Log("房主解散房间")
+			send(remotemsg.ROOMOVER, nil)
 		case <-subRoom.StartPlayChan: // 游戏开始通知
+			catLog.Log("游戏开始通知*********************")
 			send(remotemsg.ROOMSTARTPLAY, nil)
 		case <-subRoom.EndPlayChan: // 游戏结束通知
 			send(remotemsg.ROOMOVER, nil)
 		case changeMember := <-subRoom.AddMemberChan: // 加人通知
 			send(remotemsg.ROOMADD, changeMember)
 		case changeMember := <-subRoom.LeaveMemberChan: // 离开人通知
+			catLog.Log("成员离开通知", changeMember.Uuid)
 			send(remotemsg.ROOMLEAVE, changeMember)
 		case changeMember := <-subRoom.PrepareChan: // 准备通知
 			send(remotemsg.ROOMPREPARE, changeMember)
@@ -117,13 +130,15 @@ loop:
 			send(remotemsg.ROOMCHANGEMASTER, changeMember)
 		case <-subRoom.AnswerChan: // 回答问题通知
 			send(remotemsg.ROOMANSWEREND, nil)
+		case changeMember := <-subRoom.MemberAnswerChan: // 回答问题通知
+			send(remotemsg.ROOMANSWER, changeMember)
 		case <-subRoom.TimeChan: // 计时通知
 			send(remotemsg.ROOMTIME, nil)
 		case changeMember := <-subRoom.OfflineChan: // 离线通知
 			send(remotemsg.ROOMTIME, changeMember)
 		}
 	}
-	return nil
+	// return nil
 }
 
 var (

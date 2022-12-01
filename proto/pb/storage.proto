@@ -36,7 +36,9 @@ message UpdateStorageRequest {
 message PullStorageRequest {
     string Uuid = 1;
     string Uid = 2;
-    string Key = 3;
+    string Nickname = 3;
+    string Icon = 4;
+    string Key = 5;
 }
 
 message PullStorageReply {

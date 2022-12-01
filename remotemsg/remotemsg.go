@@ -10,6 +10,7 @@ const (
 	// 排行榜
 	RANKPULL   = 101 // 拉取排行榜
 	RANKUPDATE = 102 // 更新排行榜
+	RANKSELF   = 103 // 排行榜自己
 
 	// 微信openid
 	WXOPENID = 901
@@ -37,4 +38,5 @@ const (
 	ROOMMATCHROOMCANCEL   = 313 // 取消匹配房间的准备
 	ROOMMATCHMEMBERCANCEL = 314 // 取消个人匹配的准备
 	ROOMMATCHROOM         = 315 // 房间匹配
+	ROOMANSWER            = 316 // 回答题目
 )

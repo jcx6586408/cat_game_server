@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package msg;
+
+option go_package = "/msg";
+
+service Rank {
+    rpc Pull (RankPullRequest) returns (RankPullReply) {}
+    rpc Update (RankUpdateRequest) returns (RankUpdateReply) {}
+    rpc Self (RankSelfRequest) returns (RankMember) {}
+}
+
+message RankSelfRequest {
+
+}
+
+
+message RankPullRequest {
+    
+}
+
+message RankPullReply {
+    repeated RankMember Members = 1;
+}
+
+message RankUpdateRequest {
+    string Uid = 1;
+    string Nickname = 2;
+    string Icon = 3;
+    int32 Val = 4;
+}
+
+message RankMember {
+    string Uid = 1;
+    string Nickname = 2;
+    string Icon = 3;
+    int32 Val = 4;
+    string Country = 5;
+    string CountryShort = 6;
+}
+
+message RankUpdateReply {
+    bool State = 1;
+}

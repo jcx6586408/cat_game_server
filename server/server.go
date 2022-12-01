@@ -130,7 +130,7 @@ func (s *Server) wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		case <-time.After(time.Duration(1) * time.Millisecond * 1000):
 			err := c.Write(remotemsg.HEARTBEAT, []byte("hb"))
 			if err != nil {
-				catLog.Warn("Error during writing to websocket:", err)
+				catLog.Warn("没有监听到心跳消息, 断开连接:", err)
 				return
 			}
 

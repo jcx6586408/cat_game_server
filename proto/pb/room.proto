@@ -51,7 +51,7 @@ message OverRequest {
 
 message Answer {
     int32 RoomID = 1;           // 对应的房间ID
-    Member Member = 2;          // 回答问题的人
+    string Uuid = 2;            // 用户服务端uuid
     int32 QuestionID = 3;       // 问题ID
     string Result = 4;          // 回答结果
 }
@@ -65,6 +65,8 @@ message Question {
     string AnswerD = 6;     // 答案D
     string RightAnswer = 7; // 正确答案
 }
+
+
 
 message Member {
     string Uuid = 1;            // 用户服务端uuid
@@ -83,7 +85,10 @@ message CreateRoomReply {
     int32 Progress = 4;         // 当前进程(时间秒)
     int32 MsgID = 5;    // 消息ID
     Member ChangeMemeber = 6; // 变更成员
-    Question Question=7;    // 问题
+    int32 TotolQuestion = 7;
+    int32 CurQuestion = 8;
+    Question Question = 9;    // 问题
+    int32 ToTalTime = 10;       // 答题总时间
     
 }
 

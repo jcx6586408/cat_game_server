@@ -2,38 +2,48 @@ package main
 
 import (
 	"catLog"
-	"context"
-	"flag"
-	"fmt"
-	"log"
-	"net"
-	"proto/msg"
-
-	"google.golang.org/grpc"
+	"config"
+	"remotemsg/handler"
+	"server"
+	"server/client"
 )
 
-type server struct {
-	msg.HelloServer
+type Gate struct {
+	server.Server // 远程服务
 }
-
-func (s *server) SayHello(context.Context, *msg.HelloRequest) (*msg.HelloReply, error) {
-	catLog.Log("grpc hello")
-	return &msg.HelloReply{}, nil
-}
-
-var (
-	port = flag.Int("port", 50051, "The server port")
-)
 
 func main() {
-	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	var opts []grpc.ServerOption
-	grpcServer := grpc.NewServer(opts...)
-	msg.RegisterHelloServer(grpcServer, &server{})
-	grpcServer.Serve(lis)
+	s := server.New()
+	s.Name = "gate"
+	conf := config.Read()
+	s.ID = conf.Gate.ID
+	s.Port = conf.Rank.Port
+	s.HttpsPort = conf.Gate.HttpsPort
+	s.CertFile = conf.Crt.CertFile
+	s.KeyFile = conf.Crt.KeyFile
+	s.ListenerType = conf.Gate.ListenerType
+	s.MsgHandler = MsgHandler
+	s.UserHandler = UserHandler
 
+	handler.RankInstance.Run(conf.Rank.Port) // 排行榜注册
+	s.Run()                                  // 运行中心服
+}
+
+func UserHandler(c *client.Client) {
+	handler.RegisterOffline(c) // 设置客户端监听离线和登录信息
+}
+
+func MsgHandler(data []byte, c *client.Client) {
+	msg := &client.Msg{}
+	msg.Client = c
+	subMsg := client.NewSubMsg(string(data))
+	msg.Val = subMsg
+	// 获取处理器
+	handler, ok := client.GetHanlder(subMsg.ID)
+	if ok {
+		Chan := handler.Chan
+		Chan <- *msg
+	} else {
+		catLog.Warn("未注册消息", subMsg.ID)
+	}
 }
