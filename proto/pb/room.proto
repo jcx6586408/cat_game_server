@@ -5,7 +5,8 @@ package msg;
 option go_package = "/msg";
 
 service Room {
-    rpc Create (CreateRoomRequest) returns (stream CreateRoomReply){}           // 创建房间
+    rpc Connect (RoomServerConnectRequest) returns (stream CreateRoomReply){}           // 连接房间服务
+    rpc Create (CreateRoomRequest) returns (RoomChangeState){}           // 创建房间
     rpc Add (AddRequest) returns (RoomChangeState){}                            // 加入房间
     rpc Leave (LeaveRequest) returns (RoomChangeState){}                        // 离开房间
     rpc Over (OverRequest) returns (RoomChangeState){}                          // 解散房间
@@ -17,11 +18,23 @@ service Room {
     rpc Offline (OfflineRequest) returns (RoomChangeState) {}                   // 离线
 }
 
+message RoomServerConnectRequest {
+
+}
+
 message CreateRoomRequest {
     Member member = 1;          // 成员信息
 }
 
 message MatchRoomRequest {
+    int32 RoomID = 1;
+}
+
+message MatchRoomCancelRequest{
+    int32 RoomID = 1;
+}
+
+message MatchMemberCancelRequest{
     int32 RoomID = 1;
 }
 

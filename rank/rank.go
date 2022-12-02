@@ -1,49 +1,69 @@
-package main
+package rank
 
 import (
-	"catLog"
-	"config"
-	"remotemsg/handler"
-	"server"
-	"server/client"
+	"github.com/ip2location/ip2location-go"
+	"github.com/name5566/leaf/gate"
 )
 
-type Gate struct {
-	server.Server // 远程服务
+// Rank
+type Rank struct {
+	UID          string `json:"uid"`
+	Val          int    `json:"value"`
+	Icon         string `json:"icon"`
+	NickName     string `json:"nickname"`
+	Country      string `json:"country"`
+	CountryShort string `json:"countryShort"`
 }
 
-func main() {
-	s := server.New()
-	s.Name = "gate"
-	conf := config.Read()
-	s.ID = conf.Gate.ID
-	s.Port = conf.Rank.Port
-	s.HttpsPort = conf.Gate.HttpsPort
-	s.CertFile = conf.Crt.CertFile
-	s.KeyFile = conf.Crt.KeyFile
-	s.ListenerType = conf.Gate.ListenerType
-	s.MsgHandler = MsgHandler
-	s.UserHandler = UserHandler
-
-	handler.RankInstance.Run(conf.Rank.Port) // 排行榜注册
-	s.Run()                                  // 运行中心服
+type RankSelfRequest struct {
+	UID      string `json:"uid"`
+	Val      int    `json:"value"`
+	Icon     string `json:"icon"`
+	NickName string `json:"nickname"`
 }
 
-func UserHandler(c *client.Client) {
-	handler.RegisterOffline(c) // 设置客户端监听离线和登录信息
+type RequestRank struct {
+	Rank
 }
 
-func MsgHandler(data []byte, c *client.Client) {
-	msg := &client.Msg{}
-	msg.Client = c
-	subMsg := client.NewSubMsg(string(data))
-	msg.Val = subMsg
-	// 获取处理器
-	handler, ok := client.GetHanlder(subMsg.ID)
-	if ok {
-		Chan := handler.Chan
-		Chan <- *msg
-	} else {
-		catLog.Warn("未注册消息", subMsg.ID)
-	}
+type BackRankInfo struct {
+	WorldRank []*Rank
+}
+
+type RankInfo struct {
+	CountryRank  map[string]*[]*Rank
+	WorldRank    []*Rank
+	ProvinceRank map[string]*[]*Rank
+	CityRank     map[string]*[]*Rank
+}
+
+type UpScore struct {
+	State bool `json:"state"`
+}
+
+var DB *ip2location.DB
+
+var rankInfo = &RankInfo{}
+
+func init() {
+	rankInfo.WorldRank = []*Rank{}
+	rankInfo.CountryRank = make(map[string]*[]*Rank)
+	rankInfo.ProvinceRank = make(map[string]*[]*Rank)
+	rankInfo.CityRank = make(map[string]*[]*Rank)
+}
+
+func GetSelf(args []interface{}) {
+	// 收到的 Hello 消息
+	r := args[0].(*RankSelfRequest)
+	// 消息的发送者
+	a := args[1].(gate.Agent)
+	results, _ := DB.Get_all(a.RemoteAddr().String())
+	oldR := &Rank{}
+	oldR.NickName = r.NickName
+	oldR.UID = r.UID
+	oldR.Icon = r.Icon
+	oldR.Val = r.Val
+	oldR.Country = results.Country_long
+	oldR.CountryShort = results.Country_short
+	a.WriteMsg(oldR)
 }

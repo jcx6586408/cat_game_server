@@ -32,9 +32,9 @@ func NewRoom() *Room {
 	return &s
 }
 
-func CreateRoom(req *msg.CreateRoomRequest) {
+func CreateRoom() {
 	// 调用我们的服务(ListValue方法)
-	stream, err := RoomInstance.innerClient.Create(context.Background(), req)
+	stream, err := RoomInstance.innerClient.Connect(context.Background(), &msg.RoomServerConnectRequest{})
 	if err != nil {
 		log.Fatalf("Call ListStr err: %v", err)
 	}
@@ -135,7 +135,7 @@ func roomCreate(data client.Msg) {
 	u := &msg.CreateRoomRequest{}
 	data.Val.ParseData(u)
 	catLog.Log("房间创建监听============", u.Member)
-	CreateRoom(u)
+	RoomInstance.innerClient.Create(context.Background(), u)
 }
 
 // 加入准备房间

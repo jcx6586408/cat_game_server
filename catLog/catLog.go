@@ -19,11 +19,11 @@ func Err(msg ...interface{}) {
 }
 
 func Log(msg ...interface{}) {
-	// var s = color.YellowString("日志: ")
-	// fmt.Printf("\n%v%v-%v", s, time.Now().Format("2006/1/02 15:04"), color.WhiteString("%v", msg))
+	var s = color.YellowString("日志: ")
+	fmt.Printf("\n%v%v-%v", s, time.Now().Format("2006/1/02 15:04"), color.WhiteString("%v", msg))
 }
 
 func Warn(msg ...interface{}) {
-	// var s = color.YellowString("警告: ")
-	// fmt.Printf("\n%v%v-%v", s, time.Now().Format("2006/1/02 15:04"), color.YellowString("%v", msg))
+	var s = color.YellowString("警告: ")
+	fmt.Printf("\n%v%v-%v", s, time.Now().Format("2006/1/02 15:04"), color.YellowString("%v", msg))
 }

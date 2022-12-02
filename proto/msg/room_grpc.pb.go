@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RoomClient interface {
-	Create(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (Room_CreateClient, error)
+	Connect(ctx context.Context, in *RoomServerConnectRequest, opts ...grpc.CallOption) (Room_ConnectClient, error)
+	Create(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*RoomChangeState, error)
 	Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*RoomChangeState, error)
 	Leave(ctx context.Context, in *LeaveRequest, opts ...grpc.CallOption) (*RoomChangeState, error)
 	Over(ctx context.Context, in *OverRequest, opts ...grpc.CallOption) (*RoomChangeState, error)
@@ -42,12 +43,12 @@ func NewRoomClient(cc grpc.ClientConnInterface) RoomClient {
 	return &roomClient{cc}
 }
 
-func (c *roomClient) Create(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (Room_CreateClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Room_ServiceDesc.Streams[0], "/msg.Room/Create", opts...)
+func (c *roomClient) Connect(ctx context.Context, in *RoomServerConnectRequest, opts ...grpc.CallOption) (Room_ConnectClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Room_ServiceDesc.Streams[0], "/msg.Room/Connect", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &roomCreateClient{stream}
+	x := &roomConnectClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -57,21 +58,30 @@ func (c *roomClient) Create(ctx context.Context, in *CreateRoomRequest, opts ...
 	return x, nil
 }
 
-type Room_CreateClient interface {
+type Room_ConnectClient interface {
 	Recv() (*CreateRoomReply, error)
 	grpc.ClientStream
 }
 
-type roomCreateClient struct {
+type roomConnectClient struct {
 	grpc.ClientStream
 }
 
-func (x *roomCreateClient) Recv() (*CreateRoomReply, error) {
+func (x *roomConnectClient) Recv() (*CreateRoomReply, error) {
 	m := new(CreateRoomReply)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
+}
+
+func (c *roomClient) Create(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*RoomChangeState, error) {
+	out := new(RoomChangeState)
+	err := c.cc.Invoke(ctx, "/msg.Room/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *roomClient) Add(ctx context.Context, in *AddRequest, opts ...grpc.CallOption) (*RoomChangeState, error) {
@@ -159,7 +169,8 @@ func (c *roomClient) Offline(ctx context.Context, in *OfflineRequest, opts ...gr
 // All implementations must embed UnimplementedRoomServer
 // for forward compatibility
 type RoomServer interface {
-	Create(*CreateRoomRequest, Room_CreateServer) error
+	Connect(*RoomServerConnectRequest, Room_ConnectServer) error
+	Create(context.Context, *CreateRoomRequest) (*RoomChangeState, error)
 	Add(context.Context, *AddRequest) (*RoomChangeState, error)
 	Leave(context.Context, *LeaveRequest) (*RoomChangeState, error)
 	Over(context.Context, *OverRequest) (*RoomChangeState, error)
@@ -176,8 +187,11 @@ type RoomServer interface {
 type UnimplementedRoomServer struct {
 }
 
-func (UnimplementedRoomServer) Create(*CreateRoomRequest, Room_CreateServer) error {
-	return status.Errorf(codes.Unimplemented, "method Create not implemented")
+func (UnimplementedRoomServer) Connect(*RoomServerConnectRequest, Room_ConnectServer) error {
+	return status.Errorf(codes.Unimplemented, "method Connect not implemented")
+}
+func (UnimplementedRoomServer) Create(context.Context, *CreateRoomRequest) (*RoomChangeState, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedRoomServer) Add(context.Context, *AddRequest) (*RoomChangeState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
@@ -219,25 +233,43 @@ func RegisterRoomServer(s grpc.ServiceRegistrar, srv RoomServer) {
 	s.RegisterService(&Room_ServiceDesc, srv)
 }
 
-func _Room_Create_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(CreateRoomRequest)
+func _Room_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RoomServerConnectRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(RoomServer).Create(m, &roomCreateServer{stream})
+	return srv.(RoomServer).Connect(m, &roomConnectServer{stream})
 }
 
-type Room_CreateServer interface {
+type Room_ConnectServer interface {
 	Send(*CreateRoomReply) error
 	grpc.ServerStream
 }
 
-type roomCreateServer struct {
+type roomConnectServer struct {
 	grpc.ServerStream
 }
 
-func (x *roomCreateServer) Send(m *CreateRoomReply) error {
+func (x *roomConnectServer) Send(m *CreateRoomReply) error {
 	return x.ServerStream.SendMsg(m)
+}
+
+func _Room_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRoomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoomServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/msg.Room/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoomServer).Create(ctx, req.(*CreateRoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Room_Add_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -410,6 +442,10 @@ var Room_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RoomServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Create",
+			Handler:    _Room_Create_Handler,
+		},
+		{
 			MethodName: "Add",
 			Handler:    _Room_Add_Handler,
 		},
@@ -448,8 +484,8 @@ var Room_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Create",
-			Handler:       _Room_Create_Handler,
+			StreamName:    "Connect",
+			Handler:       _Room_Connect_Handler,
 			ServerStreams: true,
 		},
 	},

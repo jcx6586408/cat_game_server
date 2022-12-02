@@ -257,8 +257,6 @@ func (m *RoomManager) Delete(a []*Room, elem *Room) []*Room {
 func (m *RoomManager) RecycleRoom(room *Room) {
 	m.UsingRooms = m.Delete(m.UsingRooms, room) // 移除正在使用房间
 	m.Rooms = append(m.Rooms, room)             // 加入闲置房间
-	catLog.Log("使用房间数量_", len(m.UsingRooms))
-	catLog.Log("闲置房间数量_", len(m.Rooms))
 }
 
 func (m *RoomManager) GetPrepareRoom(id int32) (*Room, error) {
@@ -283,8 +281,6 @@ func (m *RoomManager) AnswerQuestion(a *msg.Answer) {
 func (m *RoomManager) ToUsingRoom(room *Room) {
 	m.PrepareRooms = m.Delete(m.PrepareRooms, room) // 移除正在使用房间
 	m.UsingRooms = append(m.UsingRooms, room)       // 加入闲置房间
-	catLog.Log("准备房间数量_", len(m.PrepareRooms))
-	catLog.Log("使用房间数量_", len(m.UsingRooms))
 }
 
 // 关闭房间
@@ -301,7 +297,6 @@ func (m *RoomManager) OverRoom(roomID int) error {
 
 // 创建房间
 func (m *RoomManager) CreateRoom(member *msg.Member) {
-	catLog.Log("--------------------------1")
 	var room *Room
 	// 判断是否还有闲置房间
 	if len(m.Rooms) > 0 {
@@ -310,10 +305,8 @@ func (m *RoomManager) CreateRoom(member *msg.Member) {
 	} else {
 		room = NewRoom(<-m.GenRoomID)
 	}
-	catLog.Log("--------------------------2")
 	m.PrepareRooms = append(m.PrepareRooms, room) // 加入准备列表
 	room.AddMasterMember(member)
-	catLog.Log("--------------------------3")
 	m.CreateCompleteChan <- room
 	// 通知创建房间成功, 返回房间ID
 }

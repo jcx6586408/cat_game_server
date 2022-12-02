@@ -12,4 +12,5 @@ use (
 	./proto
 	./remotemsg
 	./room
+	./leaf/leafserver
 )
