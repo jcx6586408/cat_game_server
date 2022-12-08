@@ -1,2 +1,1 @@
-./rank &&
-./gate
+go run .\leaf.\leafserver\src\server\leafserver.go

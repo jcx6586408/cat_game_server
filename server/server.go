@@ -121,6 +121,7 @@ func (s *Server) wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	// 删除客户端
 	defer s.Dele(c)
+	// defer ws.Close()
 
 	// 启动消息读取
 	go s.reader(done, ws, c)

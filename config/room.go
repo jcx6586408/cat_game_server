@@ -9,6 +9,7 @@ type RoomConfig struct {
 	PrepareTime   int // 比赛准备时间
 	AnswerTime    int // 单次回答问题时间
 	MaxMember     int // 房间成员数量
+	MaxInvite     int // 邀请成员上限
 	QuestionCount int // 答题数量
 }
 

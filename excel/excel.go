@@ -26,6 +26,14 @@ type ExcelManager struct {
 	Tables map[string]*ExcelConfig
 }
 
+func (m *ExcelManager) ToString() string {
+	var str = "\n"
+	for _, v := range m.Tables {
+		str += v.Name + "\n"
+	}
+	return str
+}
+
 func (m *ExcelManager) GetTable(name string) (*ExcelConfig, bool) {
 	t, ok := m.Tables[name]
 	return t, ok
@@ -36,7 +44,7 @@ func (m *ExcelManager) GetCell(tableName string, attributeName string, line int)
 }
 
 func Read() *ExcelManager {
-	catLog.Log("表格开始读取************************")
+	catLog.Log("excel start read************************")
 	tableMap := make(map[string]*ExcelConfig)
 	err := filepath.Walk("./table",
 		func(path string, f os.FileInfo, err error) error {
@@ -53,7 +61,7 @@ func Read() *ExcelManager {
 			if bo {
 				fileExcel, err := excelize.OpenFile(path)
 				if err != nil {
-					panic("文件打开错误")
+					panic(err)
 				}
 
 				for _, sheetName := range fileExcel.GetSheetMap() {

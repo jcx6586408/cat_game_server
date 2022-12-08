@@ -55,36 +55,36 @@ func CreateRoom() {
 			// 打印返回值
 			catLog.Log("返回房间消息——", res.RoomID)
 			// 通知准备的
-			for _, v := range res.PrepareMembers {
-				catLog.Log("返回准备成员消息----", v.Uid)
-				c, ok := RoomInstance.S.GetClient(v.Uuid)
-				if ok {
-					c.MsgChan <- &client.BackMsg{
-						MsgID: int(res.MsgID),
-						Val:   res,
-					}
-				}
-			}
-			// 通知正在玩的
-			for _, v := range res.PlayingMembers {
-				catLog.Log("返回正在玩成员消息----", v.Uid)
-				c, ok := RoomInstance.S.GetClient(v.Uuid)
-				if ok {
-					switch res.MsgID {
-					case remotemsg.ROOMANSWER:
-						c.MsgChan <- &client.BackMsg{
-							MsgID: int(res.MsgID),
-							Val:   res.ChangeMemeber.Answer,
-						}
-					default:
-						c.MsgChan <- &client.BackMsg{
-							MsgID: int(res.MsgID),
-							Val:   res,
-						}
+			// for _, v := range res.PrepareMembers {
+			// 	catLog.Log("返回准备成员消息----", v.Uid)
+			// 	c, ok := RoomInstance.S.GetClient(v.Uuid)
+			// 	if ok {
+			// 		c.MsgChan <- &client.BackMsg{
+			// 			MsgID: int(res.MsgID),
+			// 			Val:   res,
+			// 		}
+			// 	}
+			// }
+			// // 通知正在玩的
+			// for _, v := range res.PlayingMembers {
+			// 	catLog.Log("返回正在玩成员消息----", v.Uid)
+			// 	c, ok := RoomInstance.S.GetClient(v.Uuid)
+			// 	if ok {
+			// 		switch res.MsgID {
+			// 		case remotemsg.ROOMANSWER:
+			// 			c.MsgChan <- &client.BackMsg{
+			// 				MsgID: int(res.MsgID),
+			// 				Val:   res.ChangeMemeber.Answer,
+			// 			}
+			// 		default:
+			// 			c.MsgChan <- &client.BackMsg{
+			// 				MsgID: int(res.MsgID),
+			// 				Val:   res,
+			// 			}
 
-					}
-				}
-			}
+			// 		}
+			// 	}
+			// }
 		}
 	}()
 }

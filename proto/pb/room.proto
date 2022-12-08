@@ -22,51 +22,131 @@ message RoomServerConnectRequest {
 
 }
 
+
+//-----------------房间创建---------------------
 message CreateRoomRequest {
     Member member = 1;          // 成员信息
 }
 
+message CreateRoomReply {
+    int32 RoomID = 1;           // 创建房间回复
+}
+
+//-----------------房间匹配---------------------
 message MatchRoomRequest {
     int32 RoomID = 1;
 }
 
+message MatchRoomReply {
+    RoomInfoReply RoomInfo = 1;
+}
+
+message RoomAddFail {
+    int32 Code = 1;
+}
+
+//-----------------取消房间匹配---------------------
 message MatchRoomCancelRequest{
     int32 RoomID = 1;
 }
 
-message MatchMemberCancelRequest{
+message MatchRoomCancelReply {
+    bool State = 1;
+}
+
+// 房间计时
+message RoomTime {
+    int32 Time = 1;
+}
+
+// 复活消息 
+message MemberReliveRequest {
     int32 RoomID = 1;
+    string Uuid = 2;
+}
+
+// 复活消息返回
+message MemberReliveReply {
+    string Uuid = 1;
+    Answer Answer = 2;  
 }
 
 
-message OfflineRequest {
-    string Uuid  = 1;            // 离线玩家的uuid信息
-}
-
+//-----------------成员匹配---------------------
 message MatchMemberRequest {
     Member Member = 1;          // 匹配人信息
 }
 
+message MatchMemberReply {
+    RoomInfoReply RoomInfo = 1;
+}
+
+message RoomPreAddRequest {
+    
+}
+
+message RoomPreAddReply {
+    string Url = 1;
+}
+
+//-----------------取消成员匹配---------------------
+message MatchMemberCancelRequest{
+    int32 RoomID = 1;
+}
+
+message MatchMemberCancelReply {
+    bool State = 1;
+}
+
+
+//-----------------离线---------------------
+message OfflineRequest {
+    string Uuid  = 1;            // 离线玩家的uuid信息
+}
+
+
+//-----------------加入成员---------------------
 message AddRequest {
     int32 RoomID = 2;           // 要加入的房间ID
     Member member = 1;          // 要加入的成员
 }
 
+message AddReply {
+    RoomInfoReply RoomInfo = 1;
+}
+
+
+//-----------------离开成员---------------------
 message LeaveRequest {
     int32 RoomID = 2;           // 要加入的房间ID
     Member member = 1;          // 要加入的成员
 }
 
+message LeaveReply {
+    bool State = 1;
+}
+
+
+//-----------------房间结束---------------------
 message OverRequest {
     int32 RoomID = 2;           // 要加入的房间ID
     Member member = 1;          // 要加入的成员
 }
 
+message OverReply {
+    bool State = 1;         
+}
+
+//-----------------回答问题---------------------
 message Answer {
     int32 RoomID = 1;           // 对应的房间ID
     string Uuid = 2;            // 用户服务端uuid
     int32 QuestionID = 3;       // 问题ID
     string Result = 4;          // 回答结果
+}
+
+message AnswerEndReply {
+    RoomInfoReply RoomInfo = 1;
 }
 
 message Question {
@@ -80,7 +160,7 @@ message Question {
 }
 
 
-
+//-----------------成员---------------------
 message Member {
     string Uuid = 1;            // 用户服务端uuid
     string Uid = 2;             // 用户Uid
@@ -88,10 +168,12 @@ message Member {
     string Icon = 4;            // 用户头像
     bool IsMaster = 5;          // 是否房主
     bool IsRobot = 6;           // 是否是机器人
-    repeated Answer Answer = 7;           // 回答
+    bool IsInvite = 7;          // 是否邀请的人
+    bool IsDead = 8;            // 是否死亡
+    repeated Answer Answer = 9; // 回答
 }
 
-message CreateRoomReply {
+message RoomInfoReply {
     int32 RoomID = 1;           // 房间ID
     repeated Member PrepareMembers = 2;       // 准备成员列表
     repeated Member PlayingMembers = 3;       // 正在游戏成员列表
@@ -102,7 +184,7 @@ message CreateRoomReply {
     int32 CurQuestion = 8;
     Question Question = 9;    // 问题
     int32 ToTalTime = 10;       // 答题总时间
-    
+    int32 MaxMemeber = 11;
 }
 
 message RoomChangeState {

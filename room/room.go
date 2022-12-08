@@ -87,18 +87,18 @@ func (s *MsgRoom) Create(ctx context.Context, req *msg.CreateRoomRequest) (*msg.
 }
 
 func send(subRoom *room.Room, srv msg.Room_ConnectServer, msgID int32, m *msg.Member) {
-	srv.Send(&msg.CreateRoomReply{
-		RoomID:         int32(subRoom.ID),
-		PrepareMembers: subRoom.PrepareMembers,
-		PlayingMembers: subRoom.PlayingMembers,
-		Progress:       int32(subRoom.Cur),
-		TotolQuestion:  int32(subRoom.QuestionCount),
-		CurQuestion:    int32(subRoom.GetProgress()),
-		ChangeMemeber:  m,
-		Question:       subRoom.GetQuestion(),
-		MsgID:          msgID,
-		ToTalTime:      int32(subRoom.GetPlayTime()),
-	})
+	// srv.Send(&msg.CreateRoomReply{
+	// 	RoomID:         int32(subRoom.ID),
+	// 	PrepareMembers: subRoom.PrepareMembers,
+	// 	PlayingMembers: subRoom.PlayingMembers,
+	// 	Progress:       int32(subRoom.Cur),
+	// 	TotolQuestion:  int32(subRoom.QuestionCount),
+	// 	CurQuestion:    int32(subRoom.GetProgress()),
+	// 	ChangeMemeber:  m,
+	// 	Question:       subRoom.GetQuestion(),
+	// 	MsgID:          msgID,
+	// 	ToTalTime:      int32(subRoom.GetPlayTime()),
+	// })
 }
 
 // 创建房间

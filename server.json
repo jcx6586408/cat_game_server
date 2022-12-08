@@ -28,20 +28,19 @@
     "wx": {
         "ID": 5000,
         "port":":50053",
-        "appid": "wx644bf3a4289948c4",
-        "appSecret": "00a4fd27ea763e81625313ce4f0c0527"
+        "appid": "wxb5aaac64384fb62d",
+        "appSecret": "13ac91bad735351927f6eae6f38432ba"
     },
     "storage": {
         "ID": 6000,
         "port":":50054"
     },
-    "game":{
-        "ID":7000,
-        "port":":50055"
-    },
     "room": {
         "ID":8000,
         "port":":50056"
     },
-    "DB": "root:111111@tcp(127.0.0.1:3306)/user"
+    "DB": "root:111111@tcp(127.0.0.1:3306)/user",
+    "Urls": [
+        "ws://192.168.50.240:3653"
+    ]
 }

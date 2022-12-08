@@ -12,9 +12,9 @@ type Config struct {
 	Crt     *Crt     `json:"crt"`     // 证书配置
 	Wx      *Wx      `json:"wx"`      // 微信openid配置
 	Storage *Storage `json:"storage"` // 游戏存储
-	Game    *Game    `json:"game"`    // 游戏逻辑服
 	Room    *Base    `json:"room"`    // 游戏房间
 	DB      string   `json:"DB"`      // 数据库连接路径
+	Urls    []string `json:"Urls"`    // 游戏分布服务器路径
 }
 
 type Base struct {
@@ -58,17 +58,6 @@ type Rank struct {
 	CountryRankCount  int `json:"countryRankCount"`
 	ProvinceRankCount int `json:"provinceRankCount"`
 	CityRankCount     int `json:"cityRankCount"`
-}
-
-func (c *Config) GetModules() *(map[int]*Base) {
-	bs := make(map[int]*Base)
-	bs[c.Excel.ID] = &c.Excel.Base
-	bs[c.Rank.ID] = &c.Rank.Base
-	bs[c.Crt.ID] = &c.Crt.Base
-	bs[c.Game.ID] = &c.Game.Base
-	bs[c.Storage.ID] = &c.Storage.Base
-	bs[c.Wx.ID] = &c.Wx.Base
-	return &bs
 }
 
 func Read() *Config {
