@@ -1,13 +1,14 @@
 package excel
 
 import (
-	"catLog"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	_ "github.com/google/uuid"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 )
@@ -44,7 +45,6 @@ func (m *ExcelManager) GetCell(tableName string, attributeName string, line int)
 }
 
 func Read() *ExcelManager {
-	catLog.Log("excel start read************************")
 	tableMap := make(map[string]*ExcelConfig)
 	err := filepath.Walk("./table",
 		func(path string, f os.FileInfo, err error) error {
@@ -65,7 +65,6 @@ func Read() *ExcelManager {
 				}
 
 				for _, sheetName := range fileExcel.GetSheetMap() {
-					catLog.Log("表格名字", sheetName)
 					// 创建字典
 					fileMap := make(map[string][]interface{})
 
