@@ -44,3 +44,17 @@ func Read() *Config {
 	}
 	return conf
 }
+
+func leafServer() *Config {
+	conf := &Config{}
+	data, err := ioutil.ReadFile("./conf/server.json")
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(data, conf)
+	if err != nil {
+		panic("解析json文件出错")
+	}
+	return conf
+}

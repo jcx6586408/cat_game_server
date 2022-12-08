@@ -1,1 +1,3 @@
-go run .\leaf.\leafserver\src\server\leafserver.go
+@echo on
+start /min "leaf" .\bin\leaf.exe
+start /min "rank" .\bin\rank.exe

@@ -7,8 +7,11 @@ import (
 	"io"
 	"io/ioutil"
 	"leafserver/src/server/msg"
+	"math/rand"
 	"net/http"
 	"sort"
+
+	pmsg "proto/msg"
 
 	"github.com/ip2location/ip2location-go"
 	"github.com/labstack/echo"
@@ -37,7 +40,7 @@ var DB *ip2location.DB
 
 var rankInfo = &RankInfo{}
 
-var conf = config.Read()
+var Conf = config.Read()
 
 func RankInit() {
 	db, err := ip2location.OpenDB("../../../.././IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
@@ -84,11 +87,13 @@ func handle(ranks *[]*msg.Rank, count int, r *msg.Rank) {
 		oldR.Val = r.Val
 		oldR.Country = r.Country
 		oldR.CountryShort = r.CountryShort
+		oldR.City = r.City
 		(*ranks) = append((*ranks), oldR) // 加入排行
 	} else {
 		oldR.Val = r.Val
 		oldR.NickName = r.NickName
 		oldR.Icon = r.Icon
+		oldR.City = r.City
 	}
 
 	// 更新排行
@@ -112,14 +117,14 @@ func RankUpdate(c echo.Context) error {
 	r.Country = results.Country_long
 	r.CountryShort = results.Country_short
 	r.City = results.City
-	handle(&rankInfo.WorldRank, conf.Rank.WorldRankCount, r) // 全服排行更新
+	handle(&rankInfo.WorldRank, Conf.Rank.WorldRankCount, r) // 全服排行更新
 
 	// 城市
 	cityRanks, ok := rankInfo.CityRank[r.City]
 	if !ok {
 		cityRanks = &([]*msg.Rank{})
 	}
-	handle(cityRanks, conf.Rank.CityRankCount, r) // 城市排行更新
+	handle(cityRanks, Conf.Rank.CityRankCount, r) // 城市排行更新
 	rankInfo.CityRank[r.City] = cityRanks         // 重新赋值
 	return c.JSON(http.StatusOK, r)
 }
@@ -136,13 +141,20 @@ func RankCityPull(c echo.Context) error {
 }
 
 func GetSelf(c echo.Context) error {
-	// defer c.Request().Response.Body.Close()
 	addr := c.RealIP()
 	results, _ := DB.Get_all(addr)
 	oldR := &msg.Rank{}
 	oldR.Country = results.Country_long
 	oldR.CountryShort = results.Country_short
 	return c.JSON(http.StatusOK, oldR)
+}
+
+func RoomCreate(c echo.Context) error {
+	ran := rand.Intn(len(Conf.Urls))
+	url := Conf.Urls[ran]
+	return c.JSON(http.StatusOK, &pmsg.RoomPreAddReply{
+		Url: url,
+	})
 }
 
 func ParseNetBody(i interface{}, r io.ReadCloser) {
