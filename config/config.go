@@ -33,7 +33,7 @@ type Rank struct {
 
 func Read() *Config {
 	conf := &Config{}
-	data, err := ioutil.ReadFile("./server.json")
+	data, err := ioutil.ReadFile("./conf/server.json")
 	if err != nil {
 		panic(err)
 	}

@@ -15,7 +15,7 @@ type RoomConfig struct {
 
 func ReadRoom() *RoomConfig {
 	conf := &RoomConfig{}
-	data, err := ioutil.ReadFile("./room.json")
+	data, err := ioutil.ReadFile("./conf/room.json")
 	if err != nil {
 		panic(err)
 	}
