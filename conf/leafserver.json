@@ -3,6 +3,7 @@
 	"LogPath": "",
 	"TCPAddr": "",
     "WSAddr": ":3653",
+	"HttpAddr": ":8443",
 	"ConsolePort": 3333,
 	"MaxConnNum": 20000
 }

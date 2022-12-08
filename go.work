@@ -3,8 +3,9 @@ go 1.18
 use (
 	./excel
 	./config
-	./wx
 	./proto
 	./remotemsg
 	./leaf/leafserver
+	./httpserver
+	./rank
 )
