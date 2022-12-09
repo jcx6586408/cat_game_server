@@ -4,6 +4,7 @@ import (
 	"leafserver/src/server/conf"
 	"net/http"
 	"rank/rank"
+	"runtime"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -24,5 +25,18 @@ func main() {
 	e.POST("/cityPull", rank.RankCityPull)
 	e.POST("/update", rank.RankUpdate)
 	e.POST("/roomCreate", rank.RoomCreate)
-	e.Logger.Fatal(e.StartTLS(conf.Server.HttpAddr, rank.Conf.Crt.CertFile, rank.Conf.Crt.KeyFile))
+	e.POST("/openid", rank.GetOpenID)
+
+	sysType := runtime.GOOS
+
+	if sysType == "linux" {
+		// LINUX系统
+		e.Logger.Fatal(e.StartTLS(conf.Server.HttpAddr, conf.Server.CertFile, conf.Server.KeyFile))
+	}
+
+	if sysType == "windows" {
+		// windows系统
+		e.Logger.Fatal(e.Start(conf.Server.HttpAddr))
+	}
+
 }

@@ -1,19 +1,14 @@
 {
     "rank": {
-        "worldRankCount": 1000,
-        "countryRankCount": 1000,
-        "provinceRankCount": 200,
+        "worldRankCount": 50,
+        "countryRankCount": 50,
+        "provinceRankCount": 50,
         "cityRankCount": 50
-    },
-    "crt": {
-        "crt": "./ssl/Nginx/1_kampfiregames.cn_bundle.crt",
-        "crtKey": "./ssl/Nginx/2_kampfiregames.cn.key"
     },
     "wx": {
         "appid": "wxb5aaac64384fb62d",
         "appSecret": "13ac91bad735351927f6eae6f38432ba"
     },
-
     "DB": "root:111111@tcp(127.0.0.1:3306)/user",
     "Urls": [
         "ws://192.168.50.240:3653"

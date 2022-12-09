@@ -1,0 +1,17 @@
+{
+    "rank": {
+        "worldRankCount": 50,
+        "countryRankCount": 1000,
+        "provinceRankCount": 200,
+        "cityRankCount": 50
+    },
+    "wx": {
+        "appid": "wxb5aaac64384fb62d",
+        "appSecret": "13ac91bad735351927f6eae6f38432ba"
+    },
+    "DB": "root:111111@tcp(127.0.0.1:3306)/user",
+    "Urls": [
+        "wss://kampfiregames.cn:5100"
+    ],
+    "SeverType":"gate"
+}

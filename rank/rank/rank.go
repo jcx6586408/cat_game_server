@@ -157,6 +157,26 @@ func RoomCreate(c echo.Context) error {
 	})
 }
 
+type WXCode struct {
+	Code string
+}
+
+func GetOpenID(c echo.Context) error {
+	wxcode := &WXCode{}
+	ParseNetBody(wxcode, c.Request().Body)
+	resp, err := http.Get("https://api.weixin.qq.com/sns/jscode2session?appid=" + Conf.Wx.Appid +
+		"&secret=" + Conf.Wx.AppSecret +
+		"&js_code=" + wxcode.Code +
+		"&grant_type=authorization_code")
+	if err != nil {
+		return c.String(http.StatusOK, "")
+	}
+	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	return c.String(http.StatusOK, string(body))
+}
+
 func ParseNetBody(i interface{}, r io.ReadCloser) {
 	d, _ := ioutil.ReadAll(r)
 	json.Unmarshal(d, i)

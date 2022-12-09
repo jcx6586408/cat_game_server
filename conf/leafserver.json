@@ -2,8 +2,8 @@
 	"LogLevel": "debug",
 	"LogPath": "",
 	"TCPAddr": "",
-    "WSAddr": ":3653",
+	"WSAddr": ":3653",
 	"HttpAddr": ":5600",
 	"ConsolePort": 3333,
-	"MaxConnNum": 20000
+	"MaxConnNum": 2000000
 }

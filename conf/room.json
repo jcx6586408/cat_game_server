@@ -1,6 +1,6 @@
 {
     "PrepareTime": 3,
-    "AnswerTime": 10,
-    "MaxMember": 12,
-    "QuestionCount": 2
+    "AnswerTime": 15,
+    "MaxMember": 48,
+    "MaxInvite": 12
 }
