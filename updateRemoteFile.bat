@@ -3,7 +3,7 @@
 set host=118.195.244.48
 set user=root
 
-set remoteBase=/home/Test/
+set remoteBase=/home/sheep/
 
 set localPath=.\bin\bin\
 set remotePath=%remoteBase%bin/
@@ -48,3 +48,4 @@ goto end
 for /r %sslLocalPath% %%i in (*) do (scp -r %%i %user%@%host%:%sslRemotePath%)
 
 :end
+exit

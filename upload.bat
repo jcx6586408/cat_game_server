@@ -1,7 +1,7 @@
 @echo off
 
-.\updateRemoteFile.bat 1
-.\updateRemoteFile.bat 2
-.\updateRemoteFile.bat 3
-.\updateRemoteFile.bat 4
-.\updateRemoteFile.bat 5
+start .\updateRemoteFile.bat 1
+start .\updateRemoteFile.bat 2
+start .\updateRemoteFile.bat 3
+start .\updateRemoteFile.bat 4
+start .\updateRemoteFile.bat 5

@@ -33,4 +33,5 @@ const (
 	ROOMMATCHMEMBERCANCEL = 314 // 取消个人匹配的准备
 	ROOMMATCHROOM         = 315 // 房间匹配
 	ROOMANSWER            = 316 // 回答题目
+	ROOMGET               = 317 // 主动请求房间信息
 )

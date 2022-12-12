@@ -2,5 +2,6 @@
     "PrepareTime": 3,
     "AnswerTime": 18,
     "MaxMember": 48,
-    "MaxInvite": 12
+    "MaxInvite": 12,
+    "ReliveWaitTime": 6
 }
