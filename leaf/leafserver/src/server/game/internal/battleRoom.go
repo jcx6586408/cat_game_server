@@ -38,11 +38,16 @@ func (r *BattleRoom) GetID() int {
 }
 
 func (r *BattleRoom) OnInit() {
-
+	r.Members = []*pmsg.Member{}
+	r.Rooms = []Roomer{}
 }
 
 func (r *BattleRoom) OnClose() {
-
+	r.LibAnswer = nil
+	r.Members = nil
+	r.Rooms = nil
+	r.ReliveChan = nil
+	r.Cancel = nil
 }
 
 func (r *BattleRoom) OnPlayEnd() {

@@ -35,10 +35,12 @@ type Manager struct {
 	Rooms        []Roomer            // 准备房间
 	Done         chan interface{}    // 停用通道
 	TableManager *excel.ExcelManager // 表格管理器
+	IDManager    *IDManager
 }
 
 func (m *Manager) Create() Roomer {
 	r := manager.Pool.Get().(*Room)
+	r.ID = m.IDManager.Get()
 	r.OnInit()
 	return r
 }
@@ -58,6 +60,7 @@ func (m *Manager) GetRoomByID(roomID int) Roomer {
 
 func (m *Manager) destroy(room Roomer) bool {
 	room.OnClose()
+	m.IDManager.Put(room.GetID()) // id回收
 	manager.Pool.Put(room)
 	log.Debug("房间回收, ID: %d", room.GetID())
 	return true

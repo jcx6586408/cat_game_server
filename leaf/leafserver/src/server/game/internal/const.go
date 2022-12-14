@@ -31,7 +31,6 @@ func init() {
 	manager.Pool = sync.Pool{
 		New: func() any {
 			r := &Room{}
-			r.ID = manager.GetRoomsCount() + 1
 			return r
 		},
 	}
@@ -39,8 +38,7 @@ func init() {
 	battleManager = new(BattleRoomManager)
 	battleManager.Pool = sync.Pool{
 		New: func() any {
-			r := &Room{}
-			r.ID = battleManager.GetRoomsCount() + 1
+			r := &BattleRoom{}
 			return r
 		},
 	}

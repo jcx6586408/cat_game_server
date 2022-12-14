@@ -33,10 +33,12 @@ type BattleRoomManager struct {
 	Rooms        []BattleRoomer
 	Done         chan interface{}    // 停用通道
 	TableManager *excel.ExcelManager // 表格管理器
+	IDManager    *IDManager
 }
 
 func (m *BattleRoomManager) Create() BattleRoomer {
 	r := manager.Pool.Get().(*BattleRoom)
+	r.ID = m.IDManager.Get()
 	log.Debug("创建了战斗房间, ID: %d", r.ID)
 	r.OnInit()
 	return r
@@ -57,6 +59,7 @@ func (m *BattleRoomManager) GetRoomByID(roomID int) BattleRoomer {
 
 func (m *BattleRoomManager) destroy(room BattleRoomer) bool {
 	room.OnClose()
+	m.IDManager.Put(room.GetID()) // id回收
 	manager.Pool.Put(room)
 	log.Debug("战斗房间回收, ID: %d", room.GetID())
 	return true

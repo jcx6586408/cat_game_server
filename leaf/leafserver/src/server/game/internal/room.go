@@ -30,7 +30,7 @@ func (r *Room) GetID() int {
 }
 
 func (r *Room) OnInit() {
-
+	r.Members = []*pmsg.Member{}
 }
 
 func (r *Room) OnClose() {
