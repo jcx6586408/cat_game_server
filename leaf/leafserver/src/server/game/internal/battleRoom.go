@@ -29,6 +29,7 @@ type BattleRoom struct {
 	AnswerTime     int // 单次回答问题时间
 	Cur            int
 	Cancel         context.CancelFunc // 取消
+	MatchCancel    context.CancelFunc // 机器人匹配取消
 	ReliveChan     chan int           // 复活通知
 	ReliveWaitTime int
 }
@@ -128,6 +129,8 @@ func (r *BattleRoom) AddRoom(room Roomer) bool {
 		r.Rooms = append(r.Rooms, room)
 		return true
 	}
+	// 填充机器人准备战斗
+
 	return false
 }
 
