@@ -70,67 +70,52 @@ func roomLeave(args []interface{}) {
 func roomAnswer(args []interface{}) {
 	req := args[0].(*pmsg.Answer)
 	log.Debug("收到答题消息------------------------%v", req)
-	// Manager.AnswerQuestion(req)
+	manager.AnswerQuestion(req)
 }
 
 // 房间解散
 func roomOver(args []interface{}) {
-	req := args[0].(*pmsg.OverRequest)
-	log.Debug("房间解散消息----------------------------------", req.Member.Uuid)
-	// _, err := Manager.OverRoom(int(req.RoomID))
-	// if err == nil {
-	// 	a := args[1].(gate.Agent)
-	// 	a.WriteMsg(&pmsg.OverReply{State: true})
-	// }
+
 }
 
 // 房间匹配
 func roomMatch(args []interface{}) {
 	req := args[0].(*pmsg.MatchRoomRequest)
 	log.Debug("房间匹配消息----------------------------------%v", req.RoomID)
-	roomID := int(req.RoomID)
-	// room, err := Manager.GetRoomByID(roomID)
-	// if err == nil {
-	// 	room.Send(remotemsg.ROOMMATCHROOM)
-	// 	Manager.MatchRoom(room)
-	// }
+	manager.Matching(int(req.RoomID))
 }
 
 // 个人匹配
 func roomMatchMember(args []interface{}) {
 	req := args[0].(*pmsg.MatchMemberRequest)
 	log.Debug("房间个人消息----------------------------------%v", req.Member.Uuid)
-	// room, err := Manager.MatchMember(req.Member)
-	// if err == nil {
-	// 	room.Send(remotemsg.ROOMMATCH)
-	// }
+	room := manager.Create()
+	room.AddMember(req.Member)
+	room.Matching()
+	room.Send(remotemsg.ROOMMATCH, nil)
 }
 
 // 房间匹配取消
 func roomMatchCanel(args []interface{}) {
 	req := args[0].(*pmsg.MatchRoomRequest)
-	// _, err := Manager.MatchRoomCancel(int(req.RoomID))
-	// if err == nil {
-	// 	a := args[1].(gate.Agent)
-	// 	a.WriteMsg(&pmsg.MatchRoomCancelReply{State: true})
-	// }
+	manager.MatchingCancel(int(req.RoomID))
+	a := args[1].(gate.Agent)
+	a.WriteMsg(&pmsg.MatchRoomCancelReply{State: true})
 }
 
 // 个人匹配取消
 func roomMatchMemberCanel(args []interface{}) {
 	req := args[0].(*pmsg.LeaveRequest)
-	// _, err := Manager.MatchMemberCancel(req)
-	// if err == nil {
-	// 	a := args[1].(gate.Agent)
-	// 	a.WriteMsg(&pmsg.MatchMemberCancelReply{State: true})
-	// }
+	manager.MatchingCancel(int(req.RoomID))
+	a := args[1].(gate.Agent)
+	a.WriteMsg(&pmsg.MatchMemberCancelReply{State: true})
 }
 
 // 成员复活
 func roomMatchMemberRelive(args []interface{}) {
 	req := args[0].(*pmsg.MemberReliveRequest)
 	log.Debug("复活消息----------------: %v", req.Uuid)
-	// room, err := Manager.Relive(req)
+	manager.Relive(int(req.RoomID), req.Uuid)
 	// if err == nil {
 	// 	room.SendRelive(req)
 	// }

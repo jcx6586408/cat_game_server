@@ -13,6 +13,8 @@ type Roomer interface {
 	ChangeMemberState(state int)              // 改变成员状态
 	GetMembers() []*pmsg.Member               // 获取所有成员
 	SendLeave(msgID int, member *pmsg.Member) // 发送玩家离开
+	Send(msgID int, change *pmsg.Member)
+	Relive(uuid string)
 	Roombaseer
 }
 
@@ -55,7 +57,7 @@ func (r *Room) AddMember(member *pmsg.Member) bool {
 	}
 	member.IsMaster = (r.GetMemberCount() <= 0) // 第一个人设置为房主
 	r.Members = append(r.Members, member)
-	r.send(remotemsg.ROOMADD, member) // 广播加入房间
+	r.Send(remotemsg.ROOMADD, member) // 广播加入房间
 	return true
 }
 
@@ -86,4 +88,16 @@ func (m *Room) delete(a []*pmsg.Member, elem *pmsg.Member) []*pmsg.Member {
 		}
 	}
 	return a
+}
+
+func (m *Room) Answer(a *pmsg.Answer) {
+	if m.BattleRoom != nil {
+		m.BattleRoom.Answer(a)
+	}
+}
+
+func (m *Room) Relive(uuid string) {
+	if m.BattleRoom != nil {
+		m.BattleRoom.Relive(uuid)
+	}
 }

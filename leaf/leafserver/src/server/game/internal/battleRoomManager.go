@@ -21,9 +21,6 @@ type BattleRoomManagerer interface {
 	Play(roomID int)    // 开始游戏
 	PlayEnd(roomID int) // 结束游戏
 
-	// 复活
-	Relive(roomID int, member Memberer) // 复活
-
 	// 房间处理
 	AddRoom(roomID int, room Roomer) (BattleRoomer, error) // 添加成员
 
@@ -93,15 +90,6 @@ func (m *BattleRoomManager) PlayEnd(roomID int) {
 	for _, v := range m.Rooms {
 		if v.GetID() == roomID {
 			v.OnPlayEnd()
-			return
-		}
-	}
-}
-
-func (m *BattleRoomManager) Relive(roomID int, member Memberer) {
-	for _, v := range m.Rooms {
-		if v.GetID() == roomID {
-			v.Relive(member)
 			return
 		}
 	}

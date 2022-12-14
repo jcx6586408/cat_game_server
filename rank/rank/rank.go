@@ -17,6 +17,8 @@ import (
 	"github.com/labstack/echo"
 )
 
+type Ranks map[string]*[]*msg.Rank
+
 type RequestRank struct {
 	msg.Rank
 }

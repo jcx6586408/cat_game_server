@@ -26,6 +26,8 @@ type Managerer interface {
 	// 成员处理
 	AddMember(roomID int, member *pmsg.Member) (Roomer, int, error) // 添加成员
 	LeaveMember(roomID int, member Memberer) (Roomer, error)        // 添加成员
+
+	AnswerQuestion(a *pmsg.Answer) // 回答问题
 }
 
 type Manager struct {
@@ -129,12 +131,19 @@ func (m *Manager) delete(a []Roomer, elem Roomer) []Roomer {
 	return a
 }
 
-func (m *Manager) AnswerQuestion(a *pmsg.Answer) (*Room, error) {
+func (m *Manager) AnswerQuestion(a *pmsg.Answer) {
 	for _, v := range m.Rooms {
 		if v.GetID() == int(a.RoomID) {
-			v.Answer(a)
-			return v, nil
+
 		}
 	}
-	return nil, errors.New("")
+}
+
+func (m *Manager) Relive(roomID int, uuid string) {
+	for _, v := range m.Rooms {
+		if v.GetID() == roomID {
+			v.Relive(uuid)
+			return
+		}
+	}
 }

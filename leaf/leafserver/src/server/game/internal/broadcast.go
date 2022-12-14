@@ -112,7 +112,7 @@ func (m *BattleRoom) send(msgID int, change *pmsg.Member) {
 	})
 }
 
-func (m *Room) send(msgID int, change *pmsg.Member) {
+func (m *Room) Send(msgID int, change *pmsg.Member) {
 	m.sendbase(func(a Agent) {
 		a.WriteMsg(&pmsg.RoomInfoReply{
 			RoomID:         int32(m.GetID()),

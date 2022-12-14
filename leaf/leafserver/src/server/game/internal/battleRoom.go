@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/rand"
 	pmsg "proto/msg"
+	"remotemsg"
 	"time"
 
 	"github.com/name5566/leaf/log"
@@ -14,19 +15,22 @@ type BattleRoomer interface {
 	Play()                    // 开始游戏
 	OnPlayEnd()               // 游戏结束
 	AddRoom(room Roomer) bool // 加入房间
-	Relive(member Memberer)   // 复活
+	Relive(uuid string)       // 复活
+	Answer(a *pmsg.Answer)    // 答题
 }
 
 type BattleRoom struct {
-	ID            int
-	Members       []*pmsg.Member
-	Rooms         []Roomer
-	Max           int
-	LibAnswer     *LibAnswer // 当前题库
-	QuestionCount int
-	AnswerTime    int // 单次回答问题时间
-	Cur           int
-	Cancel        context.CancelFunc // 取消
+	ID             int
+	Members        []*pmsg.Member
+	Rooms          []Roomer
+	Max            int
+	LibAnswer      *LibAnswer // 当前题库
+	QuestionCount  int
+	AnswerTime     int // 单次回答问题时间
+	Cur            int
+	Cancel         context.CancelFunc // 取消
+	ReliveChan     chan int           // 复活通知
+	ReliveWaitTime int
 }
 
 func (r *BattleRoom) GetID() int {
@@ -48,8 +52,23 @@ func (r *BattleRoom) OnPlayEnd() {
 	}
 }
 
-func (r *BattleRoom) Relive(member Memberer) {
-
+func (r *BattleRoom) Relive(uuid string) {
+	for _, room := range r.Rooms {
+		for _, v := range room.GetMembers() {
+			if v.Uuid == uuid {
+				v.IsDead = false
+				skeleton.Go(func() {
+					if r.ReliveChan != nil {
+						log.Debug("发送复活通知***************************************")
+						r.ReliveChan <- 1
+					} else {
+						log.Debug("管道已经关闭, 无需通知")
+					}
+				}, func() {})
+				break
+			}
+		}
+	}
 }
 
 func (r *BattleRoom) AddMember(member Memberer) {
@@ -142,6 +161,8 @@ func (m *BattleRoom) PlayRun() {
 			case <-ctx.Done():
 				log.Debug("答题结束: %v", m.ID)
 				// m.Send(remotemsg.ROOMENDPLAY)
+				m.send(remotemsg.ROOMENDPLAY, nil)
+				m.OnPlayEnd()
 				// m.PlayingToPrepare()          // 转移成员到准备
 				// Manager.UsingToPrepareRoom(m) // 转移房间位置
 				m.Cancel = nil
@@ -166,12 +187,12 @@ func (m *BattleRoom) PlayRun() {
 						// 检查所有成员答案
 						var allWrong = m.CheckAndHandleDead()
 						// 如果没有全错
-						m.LibAnswer.Progress++ // 进度增长
-						// m.Send(remotemsg.ROOMANSWEREND) // 答题结束
+						m.LibAnswer.Progress++               // 进度增长
+						m.send(remotemsg.ROOMANSWEREND, nil) // 答题结束
 						if allWrong {
-							// m.WaitRelive(func() {
-							// 	cancel()
-							// }) // 等待复活
+							m.WaitRelive(func() {
+								cancel()
+							}) // 等待复活
 						}
 					}
 				}
@@ -267,4 +288,29 @@ func (m *BattleRoom) Answer(a *pmsg.Answer) {
 			}
 		}
 	}
+}
+
+func (m *BattleRoom) WaitRelive(fail func()) {
+	subCtx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(m.ReliveWaitTime))
+	log.Debug("创建复活管道通知++++++++++++++++++++++++%d", m.ID)
+	m.ReliveChan = make(chan int)
+	skeleton.Go(
+		func() {
+			for {
+				select {
+				case <-m.ReliveChan:
+					close(m.ReliveChan)
+					m.ReliveChan = nil
+					log.Debug("复活成功--------继续游戏%v", m.ReliveChan)
+					return
+				case <-subCtx.Done():
+					close(m.ReliveChan)
+					log.Debug("比赛结束-------------------房间ID: %v", m.ID)
+					fail()
+					return
+				}
+			}
+		},
+		func() {},
+	)
 }
