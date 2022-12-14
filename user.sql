@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS  `user` (
 `uid` varchar(45) NOT NULL COMMENT '玩家唯一ID',
 `nickname` varchar(45) NOT NULL COMMENT '玩家昵称',
 `icon` varchar(45) NOT NULL COMMENT '玩家头像',
+`online` int(11) NOT NULL COMMENT '是否在线',
 `Forever` varchar(20000) NOT NULL COMMENT '永久存储',
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户表';

@@ -67,7 +67,8 @@ message RoomTime {
 // 复活消息 
 message MemberReliveRequest {
     int32 RoomID = 1;
-    string Uuid = 2;
+    int32 BattleRoomID = 2;
+    string Uuid = 3;
 }
 
 // 复活消息返回
@@ -164,6 +165,11 @@ message Question {
     string RightAnswer = 7; // 正确答案
 }
 
+message MemberRequest {
+    string Uuid = 1;            // 用户服务端uuid
+    int32 RoomID = 11;          // 房间ID
+    int32 BattleRoomID = 12;    // 战斗房间ID
+}
 
 //-----------------成员---------------------
 message Member {
@@ -176,6 +182,10 @@ message Member {
     bool IsInvite = 7;          // 是否邀请的人
     bool IsDead = 8;            // 是否死亡
     repeated Answer Answer = 9; // 回答
+    int32 SkinID = 10;          // 皮肤ID
+    int32 RoomID = 11;          // 房间ID
+    int32 BattleRoomID = 12;    // 战斗房间ID
+    int32 State = 13;           // 角色状态（匹配，准备，战斗）
 }
 
 message RoomInfoReply {
@@ -190,6 +200,7 @@ message RoomInfoReply {
     Question Question = 9;    // 问题
     int32 ToTalTime = 10;       // 答题总时间
     int32 MaxMemeber = 11;
+    int32 BattleRoomID = 12;     // 战斗房间ID
 }
 
 message RoomChangeState {

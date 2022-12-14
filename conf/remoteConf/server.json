@@ -9,7 +9,15 @@
         "appid": "wxb5aaac64384fb62d",
         "appSecret": "13ac91bad735351927f6eae6f38432ba"
     },
-    "DB": "root:111111@tcp(127.0.0.1:3306)/user",
+    "DB": {
+        "User":"root",
+        "Password": "111111",
+        "Host":"127.0.0.1:3306",
+        "DB": "user",
+        "MinAlive":100,
+        "MaxAlive": 400,
+        "MaxIdle": 5
+    },
     "Urls": [
         "wss://kampfiregames.cn:5100"
     ],
