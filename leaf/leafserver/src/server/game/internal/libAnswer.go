@@ -18,7 +18,7 @@ func GetAnswerLib() Answers {
 }
 
 func ToAnswerLib(table string) Answers {
-	tableConf, ok := Manager.TableManager.GetTable(table)
+	tableConf, ok := manager.TableManager.GetTable(table)
 	arr := []*pmsg.Question{}
 	if ok {
 		for _, cell := range tableConf.Excel {

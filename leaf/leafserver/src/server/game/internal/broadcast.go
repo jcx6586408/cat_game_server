@@ -1,4 +1,4 @@
-package room
+package internal
 
 import (
 	pmsg "proto/msg"
@@ -10,7 +10,7 @@ type Agent interface {
 	WriteMsg(data interface{})
 }
 
-func (m *Room) sendbase(Users map[string]Agent, call func(Agent)) {
+func (m *Room) sendbase(call func(Agent)) {
 	for _, v := range m.Members {
 		a := Users[v.Uuid]
 		// 准备人员不通知
@@ -30,7 +30,7 @@ func (m *Room) sendbase(Users map[string]Agent, call func(Agent)) {
 	}
 }
 
-func (m *BattleRoom) sendbase(Users map[string]Agent, call func(Agent, Roomer, *pmsg.Member)) {
+func (m *BattleRoom) sendbase(call func(Agent, Roomer, *pmsg.Member)) {
 	for _, room := range m.Rooms {
 		for _, v := range room.GetMembers() {
 			a := Users[v.Uuid]
@@ -49,22 +49,22 @@ func (m *BattleRoom) sendbase(Users map[string]Agent, call func(Agent, Roomer, *
 }
 
 // 离开
-func (m *Room) SendLeave(Users map[string]Agent, msgID int, member *pmsg.Member) {
-	m.sendbase(Users, func(a Agent) {
+func (m *Room) SendLeave(msgID int, member *pmsg.Member) {
+	m.sendbase(func(a Agent) {
 
 	})
 }
 
 // 战斗中离开
-func (m *BattleRoom) SendLeave(Users map[string]Agent, msgID int, member *pmsg.Member) {
-	m.sendbase(Users, func(a Agent, room Roomer, member *pmsg.Member) {
-		room.SendLeave(Users, msgID, member)
+func (m *BattleRoom) SendLeave(msgID int, member *pmsg.Member) {
+	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
+		room.SendLeave(msgID, member)
 	})
 }
 
 // 发送复活
-func (m *BattleRoom) SendRelive(Users map[string]Agent, req *pmsg.MemberReliveRequest) {
-	m.sendbase(Users, func(a Agent, room Roomer, member *pmsg.Member) {
+func (m *BattleRoom) SendRelive(req *pmsg.MemberReliveRequest) {
+	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
 		a.WriteMsg(&pmsg.MemberReliveReply{
 			Uuid:   req.Uuid,
 			Answer: member.Answer[m.LibAnswer.Progress],
@@ -73,8 +73,8 @@ func (m *BattleRoom) SendRelive(Users map[string]Agent, req *pmsg.MemberReliveRe
 }
 
 // 发送答题
-func (m *BattleRoom) SendAnswer(Users map[string]Agent, uuid string, qid int32, result string) {
-	m.sendbase(Users, func(a Agent, room Roomer, member *pmsg.Member) {
+func (m *BattleRoom) SendAnswer(uuid string, qid int32, result string) {
+	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
 		a.WriteMsg(&pmsg.Answer{
 			Uuid:       uuid,
 			RoomID:     int32(m.ID),
@@ -85,16 +85,16 @@ func (m *BattleRoom) SendAnswer(Users map[string]Agent, uuid string, qid int32, 
 }
 
 // 发送计时
-func (m *BattleRoom) SendTime(Users map[string]Agent, cur int) {
-	m.sendbase(Users, func(a Agent, room Roomer, member *pmsg.Member) {
+func (m *BattleRoom) SendTime(cur int) {
+	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
 		a.WriteMsg(&pmsg.RoomTime{
 			Time: int32(cur),
 		})
 	})
 }
 
-func (m *BattleRoom) send(Users map[string]Agent, msgID int, change *pmsg.Member) {
-	m.sendbase(Users, func(a Agent, room Roomer, member *pmsg.Member) {
+func (m *BattleRoom) send(msgID int, change *pmsg.Member) {
+	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
 		a.WriteMsg(&pmsg.RoomInfoReply{
 			RoomID:         int32(room.GetID()),
 			PrepareMembers: nil,
@@ -108,6 +108,25 @@ func (m *BattleRoom) send(Users map[string]Agent, msgID int, change *pmsg.Member
 			ToTalTime:      int32(m.GetPlayTime()),
 			MaxMemeber:     int32(m.Max),
 			BattleRoomID:   int32(m.ID),
+		})
+	})
+}
+
+func (m *Room) send(msgID int, change *pmsg.Member) {
+	m.sendbase(func(a Agent) {
+		a.WriteMsg(&pmsg.RoomInfoReply{
+			RoomID:         int32(m.GetID()),
+			PrepareMembers: m.Members,
+			PlayingMembers: nil,
+			Progress:       0,
+			TotolQuestion:  0,
+			CurQuestion:    0,
+			ChangeMemeber:  change,
+			MsgID:          int32(msgID),
+			Question:       nil,
+			ToTalTime:      0,
+			MaxMemeber:     int32(m.Max),
+			BattleRoomID:   0,
 		})
 	})
 }

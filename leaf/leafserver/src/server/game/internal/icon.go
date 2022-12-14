@@ -8,7 +8,7 @@ type Icon struct {
 }
 
 func ToIconLib() []*Icon {
-	tableConf, ok := Manager.TableManager.GetTable("picture")
+	tableConf, ok := manager.TableManager.GetTable("picture")
 	arr := []*Icon{}
 	if ok {
 		for _, cell := range tableConf.Excel {

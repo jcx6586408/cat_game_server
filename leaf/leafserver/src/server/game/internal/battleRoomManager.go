@@ -1,4 +1,4 @@
-package room
+package internal
 
 import (
 	"errors"
@@ -27,8 +27,8 @@ type BattleRoomManagerer interface {
 	// 房间处理
 	AddRoom(roomID int, room Roomer) (BattleRoomer, error) // 添加成员
 
-	MatchRoom(room Roomer)        // 匹配房间
-	MatchRoomzCancel(room Roomer) // 取消匹配房间
+	MatchRoom(room Roomer) BattleRoomer // 匹配房间
+	MatchRoomzCancel(room Roomer)       // 取消匹配房间
 }
 
 type BattleRoomManager struct {
@@ -117,24 +117,22 @@ func (m *BattleRoomManager) AddRoom(roomID int, room Roomer) (BattleRoomer, erro
 	return nil, errors.New("")
 }
 
-func (m *BattleRoomManager) MatchRoom(room Roomer) {
+func (m *BattleRoomManager) MatchRoom(room Roomer) BattleRoomer {
 	if len(m.Rooms) <= 0 {
 		br := m.Create()
 		br.AddRoom(room)
+		return br
 	} else {
-		success := false
 		for _, v := range m.Rooms {
 			bo := v.AddRoom(room)
 			if bo {
-				success = true
-				break
+				return v
 			}
 		}
 		// 如果找不到合适的战斗房，则创建新的
-		if !success {
-			br := m.Create()
-			br.AddRoom(room)
-		}
+		br := m.Create()
+		br.AddRoom(room)
+		return br
 	}
 }
 

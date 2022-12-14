@@ -9,7 +9,7 @@ type Skin struct {
 }
 
 func ToSkinLib() []*Skin {
-	tableConf, ok := Manager.TableManager.GetTable("skin")
+	tableConf, ok := manager.TableManager.GetTable("skin")
 	arr := []*Skin{}
 	if ok {
 		for _, cell := range tableConf.Excel {

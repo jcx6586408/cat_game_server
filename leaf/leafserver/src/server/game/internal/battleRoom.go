@@ -1,4 +1,4 @@
-package room
+package internal
 
 import (
 	"context"
@@ -244,6 +244,26 @@ func (m *BattleRoom) SetDefaultAnswer() {
 					Result:     ranAnswer,
 				}
 				v.Answer[i] = aa
+			}
+		}
+	}
+}
+
+// 答题
+func (m *BattleRoom) Answer(a *pmsg.Answer) {
+	for _, room := range m.Rooms {
+		for _, v := range room.GetMembers() {
+			if v.Uuid == a.Uuid {
+				for i, q := range v.Answer {
+					if i >= m.LibAnswer.Progress {
+						q.Result = a.Result
+					}
+				}
+				m.SendAnswer(a.Uuid, a.QuestionID, a.Result)
+				if !v.IsRobot {
+					// m.RandomRobotTargetAnswer(a.Result)
+				}
+				break
 			}
 		}
 	}

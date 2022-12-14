@@ -1,4 +1,4 @@
-package room
+package internal
 
 type Roombaseer interface {
 	GetID() int // 房间ID

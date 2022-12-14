@@ -38,5 +38,5 @@ func rpcCloseAgent(args []interface{}) {
 	// storage.OfflineHandle(Users[guid].Data) // 离线保存
 	delete(Users, guid)
 	delete(AgentUsers, a)
-	Manager.OfflineMemeber(guid)
+	// Manager.OfflineMemeber(guid)
 }

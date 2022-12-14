@@ -8,7 +8,7 @@ type Names struct {
 }
 
 func ToNameLib() []*Names {
-	tableConf, ok := Manager.TableManager.GetTable("name")
+	tableConf, ok := manager.TableManager.GetTable("name")
 	arr := []*Names{}
 	if ok {
 		for _, cell := range tableConf.Excel {

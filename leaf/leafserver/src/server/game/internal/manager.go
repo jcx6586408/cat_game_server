@@ -1,8 +1,9 @@
-package room
+package internal
 
 import (
 	"errors"
 	"excel"
+	pmsg "proto/msg"
 	"sync"
 
 	"github.com/labstack/gommon/log"
@@ -23,8 +24,8 @@ type Managerer interface {
 	MatchingCancel(roomID int) // 取消房间创建
 
 	// 成员处理
-	AddMember(roomID int, member Memberer) (Roomer, int, error) // 添加成员
-	LeaveMember(roomID int, member Memberer) (Roomer, error)    // 添加成员
+	AddMember(roomID int, member *pmsg.Member) (Roomer, int, error) // 添加成员
+	LeaveMember(roomID int, member Memberer) (Roomer, error)        // 添加成员
 }
 
 type Manager struct {
@@ -94,7 +95,7 @@ func (m *Manager) MatchingCancel(roomID int) {
 	}
 }
 
-func (m *Manager) AddMember(roomID int, member Memberer) (Roomer, int, error) {
+func (m *Manager) AddMember(roomID int, member *pmsg.Member) (Roomer, int, error) {
 	for _, v := range m.Rooms {
 		if v.GetID() == roomID {
 			bo := v.AddMember(member)
@@ -126,4 +127,14 @@ func (m *Manager) delete(a []Roomer, elem Roomer) []Roomer {
 		}
 	}
 	return a
+}
+
+func (m *Manager) AnswerQuestion(a *pmsg.Answer) (*Room, error) {
+	for _, v := range m.Rooms {
+		if v.GetID() == int(a.RoomID) {
+			v.Answer(a)
+			return v, nil
+		}
+	}
+	return nil, errors.New("")
 }

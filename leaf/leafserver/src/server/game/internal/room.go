@@ -1,24 +1,26 @@
-package room
+package internal
 
 import (
 	pmsg "proto/msg"
+	"remotemsg"
 )
 
 type Roomer interface {
-	Matching()                                                        // 开始匹配
-	MatchingCancel()                                                  // 取消匹配
-	AddMember(member Memberer) bool                                   // 加入成员
-	LeaveMember(member Memberer)                                      // 加入成员
-	ChangeMemberState(state int)                                      // 改变成员状态
-	GetMembers() []*pmsg.Member                                       // 获取所有成员
-	SendLeave(Users map[string]Agent, msgID int, member *pmsg.Member) // 发送玩家离开
+	Matching()                                // 开始匹配
+	MatchingCancel()                          // 取消匹配
+	AddMember(member *pmsg.Member) bool       // 加入成员
+	LeaveMember(member Memberer)              // 加入成员
+	ChangeMemberState(state int)              // 改变成员状态
+	GetMembers() []*pmsg.Member               // 获取所有成员
+	SendLeave(msgID int, member *pmsg.Member) // 发送玩家离开
 	Roombaseer
 }
 
 type Room struct {
-	ID      int
-	Members []*pmsg.Member
-	Max     int
+	ID         int
+	Members    []*pmsg.Member
+	Max        int
+	BattleRoom BattleRoomer
 }
 
 func (r *Room) GetID() int {
@@ -38,18 +40,22 @@ func (r *Room) GetMembers() []*pmsg.Member {
 }
 
 func (r *Room) Matching() {
-	BattleManager.MatchRoom(r)
+	br := BattleManager.MatchRoom(r)
+	r.BattleRoom = br
 }
 
 func (r *Room) MatchingCancel() {
 	BattleManager.MatchRoomzCancel(r)
+	r.BattleRoom = nil
 }
 
-func (r *Room) AddMember(member Memberer) bool {
+func (r *Room) AddMember(member *pmsg.Member) bool {
 	if r.Max <= r.GetMemberCount() {
 		return false
 	}
-	r.Members = append(r.Members, member.(*pmsg.Member))
+	member.IsMaster = (r.GetMemberCount() <= 0) // 第一个人设置为房主
+	r.Members = append(r.Members, member)
+	r.send(remotemsg.ROOMADD, member) // 广播加入房间
 	return true
 }
 

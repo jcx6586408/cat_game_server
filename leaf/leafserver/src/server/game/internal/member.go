@@ -1,4 +1,4 @@
-package room
+package internal
 
 import pmsg "proto/msg"
 
