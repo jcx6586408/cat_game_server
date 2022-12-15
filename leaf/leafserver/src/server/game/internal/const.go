@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"config"
+	"excel"
 	"sync"
 
 	"github.com/name5566/leaf/log"
@@ -24,18 +26,21 @@ var (
 	BattleManager BattleRoomManagerer
 	battleManager *BattleRoomManager
 	results       = []string{"A", "B", "C", "D"}
+	RoomConf      *config.RoomConfig
 )
 
-func init() {
+func ConstInit() {
+	RoomConf = config.ReadRoom()
 	manager = new(Manager)
+	manager.IDManager = NewIDManager()
 	manager.Pool = sync.Pool{
 		New: func() any {
 			r := &Room{}
 			return r
 		},
 	}
-
 	battleManager = new(BattleRoomManager)
+	battleManager.IDManager = NewIDManager()
 	battleManager.Pool = sync.Pool{
 		New: func() any {
 			r := &BattleRoom{}
@@ -44,6 +49,7 @@ func init() {
 	}
 	RoomManager = manager
 	BattleManager = battleManager
+	manager.TableManager = excel.Read()
 	ExcelConfigUpdate()
 }
 

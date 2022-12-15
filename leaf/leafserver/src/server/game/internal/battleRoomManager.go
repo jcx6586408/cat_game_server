@@ -5,7 +5,7 @@ import (
 	"excel"
 	"sync"
 
-	"github.com/labstack/gommon/log"
+	"github.com/name5566/leaf/log"
 )
 
 type BattleRoomManagerer interface {
@@ -34,9 +34,10 @@ type BattleRoomManager struct {
 }
 
 func (m *BattleRoomManager) Create() BattleRoomer {
-	r := manager.Pool.Get().(*BattleRoom)
+	r := m.Pool.Get().(*BattleRoom)
 	r.ID = m.IDManager.Get()
 	log.Debug("创建了战斗房间, ID: %d", r.ID)
+	m.Rooms = append(m.Rooms, r)
 	r.OnInit()
 	return r
 }
@@ -57,7 +58,7 @@ func (m *BattleRoomManager) GetRoomByID(roomID int) BattleRoomer {
 func (m *BattleRoomManager) destroy(room BattleRoomer) bool {
 	room.OnClose()
 	m.IDManager.Put(room.GetID()) // id回收
-	manager.Pool.Put(room)
+	m.Pool.Put(room)
 	log.Debug("战斗房间回收, ID: %d", room.GetID())
 	return true
 }
@@ -105,17 +106,20 @@ func (m *BattleRoomManager) MatchRoom(room Roomer) BattleRoomer {
 	if len(m.Rooms) <= 0 {
 		br := m.Create()
 		br.AddRoom(room)
+		log.Debug("直接创建战斗****房间: %d", br.GetID())
 		return br
 	} else {
 		for _, v := range m.Rooms {
 			bo := v.AddRoom(room)
 			if bo {
+				log.Debug("加入别人//////战斗房间: %d", v.GetID())
 				return v
 			}
 		}
 		// 如果找不到合适的战斗房，则创建新的
 		br := m.Create()
 		br.AddRoom(room)
+		log.Debug("直接创建战斗-----房间: %d", br.GetID())
 		return br
 	}
 }

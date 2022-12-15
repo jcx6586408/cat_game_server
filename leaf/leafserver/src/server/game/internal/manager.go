@@ -6,7 +6,7 @@ import (
 	pmsg "proto/msg"
 	"sync"
 
-	"github.com/labstack/gommon/log"
+	"github.com/name5566/leaf/log"
 )
 
 // 房间管理器
@@ -39,8 +39,10 @@ type Manager struct {
 }
 
 func (m *Manager) Create() Roomer {
-	r := manager.Pool.Get().(*Room)
+	r := m.Pool.Get().(*Room)
 	r.ID = m.IDManager.Get()
+	m.Rooms = append(m.Rooms, r)
+	log.Debug("房间创建, ID: %d", r.GetID())
 	r.OnInit()
 	return r
 }
@@ -61,7 +63,7 @@ func (m *Manager) GetRoomByID(roomID int) Roomer {
 func (m *Manager) destroy(room Roomer) bool {
 	room.OnClose()
 	m.IDManager.Put(room.GetID()) // id回收
-	manager.Pool.Put(room)
+	m.Pool.Put(room)
 	log.Debug("房间回收, ID: %d", room.GetID())
 	return true
 }
@@ -83,8 +85,10 @@ func (m *Manager) Run(roomID int) {
 }
 
 func (m *Manager) Matching(roomID int) {
+	log.Debug("当前房间总数量: %d", len(m.Rooms))
 	for _, v := range m.Rooms {
 		if v.GetID() == roomID {
+			log.Debug("找到房间: %d", roomID)
 			v.Matching()
 			return
 		}
@@ -123,6 +127,12 @@ func (m *Manager) LeaveMember(roomID int, member Memberer) (Roomer, error) {
 	return nil, errors.New("")
 }
 
+func (m *Manager) OfflineMemeber(uuid string) {
+	for _, v := range m.Rooms {
+		v.OfflinHanlder(uuid)
+	}
+}
+
 func (m *Manager) delete(a []Roomer, elem Roomer) []Roomer {
 	for i := 0; i < len(a); i++ {
 		if a[i] == elem {
@@ -137,7 +147,8 @@ func (m *Manager) delete(a []Roomer, elem Roomer) []Roomer {
 func (m *Manager) AnswerQuestion(a *pmsg.Answer) {
 	for _, v := range m.Rooms {
 		if v.GetID() == int(a.RoomID) {
-
+			v.Answer(a)
+			break
 		}
 	}
 }

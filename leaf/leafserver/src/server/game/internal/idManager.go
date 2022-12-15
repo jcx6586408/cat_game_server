@@ -5,6 +5,12 @@ type IDManager struct {
 	Count int
 }
 
+func NewIDManager() *IDManager {
+	i := &IDManager{}
+	i.Ids = []int{}
+	return i
+}
+
 func (o *IDManager) Get() int {
 	if len(o.Ids) > 0 {
 		id := o.Ids[len(o.Ids)-1]

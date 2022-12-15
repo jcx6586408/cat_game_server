@@ -23,6 +23,7 @@ func roomCreate(args []interface{}) {
 	room := manager.Create()
 	room.AddMember(req.Member)
 	a := args[1].(gate.Agent)
+	log.Debug("房间创建消息-------------------房间ID: %v---------------%v", room.GetID(), req.Member.Uuid)
 	a.WriteMsg(&pmsg.CreateRoomReply{RoomID: int32(room.GetID())})
 }
 

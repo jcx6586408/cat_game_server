@@ -7,7 +7,7 @@ import (
 
 func init() {
 	skeleton.RegisterCommand("echo", "echo user inputs", commandEcho)
-	// skeleton.RegisterCommand("rooms", "show how many rooms", commandRooms)
+	skeleton.RegisterCommand("rooms", "show how many rooms", commandRooms)
 	skeleton.RegisterCommand("online", "show how many users", commandOnlines)
 	skeleton.RegisterCommand("excelUpdate", "update excel config", commandExcelUpdate)
 }
@@ -16,11 +16,15 @@ func commandEcho(args []interface{}) interface{} {
 	return fmt.Sprintf("%v", args)
 }
 
-// // 看房间情况
-// func commandRooms(args []interface{}) interface{} {
-// 	m := Manager
-// 	return fmt.Sprintf("idle:%v, prepare:%v,matching:%v, using:%v", len(m.Rooms), len(m.PrepareRooms), len(m.MatchingRooms), len(m.UsingRooms))
-// }
+// 看房间情况
+func commandRooms(args []interface{}) interface{} {
+	str := fmt.Sprintln(
+		fmt.Sprintf("commonRooms: %v\n", len(manager.Rooms)),
+		fmt.Sprintf("battleRooms: %v\n", len(battleManager.Rooms)),
+		fmt.Sprintf("id_Array: %v\n", manager.IDManager.Ids),
+		fmt.Sprintf("battle_id_Array: %v\n", battleManager.IDManager.Ids))
+	return str
+}
 
 // 查看在线人数
 func commandOnlines(args []interface{}) interface{} {

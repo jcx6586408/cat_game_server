@@ -16,6 +16,7 @@ func init() {
 	// storage.Connect()
 	// 模块初始化
 	RankInit()
+	ConstInit()
 	// RoomManagerInit()
 	wxConf = config.Read()
 	// 向当前模块（game 模块）注册 Hello 消息的消息处理函数 handleHello

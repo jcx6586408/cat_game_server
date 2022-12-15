@@ -14,10 +14,6 @@ type Agent interface {
 func (m *Room) sendbase(call func(Agent)) {
 	for _, v := range m.Members {
 		a := Users[v.Uuid]
-		// 准备人员不通知
-		if v.State == int32(MEMEBERPREPARE) {
-			continue
-		}
 		// 机器人不通知
 		if v.IsRobot {
 			continue
@@ -62,10 +58,11 @@ func (m *BattleRoom) SendLeave(member *pmsg.Member) {
 }
 
 // 发送复活
-func (m *BattleRoom) SendRelive(req *pmsg.MemberReliveRequest) {
+func (m *BattleRoom) SendRelive(uuid string) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
+		log.Debug("%v复活答案: %v", uuid, member.Answer[m.LibAnswer.Progress].Result)
 		a.WriteMsg(&pmsg.MemberReliveReply{
-			Uuid:   req.Uuid,
+			Uuid:   uuid,
 			Answer: member.Answer[m.LibAnswer.Progress],
 		})
 	})
@@ -92,8 +89,9 @@ func (m *BattleRoom) SendTime(cur int) {
 	})
 }
 
-func (m *BattleRoom) send(msgID int, change *pmsg.Member) {
+func (m *BattleRoom) Send(msgID int, change *pmsg.Member) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
+		log.Debug("%v发送消息:%d", room.GetID(), msgID)
 		a.WriteMsg(&pmsg.RoomInfoReply{
 			RoomID:         int32(room.GetID()),
 			PrepareMembers: nil,
