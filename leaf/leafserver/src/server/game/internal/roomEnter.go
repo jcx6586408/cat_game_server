@@ -59,11 +59,7 @@ func roomAdd(args []interface{}) {
 func roomLeave(args []interface{}) {
 	req := args[0].(*pmsg.LeaveRequest)
 	log.Debug("房间离开消息---------------------房间ID: %v-------------%v", req.RoomID, req.Member.Uuid)
-	room, err := manager.LeaveMember(int(req.RoomID), req.Member)
-	if err == nil {
-		log.Debug("广播玩家离开的消息, %v")
-		room.SendLeave(remotemsg.ROOMLEAVE, req.Member)
-	}
+	manager.LeaveMember(int(req.RoomID), req.Member)
 }
 
 // 答题

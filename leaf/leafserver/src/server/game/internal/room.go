@@ -6,13 +6,13 @@ import (
 )
 
 type Roomer interface {
-	Matching()                                // 开始匹配
-	MatchingCancel()                          // 取消匹配
-	AddMember(member *pmsg.Member) bool       // 加入成员
-	LeaveMember(member Memberer)              // 加入成员
-	ChangeMemberState(state int)              // 改变成员状态
-	GetMembers() []*pmsg.Member               // 获取所有成员
-	SendLeave(msgID int, member *pmsg.Member) // 发送玩家离开
+	Matching()                          // 开始匹配
+	MatchingCancel()                    // 取消匹配
+	AddMember(member *pmsg.Member) bool // 加入成员
+	LeaveMember(member Memberer)        // 离开成员
+	ChangeMemberState(state int)        // 改变成员状态
+	GetMembers() []*pmsg.Member         // 获取所有成员
+	SendLeave(member *pmsg.Member)      // 发送玩家离开
 	Send(msgID int, change *pmsg.Member)
 	Relive(uuid string)
 	Roombaseer
@@ -63,6 +63,11 @@ func (r *Room) AddMember(member *pmsg.Member) bool {
 
 func (r *Room) LeaveMember(member Memberer) {
 	r.Members = r.delete(r.Members, member.(*pmsg.Member))
+	if r.BattleRoom != nil {
+		r.BattleRoom.SendLeave(member.(*pmsg.Member))
+	} else {
+		r.SendLeave(member.(*pmsg.Member))
+	}
 }
 
 func (r *Room) ChangeMemberState(state int) {

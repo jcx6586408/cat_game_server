@@ -2,6 +2,7 @@ package internal
 
 import (
 	pmsg "proto/msg"
+	"remotemsg"
 
 	"github.com/name5566/leaf/log"
 )
@@ -49,16 +50,14 @@ func (m *BattleRoom) sendbase(call func(Agent, Roomer, *pmsg.Member)) {
 }
 
 // 离开
-func (m *Room) SendLeave(msgID int, member *pmsg.Member) {
-	m.sendbase(func(a Agent) {
-
-	})
+func (m *Room) SendLeave(member *pmsg.Member) {
+	m.Send(remotemsg.ROOMLEAVE, member)
 }
 
 // 战斗中离开
-func (m *BattleRoom) SendLeave(msgID int, member *pmsg.Member) {
+func (m *BattleRoom) SendLeave(member *pmsg.Member) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
-		room.SendLeave(msgID, member)
+		room.SendLeave(member)
 	})
 }
 

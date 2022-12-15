@@ -14,9 +14,6 @@ type BattleRoomManagerer interface {
 	GetRoomByID(roomID int) BattleRoomer // 通过ID获取已经创建房间
 	GetRoomsCount() int                  // 获取当前所有房间数量
 
-	// 运行处理
-	Run(roomID int) // 开始运行房间（用于等待成员加入）
-
 	// 游戏
 	Play(roomID int)    // 开始游戏
 	PlayEnd(roomID int) // 结束游戏
@@ -73,10 +70,6 @@ func (m *BattleRoomManager) Destroy(roomID int) {
 			return
 		}
 	}
-
-}
-
-func (m *BattleRoomManager) Run(roomID int) {
 
 }
 

@@ -27,7 +27,6 @@ func (m *BattleRoom) matching() {
 					m.send(remotemsg.ROOMADD, nil)
 					// 将房间移入比赛使用房间
 				}
-				// Manager.MatchingToUsingRoom(m)
 				m.Play()
 				log.Debug("开始游戏, 退出等待加入============%v", m.ID)
 				return
@@ -73,5 +72,50 @@ func (m *BattleRoom) AddRobot(count int, nameLib []*Names, iconLib []*Icon) {
 			IsRobot:  true,
 			SkinID:   int32(skinID),
 		})
+	}
+}
+
+// 随机机器人答案
+func (m *BattleRoom) RandomRobotAnswer(min, max, count int) {
+	lenRobot := rand.Intn(max) + min
+	startIndex := 0
+	if len(m.Members)-lenRobot > 0 {
+		startIndex = rand.Intn(len(m.Members) - lenRobot)
+	}
+
+	subArr := m.Members[startIndex : startIndex+lenRobot]
+	for _, v := range subArr {
+		result := rand.Intn(4)
+		var action = rand.Intn(10)
+		if action >= count {
+			return
+		}
+		if v.IsRobot {
+			m.Answer(&pmsg.Answer{
+				Uuid:       v.Uuid,
+				RoomID:     int32(m.ID),
+				QuestionID: m.GetQuestion().ID,
+				Result:     results[result],
+			})
+		}
+	}
+}
+
+func (m *BattleRoom) RandomRobotTargetAnswer(right string) {
+	lenRobot := rand.Intn(3) + 1
+	startIndex := 0
+	if len(m.Members)-lenRobot > 0 {
+		startIndex = rand.Intn(len(m.Members) - lenRobot)
+	}
+	subArr := m.Members[startIndex : startIndex+lenRobot]
+	for _, v := range subArr {
+		if v.IsRobot {
+			m.Answer(&pmsg.Answer{
+				Uuid:       v.Uuid,
+				RoomID:     int32(m.ID),
+				QuestionID: m.GetQuestion().ID,
+				Result:     right,
+			})
+		}
 	}
 }
