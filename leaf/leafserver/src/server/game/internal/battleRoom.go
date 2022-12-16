@@ -102,6 +102,10 @@ func (r *BattleRoom) OnLeave(room Roomer, member Memberer) {
 }
 
 func (r *BattleRoom) Relive(uuid string) {
+	if !r.isStart {
+		log.Debug("本次答题已经结束，无法进行复活")
+		return
+	}
 	for _, room := range r.Rooms {
 		for _, v := range room.GetMembers() {
 			if v.Uuid == uuid {
@@ -400,22 +404,20 @@ func (m *BattleRoom) Answer(a *pmsg.Answer) {
 func (m *BattleRoom) WaitRelive(success, fail func()) {
 	subCtx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(m.ReliveWaitTime))
 	log.Debug("等待复活-----------******************")
-	skeleton.Go(func() {
-		for {
-			select {
-			case <-subCtx.Done():
-				log.Debug("复活等待结束-------------")
-				if m.CheckAllDead() {
-					fail()
-				} else {
-					success()
-				}
-				return
-			case <-time.After(time.Millisecond * time.Duration(20)):
-				if !m.CheckAllDead() {
-					cancel()
-				}
+	for {
+		select {
+		case <-subCtx.Done():
+			log.Debug("复活等待结束-------------")
+			if m.CheckAllDead() {
+				fail()
+			} else {
+				success()
+			}
+			return
+		case <-time.After(time.Millisecond * time.Duration(20)):
+			if !m.CheckAllDead() {
+				cancel()
 			}
 		}
-	}, func() {})
+	}
 }
