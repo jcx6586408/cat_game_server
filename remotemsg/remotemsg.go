@@ -24,7 +24,6 @@ const (
 	ROOMSTARTPLAY         = 305 // 比赛开始
 	ROOMENDPLAY           = 306 // 比赛结束
 	ROOMANSWEREND         = 307 // 单次答题结束
-	ROOMANSWERSTART       = 318 // 单次答题开始
 	ROOMOVER              = 308 // 房间结束解散
 	ROOMPREPARE           = 309 // 准备
 	ROOMPREPARECANCEL     = 310 // 取消准备
@@ -35,4 +34,6 @@ const (
 	ROOMMATCHROOM         = 315 // 房间匹配
 	ROOMANSWER            = 316 // 回答题目
 	ROOMGET               = 317 // 主动请求房间信息
+	ROOMANSWERSTART       = 318 // 单次答题开始
+	ROOMALLFAIL           = 319 // 该房间所有人都失败了
 )

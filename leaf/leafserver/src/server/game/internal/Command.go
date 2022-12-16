@@ -21,6 +21,7 @@ func commandRooms(args []interface{}) interface{} {
 	str := fmt.Sprintln(
 		fmt.Sprintf("commonRooms: %v\n", len(manager.Rooms)),
 		fmt.Sprintf("battleRooms: %v\n", len(battleManager.Rooms)),
+		fmt.Sprintf("battlePlayingRooms: %v\n", len(battleManager.PlayingRooms)),
 		fmt.Sprintf("id_Array: %v\n", manager.IDManager.Ids),
 		fmt.Sprintf("battle_id_Array: %v\n", battleManager.IDManager.Ids))
 	return str

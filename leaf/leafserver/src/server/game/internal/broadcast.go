@@ -51,9 +51,9 @@ func (m *Room) SendLeave(member *pmsg.Member) {
 }
 
 // 战斗中离开
-func (m *BattleRoom) SendLeave(member *pmsg.Member) {
+func (m *BattleRoom) SendLeave(lmember *pmsg.Member) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
-		room.SendLeave(member)
+		room.SendLeave(lmember)
 	})
 }
 
@@ -61,10 +61,13 @@ func (m *BattleRoom) SendLeave(member *pmsg.Member) {
 func (m *BattleRoom) SendRelive(uuid string) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
 		log.Debug("%v复活答案: %v", uuid, member.Answer[m.LibAnswer.Progress].Result)
-		a.WriteMsg(&pmsg.MemberReliveReply{
-			Uuid:   uuid,
-			Answer: member.Answer[m.LibAnswer.Progress],
-		})
+		target := room.GetMemeber(uuid)
+		if target != nil {
+			a.WriteMsg(&pmsg.MemberReliveReply{
+				Uuid:   uuid,
+				Answer: target.Answer[m.LibAnswer.Progress],
+			})
+		}
 	})
 }
 
@@ -91,7 +94,6 @@ func (m *BattleRoom) SendTime(cur int) {
 
 func (m *BattleRoom) Send(msgID int, change *pmsg.Member) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
-		log.Debug("%v发送消息:%d", room.GetID(), msgID)
 		a.WriteMsg(&pmsg.RoomInfoReply{
 			RoomID:         int32(room.GetID()),
 			PrepareMembers: nil,

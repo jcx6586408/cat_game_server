@@ -10,12 +10,12 @@ import (
 
 type BattleRoomManagerer interface {
 	Create() BattleRoomer                // 创建房间
-	Destroy(roomID int)                  // 通过ID销毁房间
+	Destroy(room BattleRoomer)           // 通过ID销毁房间
 	GetRoomByID(roomID int) BattleRoomer // 通过ID获取已经创建房间
 	GetRoomsCount() int                  // 获取当前所有房间数量
 
 	// 游戏
-	Play(roomID int)    // 开始游戏
+	Play(BattleRoomer)  // 开始游戏
 	PlayEnd(roomID int) // 结束游戏
 
 	// 房间处理
@@ -28,6 +28,7 @@ type BattleRoomManagerer interface {
 type BattleRoomManager struct {
 	Pool         sync.Pool
 	Rooms        []BattleRoomer
+	PlayingRooms []BattleRoomer
 	Done         chan interface{}    // 停用通道
 	TableManager *excel.ExcelManager // 表格管理器
 	IDManager    *IDManager
@@ -63,24 +64,16 @@ func (m *BattleRoomManager) destroy(room BattleRoomer) bool {
 	return true
 }
 
-func (m *BattleRoomManager) Destroy(roomID int) {
-	for _, v := range m.Rooms {
-		if v.GetID() == roomID {
-			m.Rooms = m.delete(m.Rooms, v) // 移除
-			m.destroy(v)                   // 回收
-			return
-		}
-	}
-
+func (m *BattleRoomManager) Destroy(room BattleRoomer) {
+	m.PlayingRooms = m.delete(m.PlayingRooms, room) // 移除
+	m.destroy(room)                                 // 回收
 }
 
-func (m *BattleRoomManager) Play(roomID int) {
-	for _, v := range m.Rooms {
-		if v.GetID() == roomID {
-			v.Play()
-			return
-		}
-	}
+func (m *BattleRoomManager) Play(room BattleRoomer) {
+	// 将房间剔除
+	m.Rooms = m.delete(m.Rooms, room)
+	m.PlayingRooms = append(m.PlayingRooms, room) // 加入战斗房
+	log.Debug("战斗房ID%d: 转移到正在比赛房间, 匹配房数量: %d, 游戏房数量: %d", room.GetID(), len(m.Rooms), len(m.PlayingRooms))
 }
 
 func (m *BattleRoomManager) PlayEnd(roomID int) {
@@ -130,7 +123,7 @@ func (m *BattleRoomManager) MatchRoomzCancel(room Roomer) {
 
 func (m *BattleRoomManager) delete(a []BattleRoomer, elem BattleRoomer) []BattleRoomer {
 	for i := 0; i < len(a); i++ {
-		if a[i] == elem {
+		if a[i].GetID() == elem.GetID() {
 			a = append(a[:i], a[i+1:]...)
 			i--
 			break

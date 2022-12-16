@@ -88,7 +88,7 @@ func (m *Manager) Matching(roomID int) {
 	log.Debug("当前房间总数量: %d", len(m.Rooms))
 	for _, v := range m.Rooms {
 		if v.GetID() == roomID {
-			log.Debug("找到房间: %d", roomID)
+			log.Debug("找到房间: %d", roomID) //
 			v.Matching()
 			return
 		}

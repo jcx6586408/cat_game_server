@@ -8,14 +8,15 @@ import (
 )
 
 type Roomer interface {
-	Matching()                          // 开始匹配
-	MatchingCancel()                    // 取消匹配
-	AddMember(member *pmsg.Member) bool // 加入成员
-	LeaveMember(member Memberer)        // 离开成员
-	ChangeMemberState(state int)        // 改变成员状态
-	GetMembers() []*pmsg.Member         // 获取所有成员
-	SendLeave(member *pmsg.Member)      // 发送玩家离开
-	OnEndPlay()                         // 游戏结束处理
+	Matching()                           // 开始匹配
+	MatchingCancel()                     // 取消匹配
+	AddMember(member *pmsg.Member) bool  // 加入成员
+	LeaveMember(member Memberer)         // 离开成员
+	ChangeMemberState(state int)         // 改变成员状态
+	GetMembers() []*pmsg.Member          // 获取所有成员
+	GetMemeber(uuid string) *pmsg.Member // 获取单个成员
+	SendLeave(member *pmsg.Member)       // 发送玩家离开
+	OnEndPlay()                          // 游戏结束处理
 	Send(msgID int, change *pmsg.Member)
 	Relive(uuid string)
 	Answer(a *pmsg.Answer)     // 答题
@@ -37,22 +38,31 @@ func (r *Room) GetID() int {
 func (r *Room) OnInit() {
 	r.Members = []*pmsg.Member{}
 	r.Max = RoomConf.MaxInvite
+	r.BattleRoom = nil
 }
 
 func (r *Room) OnClose() {
-
+	r.Members = nil
+	r.BattleRoom = nil
 }
 
 func (r *Room) GetMembers() []*pmsg.Member {
 	return r.Members
 }
 
+func (r *Room) GetMemeber(uuid string) *pmsg.Member {
+	for _, v := range r.Members {
+		if v.Uuid == uuid {
+			return v
+		}
+	}
+	return nil
+}
+
 func (r *Room) Matching() {
 	br := BattleManager.MatchRoom(r)
 	r.BattleRoom = br
-	log.Debug("广播315房间匹配成功的消息--------------------------")
 	r.BattleRoom.Send(remotemsg.ROOMMATCHROOM, nil)
-
 }
 
 func (r *Room) MatchingCancel() {

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"math/rand"
 	pmsg "proto/msg"
 )
@@ -10,6 +11,20 @@ type Answers []*pmsg.Question
 type LibAnswer struct {
 	Answers  Answers
 	Progress int
+}
+
+func (l *LibAnswer) ToString() string {
+	var str = []string{}
+	for i, v := range l.Answers {
+		str = append(str, fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, v.RightAnswer))
+	}
+	return fmt.Sprintln(str)
+}
+
+func (l *LibAnswer) SingleToString() string {
+	i := l.Progress
+	v := l.Answers[l.Progress]
+	return fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, v.RightAnswer)
 }
 
 func GetAnswerLib() Answers {

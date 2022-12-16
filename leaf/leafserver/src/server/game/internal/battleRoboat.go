@@ -29,21 +29,25 @@ func (m *BattleRoom) matching() {
 				if less > 0 {
 					m.AddRobot(less, NamesLib, IconLib)
 					m.Send(remotemsg.ROOMADD, nil)
-					// 将房间移入比赛使用房间
 				}
+				// 将房间移入比赛使用房间
 				m.Play()
-				log.Debug("开始游戏, 退出等待加入============%v", m.ID)
 				return
 			case <-time.After(time.Duration(1) * time.Second):
 				// 如果没有真人，直接退出
 				if !m.CheckRealMember() {
 					return
 				}
-				cur++
-				if cur <= 3 {
-					m.AddRandomCountRobots(4, 7, func() { cancel() })
+				var less = m.Max - m.GetMemberCount()
+				log.Debug("机器人匹配: %d----%d----%d", less, m.Max, m.GetMemberCount())
+				// 人数已满，直接退出
+				if less <= 0 {
+					cancel()
 				}
-				if cur >= 5 {
+				cur++
+				if cur <= 5 {
+					m.AddRandomCountRobots(4, 7, func() { cancel() })
+				} else {
 					m.AddRandomCountRobots(1, 3, func() { cancel() })
 				}
 			}
