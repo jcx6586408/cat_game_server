@@ -31,4 +31,5 @@ func init() {
 	msg.Processor.SetRouter(&pmsg.Question{}, game.ChanRPC)            // 问题注册
 	msg.Processor.SetRouter(&pmsg.MemberReliveRequest{}, game.ChanRPC) // 复活注册
 	msg.Processor.SetRouter(&pmsg.RoomInfoGetRequest{}, game.ChanRPC)  // 房间信息主动获取
+	msg.Processor.SetRouter(&msg.TableCount{}, game.ChanRPC)           // 表格统计注册
 }

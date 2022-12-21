@@ -2,9 +2,11 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	pmsg "proto/msg"
 	"remotemsg"
+	"storage/redis"
 	"time"
 
 	"github.com/name5566/leaf/log"
@@ -18,7 +20,7 @@ type BattleRoomer interface {
 	Relive(uuid string)                  // 复活
 	Answer(a *pmsg.Answer)               // 答题
 	SendLeave(member *pmsg.Member)       // 发送离开消息
-	OnLeave(Roomer, Memberer)            // 监听成员离开
+	OnLeave(Roomer, *pmsg.Member)        // 监听成员离开
 	Send(msgID int, change *pmsg.Member) // 发送消息
 }
 
@@ -88,8 +90,8 @@ func (r *BattleRoom) OnPlayEnd() {
 	BattleManager.Destroy(r)
 }
 
-func (r *BattleRoom) OnLeave(room Roomer, member Memberer) {
-	r.SendLeave(member.(*pmsg.Member))
+func (r *BattleRoom) OnLeave(room Roomer, member *pmsg.Member) {
+	r.SendLeave(member)
 	// 如果房间没人，则清除房间
 	if room.GetMemberCount() <= 0 {
 		r.Rooms = r.delete(r.Rooms, room)
@@ -131,7 +133,7 @@ func (r *BattleRoom) GetPlayingMembers() []*pmsg.Member {
 		}
 	}
 	members = append(members, r.Members...)
-	log.Debug("游玩人数: %d", len(members))
+	log.Debug("战斗房间ID:%d,游玩人数: %d", r.GetID(), len(members))
 	return members
 }
 
@@ -237,6 +239,10 @@ func (m *BattleRoom) singleRun() {
 				// 如果没有全错
 				m.isAnswerTime = false
 				m.Send(remotemsg.ROOMANSWEREND, nil) // 答题结束
+				if m.LibAnswer.Progress >= m.QuestionCount-1 {
+					m.endjudge()
+					return
+				}
 
 				if allWrong {
 					if !m.isRelive {
@@ -307,10 +313,18 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 	var allWrong = true
 	rightCount := 0
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
+		if v == nil {
+			log.Debug("玩家不存在")
+			return
+		}
 		if v.IsDead {
 			return
 		}
 		q := m.GetQuestion().RightAnswer
+		if v.Answer == nil || len(v.Answer) <= m.LibAnswer.Progress {
+			log.Debug("答题不存在, 或超出数组")
+			return
+		}
 		playerAnswer := v.Answer[m.LibAnswer.Progress]
 		tip := ""
 		if q == playerAnswer.Result {
@@ -325,7 +339,18 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 		if right {
 			allWrong = false
 			rightCount++
+			skeleton.Go(func() {
+				if !v.IsRobot {
+					redis.AddWinTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
+				}
+			}, func() {})
+
 		} else {
+			skeleton.Go(func() {
+				if !v.IsRobot {
+					redis.AddFailTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
+				}
+			}, func() {})
 			// 标记死亡
 			v.IsDead = true
 			var allDead = true

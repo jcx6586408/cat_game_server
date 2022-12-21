@@ -29,10 +29,13 @@ type Wx struct {
 }
 
 type Rank struct {
-	WorldRankCount    int `json:"worldRankCount"`
-	CountryRankCount  int `json:"countryRankCount"`
-	ProvinceRankCount int `json:"provinceRankCount"`
-	CityRankCount     int `json:"cityRankCount"`
+	Port              string `json:"Port"`
+	RedisUrl          string `json:"RedisUrl"`
+	WorldRankCount    int    `json:"worldRankCount"`
+	CountryRankCount  int    `json:"countryRankCount"`
+	ProvinceRankCount int    `json:"provinceRankCount"`
+	CityRankCount     int    `json:"cityRankCount"`
+	Max               int    `json:"Max"`
 }
 
 func Read() *Config {

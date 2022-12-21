@@ -18,10 +18,18 @@ func commandEcho(args []interface{}) interface{} {
 
 // 看房间情况
 func commandRooms(args []interface{}) interface{} {
+	prepare := []int{}
+	playing := []int{}
+	for _, v := range battleManager.Rooms {
+		prepare = append(prepare, v.GetID())
+	}
+	for _, v := range battleManager.PlayingRooms {
+		playing = append(playing, v.GetID())
+	}
 	str := fmt.Sprintln(
 		fmt.Sprintf("commonRooms: %v\n", len(manager.Rooms)),
-		fmt.Sprintf("battleRooms: %v\n", len(battleManager.Rooms)),
-		fmt.Sprintf("battlePlayingRooms: %v\n", len(battleManager.PlayingRooms)),
+		fmt.Sprintf("battleRooms: %v\n", prepare),
+		fmt.Sprintf("battlePlayingRooms: %v\n", playing),
 		fmt.Sprintf("id_Array: %v\n", manager.IDManager.Ids),
 		fmt.Sprintf("battle_id_Array: %v\n", battleManager.IDManager.Ids))
 	return str

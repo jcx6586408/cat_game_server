@@ -3,6 +3,8 @@ package msg
 import (
 	pmsg "proto/msg"
 
+	predis "github.com/go-redis/redis/v8"
+
 	"github.com/name5566/leaf/network/json"
 )
 
@@ -65,6 +67,10 @@ func init() {
 	Processor.Register(&WXcodeReply{})        // 微信请求
 	Processor.Register(&pmsg.RoomAddFail{})   // 房间加入失败返回
 
+	// 表格消息注册
+	Processor.Register(&TableCount{})
+	Processor.Register(&BackTable{})
+
 }
 
 type WXCode struct {
@@ -73,4 +79,13 @@ type WXCode struct {
 
 type WXcodeReply struct {
 	Openid string
+}
+
+type TableCount struct {
+	Min int
+	Max int
+}
+type BackTable struct {
+	Arr  []predis.Z
+	Name string
 }

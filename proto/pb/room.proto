@@ -163,6 +163,7 @@ message Question {
     string AnswerC = 5;     // 答案C
     string AnswerD = 6;     // 答案D
     string RightAnswer = 7; // 正确答案
+    string table = 8;       // 表
 }
 
 message MemberRequest {
@@ -186,6 +187,7 @@ message Member {
     int32 RoomID = 11;          // 房间ID
     int32 BattleRoomID = 12;    // 战斗房间ID
     int32 State = 13;           // 角色状态（匹配，准备，战斗）
+    int32 Level = 14;           // 段位等级
 }
 
 message RoomInfoReply {

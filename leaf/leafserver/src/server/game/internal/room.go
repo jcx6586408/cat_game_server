@@ -11,7 +11,7 @@ type Roomer interface {
 	Matching()                           // 开始匹配
 	MatchingCancel()                     // 取消匹配
 	AddMember(member *pmsg.Member) bool  // 加入成员
-	LeaveMember(member Memberer)         // 离开成员
+	LeaveMember(member *pmsg.Member)     // 离开成员
 	ChangeMemberState(state int)         // 改变成员状态
 	GetMembers() []*pmsg.Member          // 获取所有成员
 	GetMemeber(uuid string) *pmsg.Member // 获取单个成员
@@ -90,6 +90,7 @@ func (r *Room) AddMember(member *pmsg.Member) bool {
 		return false
 	}
 	log.Debug("加入新成员*************2")
+	member.RoomID = int32(r.GetID())
 	member.IsMaster = (r.GetMemberCount() <= 0) // 第一个人设置为房主
 	r.Members = append(r.Members, member)
 	if r.BattleRoom != nil {
@@ -102,9 +103,10 @@ func (r *Room) AddMember(member *pmsg.Member) bool {
 	return true
 }
 
-func (r *Room) LeaveMember(member Memberer) {
+func (r *Room) LeaveMember(member *pmsg.Member) {
 	log.Debug("玩家离开房间, %v", member.GetUuid())
-	r.Members = r.delete(r.Members, member.(*pmsg.Member))
+	member.RoomID = 0
+	r.Members = r.delete(r.Members, member)
 	// 如果离开的人是房主，则进行房主转移
 	if member.GetIsMaster() {
 		if r.GetMemberCount() > 0 {
@@ -118,7 +120,7 @@ func (r *Room) LeaveMember(member Memberer) {
 		r.BattleRoom.OnLeave(r, member)
 	} else {
 		log.Debug("玩家离开房间*****************2, %v", member.GetUuid())
-		r.SendLeave(member.(*pmsg.Member))
+		r.SendLeave(member)
 	}
 	if len(r.Members) <= 0 {
 		RoomManager.Destroy(r.ID)

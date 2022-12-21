@@ -120,7 +120,7 @@ func (m *Manager) AddMember(roomID int, member *pmsg.Member) (Roomer, int, error
 func (m *Manager) LeaveMember(roomID int, member Memberer) (Roomer, error) {
 	for _, v := range m.Rooms {
 		if v.GetID() == roomID {
-			v.LeaveMember(member)
+			v.LeaveMember(member.(*pmsg.Member))
 			return v, nil
 		}
 	}

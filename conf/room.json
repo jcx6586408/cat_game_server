@@ -1,8 +1,8 @@
 {
     "PrepareTime": 4,
     "AnswerTime": 15,
-    "MaxMember": 2,
-    "MaxInvite": 2,
+    "MaxMember": 48,
+    "MaxInvite": 12,
     "ReliveWaitTime": 6,
     "RobotMin": 4,
     "RobotMax": 8

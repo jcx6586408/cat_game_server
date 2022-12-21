@@ -1,4 +1,3 @@
-mkdir conf
 #如果文件夹不存在，则创建文件夹
 tempPath="conf/"
 if [ ! -d "$tempPath" ]; then
@@ -26,7 +25,7 @@ if [ ! -d "$tempPath" ]; then
 mkdir ssl
 fi
 
-tempPath="ssh/Nginx/"
+tempPath="ssl/Nginx/"
 if [ ! -d "$tempPath" ]; then
-mkdir ssh/Nginx
+mkdir ssl/Nginx
 fi

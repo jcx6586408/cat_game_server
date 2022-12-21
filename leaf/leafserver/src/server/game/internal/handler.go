@@ -7,6 +7,7 @@ import (
 	"net/http"
 	pmsg "proto/msg"
 	"reflect"
+	"storage/redis"
 
 	"github.com/name5566/leaf/gate"
 )
@@ -14,6 +15,7 @@ import (
 func init() {
 	// 数据库连接
 	// storage.Connect()
+	redis.ConnectReids()
 	// 模块初始化
 	RankInit()
 	ConstInit()
@@ -38,12 +40,19 @@ func init() {
 	handler(&msg.RoomStartPlay{}, roomStartPlay)
 	handler(&pmsg.MemberReliveRequest{}, roomMatchMemberRelive)
 	handler(&pmsg.RoomInfoGetRequest{}, roomInfoGet)
+	handler(&msg.TableCount{}, tableCount)
 
 }
 
 func handler(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
+}
 
+func tableCount(args []interface{}) {
+	req := args[0].(*msg.TableCount)
+	a := args[1].(gate.Agent)
+	a.WriteMsg(redis.GetWinTableRank(req.Min, req.Max))
+	a.WriteMsg(redis.GetFailTableRank(req.Min, req.Max))
 }
 
 var wxConf *config.Config

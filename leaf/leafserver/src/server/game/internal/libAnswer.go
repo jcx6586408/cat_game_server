@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	pmsg "proto/msg"
+
+	"github.com/name5566/leaf/log"
 )
 
 type Answers []*pmsg.Question
@@ -11,6 +13,7 @@ type Answers []*pmsg.Question
 type LibAnswer struct {
 	Answers  Answers
 	Progress int
+	Name     string
 }
 
 func (l *LibAnswer) ToString() string {
@@ -38,6 +41,7 @@ func ToAnswerLib(table string) Answers {
 	if ok {
 		for _, cell := range tableConf.Excel {
 			obj := &pmsg.Question{}
+			obj.Table = table
 			for index, v := range tableConf.AttributeNames {
 				switch v {
 				case "ID":
@@ -54,6 +58,14 @@ func ToAnswerLib(table string) Answers {
 					obj.AnswerD = cell[index].(string)
 				case "rightAnswer":
 					obj.RightAnswer = cell[index].(string)
+					switch obj.RightAnswer {
+					case "A":
+					case "B":
+					case "C":
+					case "D":
+					default:
+						log.Error("%v|%v|%v非法答案, %v", table, obj.ID, obj.Question, obj.RightAnswer)
+					}
 				}
 			}
 			arr = append(arr, obj)

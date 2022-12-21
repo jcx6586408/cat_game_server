@@ -38,6 +38,12 @@ func (m *BattleRoomManager) Create() BattleRoomer {
 	r := m.Pool.Get().(*BattleRoom)
 	r.ID = m.IDManager.Get()
 	log.Debug("创建了战斗房间, ID: %d", r.ID)
+	for _, v := range m.Rooms {
+		log.Debug("***当前准备间: %d", v.GetID())
+	}
+	for _, v := range m.PlayingRooms {
+		log.Debug("***当前准备间: %d", v.GetID())
+	}
 	m.Rooms = append(m.Rooms, r)
 	r.OnInit()
 	return r
@@ -61,12 +67,33 @@ func (m *BattleRoomManager) destroy(room BattleRoomer) bool {
 	m.IDManager.Put(room.GetID()) // id回收
 	m.Pool.Put(room)
 	log.Debug("战斗房间回收, ID: %d", room.GetID())
+	for _, v := range m.Rooms {
+		log.Debug("当前准备间---: %d", v.GetID())
+	}
+	for _, v := range m.PlayingRooms {
+		log.Debug("当前游玩间***: %d", v.GetID())
+	}
 	return true
 }
 
 func (m *BattleRoomManager) Destroy(room BattleRoomer) {
-	m.PlayingRooms = m.delete(m.PlayingRooms, room) // 移除
-	m.destroy(room)                                 // 回收
+	for _, v := range m.PlayingRooms {
+		if v.GetID() == room.GetID() {
+			log.Debug("处于游玩间被回收")
+			m.PlayingRooms = m.delete(m.PlayingRooms, room) // 移除
+			m.destroy(room)                                 // 回收
+			return
+		}
+	}
+	for _, v := range m.Rooms {
+		if v.GetID() == room.GetID() {
+			log.Debug("处于准备间被回收")
+			m.Rooms = m.delete(m.Rooms, room) // 移除
+			m.destroy(room)                   // 回收
+			return
+		}
+	}
+
 }
 
 func (m *BattleRoomManager) Play(room BattleRoomer) {

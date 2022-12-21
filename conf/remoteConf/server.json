@@ -1,9 +1,12 @@
 {
     "rank": {
-        "worldRankCount": 50,
-        "countryRankCount": 1000,
-        "provinceRankCount": 200,
-        "cityRankCount": 50
+        "Port": ":5200",
+        "RedisUrl": "118.195.244.48:6379",
+        "worldRankCount": 100,
+        "countryRankCount": 100,
+        "provinceRankCount": 100,
+        "cityRankCount": 100,
+        "Max": 1000   
     },
     "wx": {
         "appid": "wxb5aaac64384fb62d",

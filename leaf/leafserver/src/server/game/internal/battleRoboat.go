@@ -23,6 +23,8 @@ func (m *BattleRoom) matching() {
 			case <-ctx.Done():
 				// 如果没有真人，直接退出
 				if !m.CheckRealMember() {
+					// 回收房间
+					log.Debug("房间ID: %d, 匹配中真人全部退出，回收房间", m.GetID())
 					return
 				}
 				var less = m.Max - m.GetMemberCount()
@@ -36,6 +38,7 @@ func (m *BattleRoom) matching() {
 			case <-time.After(time.Duration(1) * time.Second):
 				// 如果没有真人，直接退出
 				if !m.CheckRealMember() {
+					log.Debug("房间ID: %d, 匹配中真人全部退出，回收房间", m.GetID())
 					return
 				}
 				var less = m.Max - m.GetMemberCount()
@@ -76,7 +79,7 @@ func (m *BattleRoom) AddRobot(count int, nameLib []*Names, iconLib []*Icon) {
 		guid := uuid.New().String()
 		skinID := 1
 		if rand.Intn(10) > 7 {
-			skinID = 2 + rand.Intn(len(Skins))
+			skinID = 2 + rand.Intn(len(Skins)-1)
 		}
 		m.Members = append(m.Members, &pmsg.Member{
 			Nickname: fmt.Sprintf("%v", subName[i].ID),

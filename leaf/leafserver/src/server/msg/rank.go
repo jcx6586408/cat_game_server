@@ -3,6 +3,8 @@ package msg
 type Rank struct {
 	UID          string
 	Val          int
+	WorldRank    int64
+	CityRank     int64
 	Icon         string
 	NickName     string
 	Country      string

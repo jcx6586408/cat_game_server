@@ -20,11 +20,15 @@ set iplocationRemotePath=%remoteBase%IP2LOCATION-LITE-DB3.IPV6.BIN/
 set sslLocalPath=.\ssl\Nginx\
 set sslRemotePath=%remoteBase%ssl/Nginx/
 
+set keyLocalPath = C:\Users\Dell\.ssh\id_rsa.pub
+set keyRemotePath = /root/.ssh/
+
 if %1==1 (goto program) 
 if %1==2 (goto conf) 
 if %1==3 (goto excel) 
 if %1==4 (goto iplocation) 
 if %1==5 (goto ssl) 
+if %1==6 (goto keystore)
 
 
 
@@ -46,6 +50,9 @@ goto end
 
 :ssl
 for /r %sslLocalPath% %%i in (*) do (scp -r %%i %user%@%host%:%sslRemotePath%)
+
+:keystore
+scp -F %keyLocalPath% %user%@%host%:%keyRemotePath%
 
 :end
 exit

@@ -17,6 +17,7 @@ func main() {
 		AllowOrigins:     []string{"*"},
 		AllowCredentials: true,
 		AllowMethods:     []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
+		AllowHeaders:     []string{"*"},
 	}
 	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
 	rank.RankInit()
