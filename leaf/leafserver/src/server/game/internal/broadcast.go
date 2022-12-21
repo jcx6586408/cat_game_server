@@ -45,6 +45,13 @@ func (m *BattleRoom) sendbase(call func(Agent, Roomer, *pmsg.Member)) {
 	}
 }
 
+func (m *Room) SendRoomMatchCancel(bo bool) {
+	m.sendbase(func(a Agent) {
+		log.Debug("取消匹配发送************: %v", bo)
+		a.WriteMsg(&pmsg.MatchRoomCancelReply{State: bo})
+	})
+}
+
 // 离开
 func (m *Room) SendLeave(member *pmsg.Member) {
 	m.Send(remotemsg.ROOMLEAVE, member)

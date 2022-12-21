@@ -9,7 +9,7 @@ import (
 
 type Roomer interface {
 	Matching()                           // 开始匹配
-	MatchingCancel()                     // 取消匹配
+	MatchingCancel() bool                // 取消匹配
 	AddMember(member *pmsg.Member) bool  // 加入成员
 	LeaveMember(member *pmsg.Member)     // 离开成员
 	ChangeMemberState(state int)         // 改变成员状态
@@ -65,9 +65,11 @@ func (r *Room) Matching() {
 	r.BattleRoom.Send(remotemsg.ROOMMATCHROOM, nil)
 }
 
-func (r *Room) MatchingCancel() {
-	BattleManager.MatchRoomzCancel(r)
+func (r *Room) MatchingCancel() bool {
 	r.BattleRoom = nil
+	bo := BattleManager.MatchRoomzCancel(r)
+	r.SendRoomMatchCancel(bo)
+	return bo
 }
 
 func (r *Room) OfflinHanlder(uuid string) {

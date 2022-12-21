@@ -17,6 +17,7 @@ type BattleRoomer interface {
 	Play()                               // 开始游戏
 	OnPlayEnd()                          // 游戏结束
 	AddRoom(room Roomer) bool            // 加入房间
+	DeleRoom(room Roomer) bool           // 退出房间
 	Relive(uuid string)                  // 复活
 	Answer(a *pmsg.Answer)               // 答题
 	SendLeave(member *pmsg.Member)       // 发送离开消息
@@ -78,6 +79,22 @@ func (m *BattleRoom) delete(a []Roomer, elem Roomer) []Roomer {
 		}
 	}
 	return a
+}
+
+func (m *BattleRoom) DeleRoom(room Roomer) bool {
+	for _, v := range m.Rooms {
+		if v.GetID() == room.GetID() {
+			log.Debug("房间取消---开始：%v|%v", len(m.Rooms), room.GetID())
+			m.Rooms = m.delete(m.Rooms, room)
+			log.Debug("房间取消成功%v|%v", len(m.Rooms), room.GetID())
+			if len(m.Rooms) <= 0 {
+				// 回收房间
+				BattleManager.Destroy(m)
+			}
+			return true
+		}
+	}
+	return false
 }
 
 func (r *BattleRoom) OnPlayEnd() {

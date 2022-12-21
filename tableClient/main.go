@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/gorilla/websocket"
@@ -44,30 +46,49 @@ func main() {
 		log.Debug("报错：发送消息失败%v", e)
 	}
 
-	for {
-		_, data, err := ws.ReadMessage()
-		if err != nil {
-			log.Fatal("%v", err)
-		}
-		tableData := &Back{}
-		err = json.Unmarshal(data, tableData)
-		if err != nil {
-			panic("解析json文件出错")
-		}
-		log.Debug("receive: %v", string(data))
-		if tableData.BackTable != nil {
-			log.Debug("数组长度: %d", len(tableData.BackTable.Arr))
-			excelData := [][]string{}
-			for _, v := range tableData.BackTable.Arr {
-				log.Debug("%v|%v", v.Member, v.Score)
-				subData := []string{fmt.Sprintf("%v", v.Member), fmt.Sprintf("%v", v.Score)}
-				excelData = append(excelData, subData)
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGKILL, syscall.SIGINT)
+
+	go func() {
+		for {
+			_, data, err := ws.ReadMessage()
+			if err != nil {
+				log.Fatal("%v", err)
 			}
-			CreateXlS(excelData, tableData.BackTable.Name, []string{"questionID", "count"})
-			if tableData.BackTable.Name == "fail" {
-				return
+			tableData := &Back{}
+			err = json.Unmarshal(data, tableData)
+			if err != nil {
+				panic("解析json文件出错")
+			}
+			log.Debug("receive: %v", string(data))
+			if tableData.BackTable != nil {
+				log.Debug("数组长度: %d", len(tableData.BackTable.Arr))
+				excelData := [][]string{}
+				for _, v := range tableData.BackTable.Arr {
+					log.Debug("%v|%v", v.Member, v.Score)
+					subData := []string{fmt.Sprintf("%v", v.Member), fmt.Sprintf("%v", v.Score)}
+					excelData = append(excelData, subData)
+				}
+				CreateXlS(excelData, tableData.BackTable.Name, []string{"questionID", "count"})
+				if tableData.BackTable.Name == "fail" {
+					os.Exit(2)
+					return
+				}
 			}
 		}
+	}()
+
+	s := <-ch
+	switch s {
+	case syscall.SIGINT:
+		//SIGINT 信号，在程序关闭时会收到这个信号
+		fmt.Println("SIGINT", "退出程序，执行退出前逻辑")
+		return
+	case syscall.SIGKILL:
+		fmt.Println("SIGKILL")
+		return
+	default:
+		fmt.Println("default")
 	}
 }
 
@@ -111,4 +132,8 @@ func CreateXlS(data [][]string, fileName string, headerNameArray []string) {
 	if err := f.SaveAs(fileName + ".xlsx"); err != nil {
 		fmt.Println(err)
 	}
+}
+
+func OnExit() {
+
 }

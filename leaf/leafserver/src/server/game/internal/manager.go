@@ -20,8 +20,8 @@ type Managerer interface {
 	Run(roomID int) // 开始运行房间（用于等待成员加入）
 
 	// 匹配
-	Matching(roomID int)       // 匹配房间
-	MatchingCancel(roomID int) // 取消房间创建
+	Matching(roomID int)            // 匹配房间
+	MatchingCancel(roomID int) bool // 取消房间创建
 
 	// 成员处理
 	AddMember(roomID int, member *pmsg.Member) (Roomer, int, error) // 添加成员
@@ -95,13 +95,14 @@ func (m *Manager) Matching(roomID int) {
 	}
 }
 
-func (m *Manager) MatchingCancel(roomID int) {
+func (m *Manager) MatchingCancel(roomID int) bool {
 	for _, v := range m.Rooms {
 		if v.GetID() == roomID {
-			v.MatchingCancel()
-			return
+			return v.MatchingCancel()
+
 		}
 	}
+	return false
 }
 
 func (m *Manager) AddMember(roomID int, member *pmsg.Member) (Roomer, int, error) {

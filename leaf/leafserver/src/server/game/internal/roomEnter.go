@@ -94,10 +94,10 @@ func roomMatchMember(args []interface{}) {
 
 // 房间匹配取消
 func roomMatchCanel(args []interface{}) {
-	req := args[0].(*pmsg.MatchRoomRequest)
-	manager.MatchingCancel(int(req.RoomID))
+	req := args[0].(*pmsg.MatchRoomCancelRequest)
+	bo := manager.MatchingCancel(int(req.RoomID))
 	a := args[1].(gate.Agent)
-	a.WriteMsg(&pmsg.MatchRoomCancelReply{State: true})
+	a.WriteMsg(&pmsg.MatchRoomCancelReply{State: bo})
 }
 
 // 个人匹配取消

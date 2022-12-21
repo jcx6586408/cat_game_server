@@ -22,7 +22,7 @@ type BattleRoomManagerer interface {
 	AddRoom(roomID int, room Roomer) (BattleRoomer, error) // 添加成员
 
 	MatchRoom(room Roomer) BattleRoomer // 匹配房间
-	MatchRoomzCancel(room Roomer)       // 取消匹配房间
+	MatchRoomzCancel(room Roomer) bool  // 取消匹配房间
 }
 
 type BattleRoomManager struct {
@@ -144,8 +144,12 @@ func (m *BattleRoomManager) MatchRoom(room Roomer) BattleRoomer {
 	}
 }
 
-func (m *BattleRoomManager) MatchRoomzCancel(room Roomer) {
-
+func (m *BattleRoomManager) MatchRoomzCancel(room Roomer) bool {
+	for _, v := range m.Rooms {
+		return v.DeleRoom(room)
+	}
+	log.Debug("管理器找不到匹配取消的房间 %v", room.GetID())
+	return false
 }
 
 func (m *BattleRoomManager) delete(a []BattleRoomer, elem BattleRoomer) []BattleRoomer {
