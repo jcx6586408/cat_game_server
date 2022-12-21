@@ -1,7 +1,7 @@
 {
     "rank": {
         "Port": ":5200",
-        "RedisUrl": "118.195.244.48:6379",
+        "RedisUrl": "localhost:6379",
         "worldRankCount": 100,
         "countryRankCount": 100,
         "provinceRankCount": 100,
