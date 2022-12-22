@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -66,10 +67,11 @@ func main() {
 				excelData := [][]string{}
 				for _, v := range tableData.BackTable.Arr {
 					log.Debug("%v|%v", v.Member, v.Score)
-					subData := []string{fmt.Sprintf("%v", v.Member), fmt.Sprintf("%v", v.Score)}
+					str := strings.Split(fmt.Sprintf("%v", v.Member), "_")
+					subData := []string{str[0], str[1], fmt.Sprintf("%v", v.Score)}
 					excelData = append(excelData, subData)
 				}
-				CreateXlS(excelData, tableData.BackTable.Name, []string{"questionID", "count"})
+				CreateXlS(excelData, tableData.BackTable.Name, []string{"tableName", "questionID", "count"})
 				if tableData.BackTable.Name == "fail" {
 					os.Exit(2)
 					return
