@@ -67,6 +67,9 @@ func ExcelConfigUpdate() {
 		Question:         make(map[int][]*Question),
 		PhaseQuestionLib: make(map[int][]int),
 		WinRates:         make(map[int][]float32),
+		WinChan:          make(chan int),
+		FailChan:         make(chan int),
+		Done:             make(chan interface{}),
 	}
 	for i, v := range RoomConf.Question {
 		Questions.PhaseQuestionLib[i+1] = v.AnswerPhase
@@ -79,6 +82,7 @@ func ExcelConfigUpdate() {
 	}
 	AnswerLibs = []Answers{}
 	AnswerLibs = append(AnswerLibs, ToAnswerLib("question1"))
+	Questions.Run() // 题库监听
 
 	for i := 0; i < 80; i++ {
 		Questions.WinCount(10)
@@ -103,6 +107,7 @@ func OnExit() {
 
 	skeleton.Go(func() {
 		s := <-ch
+		close(Questions.Done)
 		switch s {
 		case syscall.SIGINT:
 			//SIGINT 信号，在程序关闭时会收到这个信号

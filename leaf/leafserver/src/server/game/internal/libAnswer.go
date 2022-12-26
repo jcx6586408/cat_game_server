@@ -28,6 +28,24 @@ type QuestionLib struct {
 	Question         map[int][]*Question // 段位题库
 	PhaseQuestionLib map[int][]int       // 各个段位对于的题库
 	WinRates         map[int][]float32   // 各个段位对应胜率
+	WinChan          chan int            // 统计管道
+	FailChan         chan int            // 统计管道
+	Done             chan interface{}
+}
+
+func (q *QuestionLib) Run() {
+	skeleton.Go(func() {
+		for {
+			select {
+			case <-q.Done:
+				return
+			case id := <-q.WinChan:
+				q.WinCount(id)
+			case id := <-q.FailChan:
+				q.FailCount(id)
+			}
+		}
+	}, func() {})
 }
 
 func (l *LibAnswer) ToString() string {
