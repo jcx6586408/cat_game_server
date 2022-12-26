@@ -112,16 +112,16 @@ func GetSelfCityRank(city, uid string) int64 {
 // 更新排行榜
 func UpdateRank(city, uid string, score float64) {
 	// 世界排行更新
-	f := Rdb.ZScore(ctx, worldRank, uid).Val()
-	if f < score {
-		AddRank(worldRank, uid, score)
-	}
+	AddRank(worldRank, uid, score)
+	AddRank(city, uid, score)
+	// f := Rdb.ZScore(ctx, worldRank, uid).Val()
+	// if f < score {
+	// }
 
-	// 城市排行更新
-	f = Rdb.ZScore(ctx, city, uid).Val()
-	if f < score {
-		AddRank(city, uid, score)
-	}
+	// // 城市排行更新
+	// f = Rdb.ZScore(ctx, city, uid).Val()
+	// if f < score {
+	// }
 }
 
 // 获取排行榜
