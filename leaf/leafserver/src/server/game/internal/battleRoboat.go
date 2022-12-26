@@ -73,10 +73,10 @@ func (m *BattleRoom) AddRandomCountRobots(min, max int, callback func()) {
 }
 
 func (m *BattleRoom) AddRobot(count int) {
-	subName, nr := RandNameClip(count, m.robotNames)
-	subIcon, ir := RandIconClip(count, m.robotIcons)
-	m.robotNames = nr
-	m.robotIcons = ir
+	subName, _ := RandNameClip(count, m.robotNames)
+	subIcon, _ := RandIconClip(count, m.robotIcons)
+	// m.robotNames = nr
+	// m.robotIcons = ir
 	for i := 0; i < count; i++ {
 		guid := uuid.New().String()
 		skinID := 1
