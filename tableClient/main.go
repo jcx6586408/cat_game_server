@@ -135,7 +135,3 @@ func CreateXlS(data [][]string, fileName string, headerNameArray []string) {
 		fmt.Println(err)
 	}
 }
-
-func OnExit() {
-
-}

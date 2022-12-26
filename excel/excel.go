@@ -1,6 +1,7 @@
 package excel
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -169,5 +170,47 @@ func Read() *ExcelManager {
 	}
 	return &ExcelManager{
 		Tables: tableMap,
+	}
+}
+
+// CreateXlS data为要写入的数据,fileName 文件名称, headerNameArray 表头数组
+func CreateXlS(data [][]string, fileName string, headerNameArray []string) {
+	f := excelize.NewFile()
+	sheetName := "sheet1"
+	sheetWords := []string{
+		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U",
+		"V", "W", "X", "Y", "Z",
+	}
+
+	for k, v := range headerNameArray {
+		f.SetCellValue(sheetName, sheetWords[k]+"1", v)
+	}
+
+	//设置列的宽度
+	f.SetColWidth("Sheet1", "A", sheetWords[len(headerNameArray)-1], 18)
+	headStyleID, _ := f.NewStyle(`{
+   "font":{
+      "color":"#333333",
+      "bold":false,
+      "family":"arial"
+   },
+   "alignment":{
+      "vertical":"center",
+      "horizontal":"center"
+   }
+}`)
+	//设置表头的样式
+	f.SetCellStyle(sheetName, "A1", sheetWords[len(headerNameArray)-1]+"1", headStyleID)
+	line := 1
+	// 循环写入数据
+	for _, v := range data {
+		line++
+		for kk, _ := range headerNameArray {
+			f.SetCellValue(sheetName, sheetWords[kk]+strconv.Itoa(line), v[kk])
+		}
+	}
+	// 保存文件
+	if err := f.SaveAs(fileName + ".xlsx"); err != nil {
+		fmt.Println(err)
 	}
 }

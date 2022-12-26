@@ -2,11 +2,9 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	pmsg "proto/msg"
 	"remotemsg"
-	"storage/redis"
 	"time"
 
 	"github.com/name5566/leaf/log"
@@ -64,8 +62,8 @@ func (r *BattleRoom) OnInit() {
 	r.isRelive = false
 	r.isAnswerTime = false
 	// 复制头像名字
+	r.robotIcons = make([]*Icon, len(IconLib))
 	copy(r.robotIcons, IconLib)
-	copy(r.robotNames, NamesLib)
 	// 挂起机器人
 	r.matching()
 }
@@ -221,7 +219,9 @@ func (r *BattleRoom) Play() {
 	}
 
 	// 获取题库
-	r.LibAnswer = RandAnswerLib(5, GetAnswerLib())
+	r.LibAnswer = Questions.RandAnswerLib(r.GetMaxLevel(), 5)
+	// r.LibAnswer = RandAnswerLib(5, GetAnswerLib())
+
 	log.Debug("%s", r.LibAnswer.ToString())
 	r.QuestionCount = len(r.LibAnswer.Answers)
 
@@ -332,6 +332,16 @@ func (m *BattleRoom) CheckAllDead() bool {
 	return all
 }
 
+func (m *BattleRoom) GetMaxLevel() int {
+	var i = 1
+	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
+		if v.Level > int32(i) {
+			i = int(v.Level)
+		}
+	})
+	return i
+}
+
 func (m *BattleRoom) CheckAndHandleDead() bool {
 	var allWrong = true
 	rightCount := 0
@@ -364,14 +374,16 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			rightCount++
 			skeleton.Go(func() {
 				if !v.IsRobot {
-					redis.AddWinTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
+					// redis.AddWinTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
+					Questions.WinCount(int(m.GetQuestion().ID))
 				}
 			}, func() {})
 
 		} else {
 			skeleton.Go(func() {
 				if !v.IsRobot {
-					redis.AddFailTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
+					// redis.AddFailTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
+					Questions.FailCount(int(m.GetQuestion().ID))
 				}
 			}, func() {})
 			// 标记死亡

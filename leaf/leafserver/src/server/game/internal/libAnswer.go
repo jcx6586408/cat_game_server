@@ -16,6 +16,19 @@ type LibAnswer struct {
 	Name     string
 }
 
+type Question struct {
+	Q    *pmsg.Question
+	win  int
+	fail int
+}
+
+type QuestionLib struct {
+	QuestionMap      map[int]*Question
+	Question         map[int][]*Question // 段位题库
+	PhaseQuestionLib map[int][]int       // 各个段位对于的题库
+	WinRates         map[int][]float32   // 各个段位对应胜率
+}
+
 func (l *LibAnswer) ToString() string {
 	var str = []string{}
 	for i, v := range l.Answers {
@@ -69,6 +82,18 @@ func ToAnswerLib(table string) Answers {
 				}
 			}
 			arr = append(arr, obj)
+			q := &Question{
+				Q: obj,
+			}
+			Questions.QuestionMap[int(obj.ID)] = q
+			subA, ok := Questions.Question[1]
+			if !ok {
+				subA = make([]*Question, 0)
+				subA = append(subA, q)
+				Questions.Question[1] = subA
+			} else {
+				Questions.Question[1] = append(Questions.Question[1], q)
+			}
 		}
 	}
 	return arr
@@ -94,4 +119,97 @@ func RandAnswerLib(count int, arr []*pmsg.Question) *LibAnswer {
 		Answers:  arr[startIndex : startIndex+count],
 		Progress: 0,
 	}
+}
+
+func (m *QuestionLib) RandAnswerLib(id, count int) *LibAnswer {
+	var lib = m.GetQuestions(id)
+	return RandAnswerLib(count, lib)
+}
+
+func (m *QuestionLib) _getQuestions(id int) []*pmsg.Question {
+	arr := []*pmsg.Question{}
+	ids, ok := m.PhaseQuestionLib[id]
+	if ok {
+		for _, phase := range ids {
+			for _, v := range m.Question[phase] {
+				arr = append(arr, v.Q)
+			}
+		}
+	}
+
+	return arr
+}
+
+// 根据段位获取题库
+func (m *QuestionLib) GetQuestions(id int) []*pmsg.Question {
+	ARR := []*pmsg.Question{}
+	count := id
+	c := 0
+	for {
+		if len(ARR) <= 5 {
+			ARR = append(ARR, m._getQuestions(count)...)
+			count--
+			if count < 0 {
+				count = 12
+			}
+			c++
+			if c >= 12 {
+				break
+			}
+		} else {
+			break
+		}
+	}
+	return ARR
+}
+
+func (m *QuestionLib) WinCount(id int) {
+	q, ok := m.QuestionMap[id]
+	if ok {
+		q.win++
+		m.updateLib(q)
+	}
+}
+
+func (m *QuestionLib) FailCount(id int) {
+	q, ok := m.QuestionMap[id]
+	if ok {
+		q.fail++
+		m.updateLib(q)
+	}
+}
+
+func (m *QuestionLib) updateLib(q *Question) {
+	total := q.win + q.fail
+	// 统计大于100且每格100次更新一次题库
+	if total >= RoomConf.QuestionCountMinLimit && total%RoomConf.QuestionCountDur == 0 {
+		// 计算题库正确率
+		rate := float32(q.win) * 100 / (float32(q.win) + float32(q.fail))
+		for i, v := range m.WinRates {
+			if rate >= v[0] && rate < v[1] {
+				// 找到原有题库
+				for k, questions := range m.Question {
+					for _, subQ := range questions {
+						if subQ.Q.ID == int32(q.Q.ID) {
+							m.Question[k] = m.delete(questions, subQ)   // 移除该题库
+							m.Question[i] = append(m.Question[i], subQ) // 加入新题库
+							break
+						}
+					}
+				}
+				return
+			}
+		}
+	}
+}
+
+func (m *QuestionLib) delete(a []*Question, elem *Question) []*Question {
+	for i := 0; i < len(a); i++ {
+		if a[i].Q.ID == elem.Q.ID {
+			a = append(a[:i], a[i+1:]...)
+			i--
+			break
+		}
+	}
+	return a
 }
