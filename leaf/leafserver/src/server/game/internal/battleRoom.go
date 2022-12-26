@@ -375,7 +375,7 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			skeleton.Go(func() {
 				if !v.IsRobot {
 					// redis.AddWinTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
-					Questions.WinCount(int(m.GetQuestion().ID))
+					Questions.WinChan <- int(m.GetQuestion().ID)
 				}
 			}, func() {})
 
@@ -383,7 +383,7 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			skeleton.Go(func() {
 				if !v.IsRobot {
 					// redis.AddFailTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
-					Questions.FailCount(int(m.GetQuestion().ID))
+					Questions.FailChan <- int(m.GetQuestion().ID)
 				}
 			}, func() {})
 			// 标记死亡
