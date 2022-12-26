@@ -73,7 +73,7 @@ func (m *BattleRoom) AddRandomCountRobots(min, max int, callback func()) {
 }
 
 func (m *BattleRoom) AddRobot(count int) {
-	subName, _ := RandNameClip(count, m.robotNames)
+	// subName, _ := RandNameClip(count, m.robotNames)
 	subIcon, _ := RandIconClip(count, m.robotIcons)
 	// m.robotNames = nr
 	// m.robotIcons = ir
@@ -84,7 +84,7 @@ func (m *BattleRoom) AddRobot(count int) {
 			skinID = 2 + rand.Intn(len(Skins)-1)
 		}
 		m.Members = append(m.Members, &pmsg.Member{
-			Nickname: fmt.Sprintf("%v", subName[i].ID),
+			Nickname: "",
 			Uuid:     guid,
 			Icon:     fmt.Sprintf("%v", subIcon[i].ID),
 			IsMaster: false,
