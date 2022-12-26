@@ -107,12 +107,15 @@ func OnExit() {
 		case syscall.SIGINT:
 			//SIGINT 信号，在程序关闭时会收到这个信号
 			fmt.Println("SIGINT", "退出程序，执行退出前逻辑")
+			Questions.ToExcel()
 			return
 		case syscall.SIGKILL:
 			fmt.Println("SIGKILL关闭********************")
+			Questions.ToExcel()
 			return
 		default:
 			fmt.Println("未知关闭")
+			Questions.ToExcel()
 		}
 	}, func() {})
 }

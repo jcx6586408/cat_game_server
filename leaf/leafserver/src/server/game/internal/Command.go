@@ -10,10 +10,16 @@ func init() {
 	skeleton.RegisterCommand("rooms", "show how many rooms", commandRooms)
 	skeleton.RegisterCommand("online", "show how many users", commandOnlines)
 	skeleton.RegisterCommand("excelUpdate", "update excel config", commandExcelUpdate)
+	skeleton.RegisterCommand("toExcel", "to question excel count", commandToQuestionExcel)
 }
 
 func commandEcho(args []interface{}) interface{} {
 	return fmt.Sprintf("%v", args)
+}
+
+func commandToQuestionExcel(args []interface{}) interface{} {
+	Questions.ToExcel()
+	return "success"
 }
 
 // 看房间情况

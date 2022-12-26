@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"excel"
 	"fmt"
 	"math/rand"
 	pmsg "proto/msg"
@@ -212,4 +213,17 @@ func (m *QuestionLib) delete(a []*Question, elem *Question) []*Question {
 		}
 	}
 	return a
+}
+
+func (m *QuestionLib) ToExcel() {
+	var str = [][]string{}
+	title1 := []string{"ID", "question", "answerA", "answerB", "answerC", "answerD", "rightAnswer", "win", "fail"}
+	str = append(str, title1)
+	title2 := []string{"int", "string", "string", "string", "string", "string", "string", "int", "int"}
+	str = append(str, title2)
+	for _, v := range m.QuestionMap {
+		subS := []string{fmt.Sprintf("%v", v.Q.ID), v.Q.Question, v.Q.AnswerA, v.Q.AnswerB, v.Q.AnswerC, v.Q.AnswerD, v.Q.RightAnswer, fmt.Sprintf("%v", v.win), fmt.Sprintf("%v", v.fail)}
+		str = append(str, subS)
+	}
+	excel.CreateXlS(str, "question1", []string{"ID", "问题", "选项A", "选项B", "选项C", "选项D", "正确答案", "正确次数", "错误次数"})
 }
