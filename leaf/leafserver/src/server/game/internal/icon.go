@@ -47,3 +47,24 @@ func RandIcon(count int, arr []*Icon) []*Icon {
 	// 返回子数组
 	return arr[startIndex : startIndex+count]
 }
+
+func RandIconClip(count int, arr []*Icon) ([]*Icon, []*Icon) {
+	// 获得其实随机数
+	startIndex := 0
+	length := len(arr)
+	if len(arr)-count > 0 {
+		startIndex = rand.Intn(length - count)
+	}
+
+	// 长度不够则补充
+	if count >= length {
+		for i := 0; i < count; i++ {
+			arr = append(arr, arr[0])
+		}
+	}
+
+	r := append(arr[:startIndex], arr[startIndex+count+1:]...)
+
+	// 返回子数组
+	return arr[startIndex : startIndex+count], r
+}

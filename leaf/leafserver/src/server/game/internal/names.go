@@ -47,3 +47,24 @@ func RandName(count int, arr []*Names) []*Names {
 	// 返回子数组
 	return arr[startIndex : startIndex+count]
 }
+
+func RandNameClip(count int, arr []*Names) ([]*Names, []*Names) {
+	// 获得其实随机数
+	startIndex := 0
+	length := len(arr)
+	if len(arr)-count > 0 {
+		startIndex = rand.Intn(length - count)
+	}
+
+	// 长度不够则补充
+	if count >= length {
+		for i := 0; i < count; i++ {
+			arr = append(arr, arr[0])
+		}
+	}
+
+	r := append(arr[:startIndex], arr[startIndex+count+1:]...)
+
+	// 返回子数组
+	return arr[startIndex : startIndex+count], r
+}

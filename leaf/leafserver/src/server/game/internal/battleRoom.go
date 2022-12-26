@@ -42,6 +42,9 @@ type BattleRoom struct {
 	isStart        bool
 	isRelive       bool
 	isAnswerTime   bool // 答题时间
+
+	robotIcons []*Icon  // 机器人头像
+	robotNames []*Names // 机器人名字
 }
 
 func (r *BattleRoom) GetID() int {
@@ -60,6 +63,9 @@ func (r *BattleRoom) OnInit() {
 	r.isStart = false
 	r.isRelive = false
 	r.isAnswerTime = false
+	// 复制头像名字
+	copy(r.robotIcons, IconLib)
+	copy(r.robotNames, NamesLib)
 	// 挂起机器人
 	r.matching()
 }

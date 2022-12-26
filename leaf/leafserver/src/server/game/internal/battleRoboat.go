@@ -14,7 +14,7 @@ import (
 
 // 匹配加入机器人
 func (m *BattleRoom) matching() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(8))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(5))
 	m.MatchCancel = cancel
 	cur := 0
 	skeleton.Go(func() {
@@ -29,7 +29,7 @@ func (m *BattleRoom) matching() {
 				}
 				var less = m.Max - m.GetMemberCount()
 				if less > 0 {
-					m.AddRobot(less, NamesLib, IconLib)
+					m.AddRobot(less)
 					m.Send(remotemsg.ROOMADD, nil)
 				}
 				// 将房间移入比赛使用房间
@@ -63,18 +63,20 @@ func (m *BattleRoom) AddRandomCountRobots(min, max int, callback func()) {
 	ranNumber := rand.Intn(max+1) + min
 	if ranNumber > less {
 		log.Debug("补满所有机器人, %d", less)
-		m.AddRobot(less, NamesLib, IconLib)
+		m.AddRobot(less)
 		callback()
 	} else {
 		log.Debug("补充指定数量机器人, %d", ranNumber)
-		m.AddRobot(ranNumber, NamesLib, IconLib)
+		m.AddRobot(ranNumber)
 	}
 	m.Send(remotemsg.ROOMADD, nil)
 }
 
-func (m *BattleRoom) AddRobot(count int, nameLib []*Names, iconLib []*Icon) {
-	subName := RandName(count, nameLib)
-	subIcon := RandIcon(count, iconLib)
+func (m *BattleRoom) AddRobot(count int) {
+	subName, nr := RandNameClip(count, m.robotNames)
+	subIcon, ir := RandIconClip(count, m.robotIcons)
+	m.robotNames = nr
+	m.robotIcons = ir
 	for i := 0; i < count; i++ {
 		guid := uuid.New().String()
 		skinID := 1
