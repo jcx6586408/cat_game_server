@@ -74,7 +74,7 @@ func (m *BattleRoom) AddRandomCountRobots(min, max int, callback func()) {
 
 func (m *BattleRoom) AddRobot(count int) {
 	// subName, _ := RandNameClip(count, m.robotNames)
-	subIcon, _ := RandIconClip(count, m.robotIcons)
+	subIcon := RandIcon(count, IconLib)
 	// m.robotNames = nr
 	// m.robotIcons = ir
 	for i := 0; i < count; i++ {
