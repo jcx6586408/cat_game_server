@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	// Rdb redis.Pipeliner
 	Rdb *redis.Client
 
 	worldRank = "world"
@@ -34,13 +35,16 @@ var (
 func ConnectReids() {
 	conf = config.Read()
 	Max = int64(conf.Rank.Max)
+
 	Rdb = redis.NewClient(&redis.Options{
 		Addr:     conf.Rank.RedisUrl,
 		Password: "",
 		DB:       0,
+		PoolSize: 1000,
 	})
 
-	// Pipe = Rdb.Pipeline()
+	// Rdb = rdb.Pipeline()
+	// Pipe.ZAdd()
 	println("******************redis数据库连接成功******************")
 	iplocationInit()
 }
@@ -114,14 +118,6 @@ func UpdateRank(city, uid string, score float64) {
 	// 世界排行更新
 	AddRank(worldRank, uid, score)
 	AddRank(city, uid, score)
-	// f := Rdb.ZScore(ctx, worldRank, uid).Val()
-	// if f < score {
-	// }
-
-	// // 城市排行更新
-	// f = Rdb.ZScore(ctx, city, uid).Val()
-	// if f < score {
-	// }
 }
 
 // 获取排行榜

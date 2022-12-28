@@ -23,6 +23,7 @@ var (
 	Skins      []*Skin
 	NamesLib   []*Names
 	IconLib    []*Icon
+	LevelLib   []*Level
 	AnswerLibs []Answers
 
 	RoomManager   Managerer
@@ -62,6 +63,7 @@ func ExcelConfigUpdate() {
 	Skins = ToSkinLib()
 	NamesLib = ToNameLib()
 	IconLib = ToIconLib()
+	LevelLib = ToLevelLib()
 	Questions = &QuestionLib{
 		QuestionMap:      make(map[int]*Question),
 		Question:         make(map[int][]*Question),
@@ -83,17 +85,6 @@ func ExcelConfigUpdate() {
 	AnswerLibs = []Answers{}
 	AnswerLibs = append(AnswerLibs, ToAnswerLib("question1"))
 	Questions.Run() // 题库监听
-
-	for i := 0; i < 80; i++ {
-		Questions.WinCount(10)
-	}
-
-	for i := 0; i < 20; i++ {
-		Questions.FailCount(10)
-	}
-
-	re := Questions.GetQuestions(5)
-	log.Debug("5段位题库长度%v", len(re))
 
 	log.Debug("皮肤数量: %v", len(Skins))
 	log.Debug("名字数量: %v", len(NamesLib))

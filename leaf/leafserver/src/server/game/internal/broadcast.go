@@ -31,10 +31,6 @@ func (m *BattleRoom) sendbase(call func(Agent, Roomer, *pmsg.Member)) {
 	for _, room := range m.Rooms {
 		for _, v := range room.GetMembers() {
 			a := Users[v.Uuid]
-			// 准备人员不通知
-			if v.State == int32(MEMEBERPREPARE) {
-				continue
-			}
 			// 离线玩家不通知
 			if a == nil {
 				log.Debug("用户不存在%v", v.Uuid)
@@ -103,7 +99,7 @@ func (m *BattleRoom) Send(msgID int, change *pmsg.Member) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
 		a.WriteMsg(&pmsg.RoomInfoReply{
 			RoomID:         int32(room.GetID()),
-			PrepareMembers: nil,
+			PrepareMembers: m.GetPrepareMembers(),
 			PlayingMembers: m.GetPlayingMembers(),
 			Progress:       int32(m.Cur),
 			TotolQuestion:  int32(m.QuestionCount),

@@ -1,6 +1,9 @@
 package internal
 
-import "math/rand"
+import (
+	"math/rand"
+	"sort"
+)
 
 type Icon struct {
 	ID      int
@@ -26,6 +29,9 @@ func ToIconLib() []*Icon {
 			arr = append(arr, obj)
 		}
 	}
+	sort.SliceStable(arr, func(i, j int) bool {
+		return arr[i].ID < arr[j].ID
+	})
 	return arr
 }
 
@@ -62,9 +68,11 @@ func RandIconClip(count int, arr []*Icon) ([]*Icon, []*Icon) {
 			arr = append(arr, arr[0])
 		}
 	}
-
-	r := append(arr[:startIndex], arr[startIndex+count+1:]...)
-
+	endIndex := startIndex + count
+	subArr := arr[startIndex:endIndex]
+	ex := []*Icon{}
+	ex = append(ex, subArr...)
+	other := append(arr[:startIndex], arr[endIndex:]...)
 	// 返回子数组
-	return arr[startIndex : startIndex+count], r
+	return ex, other
 }

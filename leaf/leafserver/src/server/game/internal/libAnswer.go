@@ -141,7 +141,9 @@ func RandAnswerLib(count int, arr []*pmsg.Question) *LibAnswer {
 }
 
 func (m *QuestionLib) RandAnswerLib(id, count int) *LibAnswer {
-	var lib = m.GetQuestions(id)
+	l := GetIDByLevel(id)
+	log.Debug("************************输入段位:%v|%v", id, l)
+	var lib = m.GetQuestions(l, count)
 	return RandAnswerLib(count, lib)
 }
 
@@ -160,12 +162,12 @@ func (m *QuestionLib) _getQuestions(id int) []*pmsg.Question {
 }
 
 // 根据段位获取题库
-func (m *QuestionLib) GetQuestions(id int) []*pmsg.Question {
+func (m *QuestionLib) GetQuestions(id, total int) []*pmsg.Question {
 	ARR := []*pmsg.Question{}
 	count := id
 	c := 0
 	for {
-		if len(ARR) <= 5 {
+		if len(ARR) <= total {
 			ARR = append(ARR, m._getQuestions(count)...)
 			count--
 			if count < 0 {

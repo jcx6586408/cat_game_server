@@ -42,7 +42,7 @@ func (m *BattleRoom) matching() {
 					return
 				}
 				var less = m.Max - m.GetMemberCount()
-				log.Debug("机器人匹配: %d----%d----%d", less, m.Max, m.GetMemberCount())
+				// log.Debug("机器人匹配: %d----%d----%d", less, m.Max, m.GetMemberCount())
 				// 人数已满，直接退出
 				if less <= 0 {
 					cancel()
@@ -62,11 +62,9 @@ func (m *BattleRoom) AddRandomCountRobots(min, max int, callback func()) {
 	var less = m.Max - m.GetMemberCount()
 	ranNumber := rand.Intn(max+1) + min
 	if ranNumber > less {
-		log.Debug("补满所有机器人, %d", less)
 		m.AddRobot(less)
 		callback()
 	} else {
-		log.Debug("补充指定数量机器人, %d", ranNumber)
 		m.AddRobot(ranNumber)
 	}
 	m.Send(remotemsg.ROOMADD, nil)

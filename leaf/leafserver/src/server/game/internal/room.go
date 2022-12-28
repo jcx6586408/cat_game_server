@@ -59,7 +59,21 @@ func (r *Room) GetMemeber(uuid string) *pmsg.Member {
 	return nil
 }
 
+func (r *Room) GetMaster() *pmsg.Member {
+	for _, v := range r.Members {
+		if v.IsMaster {
+			return v
+		}
+	}
+	return nil
+}
+
 func (r *Room) Matching() {
+	master := r.GetMaster()
+	// 游戏状态不运行匹配
+	if master != nil && master.State == int32(MEMBERPLAYING) {
+		return
+	}
 	br := BattleManager.MatchRoom(r)
 	r.BattleRoom = br
 	r.BattleRoom.Send(remotemsg.ROOMMATCHROOM, nil)
@@ -94,6 +108,7 @@ func (r *Room) AddMember(member *pmsg.Member) bool {
 	log.Debug("加入新成员*************2")
 	member.RoomID = int32(r.GetID())
 	member.IsMaster = (r.GetMemberCount() <= 0) // 第一个人设置为房主
+	member.State = int32(MEMEBERPREPARE)
 	r.Members = append(r.Members, member)
 	if r.BattleRoom != nil {
 		log.Debug("加入新成员*************3")
@@ -132,6 +147,7 @@ func (r *Room) LeaveMember(member *pmsg.Member) {
 func (r *Room) ChangeMemberState(state int) {
 	for _, v := range r.Members {
 		v.State = int32(state)
+		v.IsDead = false
 	}
 }
 

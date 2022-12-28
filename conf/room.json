@@ -6,8 +6,8 @@
     "ReliveWaitTime": 6,
     "RobotMin": 4,
     "RobotMax": 8,
-    "QuestionCountMinLimit": 100,
-    "QuestionCountDur": 100,
+    "QuestionCountMinLimit": 3,
+    "QuestionCountDur": 3,
     "Question":[
         {
             "WinRate": [90, 100],

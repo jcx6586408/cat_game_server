@@ -33,11 +33,11 @@ func commandRooms(args []interface{}) interface{} {
 		playing = append(playing, v.GetID())
 	}
 	str := fmt.Sprintln(
-		fmt.Sprintf("commonRooms: %v\n", len(manager.Rooms)),
-		fmt.Sprintf("battleRooms: %v\n", prepare),
-		fmt.Sprintf("battlePlayingRooms: %v\n", playing),
-		fmt.Sprintf("id_Array: %v\n", manager.IDManager.Ids),
-		fmt.Sprintf("battle_id_Array: %v\n", battleManager.IDManager.Ids))
+		fmt.Sprintf("commonRoomslength: %v\r\n", len(manager.Rooms)),
+		fmt.Sprintf("battleRooms: %v\r\n", prepare),
+		fmt.Sprintf("battlePlayingRooms: %v\r\n", playing),
+		fmt.Sprintf("id_Array: %v\r\n", manager.IDManager.Ids),
+		fmt.Sprintf("battle_id_Array: %v\r\n", battleManager.IDManager.Ids))
 	return str
 }
 

@@ -38,11 +38,13 @@ type BattleRoom struct {
 	ReliveWaitTime int
 	PrepareTime    int
 	isStart        bool
-	isRelive       bool
+	isRelive       bool // 是否使用了复活机会
 	isAnswerTime   bool // 答题时间
 
 	robotIcons []*Icon  // 机器人头像
 	robotNames []*Names // 机器人名字
+
+	Done chan interface{} // 结束管道
 }
 
 func (r *BattleRoom) GetID() int {
@@ -63,15 +65,22 @@ func (r *BattleRoom) OnInit() {
 	r.isAnswerTime = false
 	// 复制头像名字
 	r.robotIcons = make([]*Icon, len(IconLib))
+	r.Done = make(chan interface{})
 	copy(r.robotIcons, IconLib)
 	// 挂起机器人
 	r.matching()
 }
 
 func (r *BattleRoom) OnClose() {
+	defer recover()
 	r.LibAnswer = nil
 	r.Members = nil
 	r.Rooms = nil
+	r.isStart = false
+	if r.Done != nil {
+		close(r.Done)
+		r.Done = nil
+	}
 }
 
 func (m *BattleRoom) delete(a []Roomer, elem Roomer) []Roomer {
@@ -103,10 +112,6 @@ func (m *BattleRoom) DeleRoom(room Roomer) bool {
 
 func (r *BattleRoom) OnPlayEnd() {
 	r.isStart = false
-	// 回归所有成员状态
-	for _, v := range r.Rooms {
-		v.OnEndPlay()
-	}
 	// 回收房间
 	BattleManager.Destroy(r)
 }
@@ -154,7 +159,7 @@ func (r *BattleRoom) GetPlayingMembers() []*pmsg.Member {
 		}
 	}
 	members = append(members, r.Members...)
-	log.Debug("战斗房间ID:%d,游玩人数: %d", r.GetID(), len(members))
+	// log.Debug("战斗房间ID:%d,游玩人数: %d", r.GetID(), len(members))
 	return members
 }
 
@@ -180,7 +185,7 @@ func (r *BattleRoom) GetMemberCount() int {
 		count += v.GetMemberCount()
 	}
 	count += len(r.Members)
-	log.Debug("当前战斗房间人数: %d", count)
+	// log.Debug("当前战斗房间人数: %d", count)
 	return count
 }
 
@@ -192,11 +197,12 @@ func (r *BattleRoom) AddRoom(room Roomer) bool {
 	less := r.Max - r.GetMemberCount()
 	if less >= room.GetMemberCount() {
 		r.Rooms = append(r.Rooms, room)
+		log.Debug("%d****号战斗房成功加入房间: %d", r.GetID(), room.GetID())
 		if r.Max == r.GetMemberCount() {
 			log.Debug("满员开始游戏")
 			r.Play() // 满员开始游戏
 		} else {
-			log.Debug("当前战斗房人数:%d", r.GetMemberCount())
+			// log.Debug("当前战斗房人数:%d", r.GetMemberCount())
 		}
 		return true
 	}
@@ -232,10 +238,19 @@ func (r *BattleRoom) Play() {
 	r.PlayRun()
 }
 
+func (m *BattleRoom) SendEndPlay() {
+	// 回归所有成员状态
+	for _, v := range m.Rooms {
+		v.OnEndPlay()
+	}
+	m.Send(remotemsg.ROOMENDPLAY, nil)
+}
+
 func (m *BattleRoom) endjudge() {
-	if m.LibAnswer.Progress >= m.QuestionCount-1 {
+	if m.LibAnswer == nil || m.LibAnswer.Progress >= m.QuestionCount-1 {
 		log.Debug("答题结束: %v", m.ID)
-		m.Send(remotemsg.ROOMENDPLAY, nil)
+		// 回归所有成员状态
+		m.SendEndPlay()
 		m.OnPlayEnd()
 		m.Cancel = nil
 	} else {
@@ -252,9 +267,12 @@ func (m *BattleRoom) singleRun() {
 	cur := m.AnswerTime
 	m.isAnswerTime = true
 	log.Debug("================（单次答题开始%d）===================", m.LibAnswer.Progress+1)
+
 	skeleton.Go(func() {
 		for {
 			select {
+			case <-m.Done:
+				return
 			case <-ctx.Done():
 				log.Debug("================单次答题结束==================")
 				// 检查所有成员答案
@@ -262,7 +280,7 @@ func (m *BattleRoom) singleRun() {
 				// 如果没有全错
 				m.isAnswerTime = false
 				m.Send(remotemsg.ROOMANSWEREND, nil) // 答题结束
-				if m.LibAnswer.Progress >= m.QuestionCount-1 {
+				if m.LibAnswer == nil || m.LibAnswer.Progress >= m.QuestionCount-1 {
 					m.endjudge()
 					return
 				}
@@ -270,16 +288,17 @@ func (m *BattleRoom) singleRun() {
 				if allWrong {
 					if !m.isRelive {
 						m.isRelive = true
+						m.endjudge()
 						m.WaitRelive(func() {
-							m.endjudge()
+
 						}, func() {
 							log.Debug("全员失败,答题结束: %v", m.ID)
-							m.Send(remotemsg.ROOMENDPLAY, nil)
+							m.SendEndPlay()
 							m.OnPlayEnd()
 						})
 					} else {
 						log.Debug("已经复活等待过, 全员失败,答题结束: %v", m.ID)
-						m.Send(remotemsg.ROOMENDPLAY, nil)
+						m.SendEndPlay()
 						m.OnPlayEnd()
 					}
 				} else {
@@ -332,6 +351,16 @@ func (m *BattleRoom) CheckAllDead() bool {
 	return all
 }
 
+func (m *BattleRoom) CheckRoomAllDead(room Roomer) bool {
+	all := true
+	for _, v := range room.GetMembers() {
+		if !v.IsDead {
+			all = false
+		}
+	}
+	return all
+}
+
 func (m *BattleRoom) GetMaxLevel() int {
 	var i = 1
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
@@ -339,6 +368,10 @@ func (m *BattleRoom) GetMaxLevel() int {
 			i = int(v.Level)
 		}
 	})
+	if i <= 0 {
+		log.Debug("非法段位0**********************")
+		i = 1
+	}
 	return i
 }
 
@@ -359,15 +392,15 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			return
 		}
 		playerAnswer := v.Answer[m.LibAnswer.Progress]
-		tip := ""
-		if q == playerAnswer.Result {
-			tip = "true---------------"
-		}
-		if v.IsMaster {
-			log.Debug("房主***玩家uuid %v: 第%v题,  正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
-		} else {
-			log.Debug("玩家uuid %v: 第%v题, 正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
-		}
+		// tip := ""
+		// if q == playerAnswer.Result {
+		// 	tip = "true---------------"
+		// }
+		// if v.IsMaster {
+		// 	log.Debug("房主***玩家uuid %v: 第%v题,  正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
+		// } else {
+		// 	log.Debug("玩家uuid %v: 第%v题, 正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
+		// }
 		right := (q == playerAnswer.Result)
 		if right {
 			allWrong = false
@@ -389,8 +422,10 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			// 标记死亡
 			v.IsDead = true
 			var allDead = true
+
 			if room != nil {
 				// 检查房间是否所有人死亡
+				log.Debug("检测所有人死亡的房间ID: %d|%d", room.GetID(), len(room.GetMembers()))
 				for _, subV := range room.GetMembers() {
 					if !subV.IsDead {
 						allDead = false
@@ -398,7 +433,15 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 				}
 				if allDead {
 					log.Debug("发送319消息*****************************************")
-					room.Send(remotemsg.ROOMALLFAIL, nil)
+					m.WaitRoomRelive(room, func() {
+
+					}, func() {
+						log.Debug("全员死亡，退出战斗房间, 退出房间ID: %v", room.GetID())
+						room.ChangeMemberState(MEMEBERPREPARE)
+						m.DeleRoom(room) // 移除房间
+						room.Send(remotemsg.ROOMALLFAIL, nil)
+					})
+
 				}
 			}
 		}
@@ -461,23 +504,48 @@ func (m *BattleRoom) Answer(a *pmsg.Answer) {
 	})
 }
 
+func (m *BattleRoom) WaitRoomRelive(room Roomer, success, fail func()) {
+	subCtx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(m.ReliveWaitTime))
+	log.Debug("等待复活-----------******************")
+	skeleton.Go(func() {
+		for {
+			select {
+			case <-subCtx.Done():
+				log.Debug("复活等待结束-------------")
+				if m.CheckRoomAllDead(room) {
+					fail()
+				} else {
+					success()
+				}
+				return
+			case <-time.After(time.Millisecond * time.Duration(20)):
+				if !m.CheckRoomAllDead(room) {
+					cancel()
+				}
+			}
+		}
+	}, func() {})
+}
+
 func (m *BattleRoom) WaitRelive(success, fail func()) {
 	subCtx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(m.ReliveWaitTime))
 	log.Debug("等待复活-----------******************")
-	for {
-		select {
-		case <-subCtx.Done():
-			log.Debug("复活等待结束-------------")
-			if m.CheckAllDead() {
-				fail()
-			} else {
-				success()
-			}
-			return
-		case <-time.After(time.Millisecond * time.Duration(20)):
-			if !m.CheckAllDead() {
-				cancel()
+	skeleton.Go(func() {
+		for {
+			select {
+			case <-subCtx.Done():
+				log.Debug("复活等待结束-------------")
+				if m.CheckAllDead() {
+					fail()
+				} else {
+					success()
+				}
+				return
+			case <-time.After(time.Millisecond * time.Duration(20)):
+				if !m.CheckAllDead() {
+					cancel()
+				}
 			}
 		}
-	}
+	}, func() {})
 }
