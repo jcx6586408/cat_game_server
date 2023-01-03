@@ -148,6 +148,7 @@ func (m *Manager) delete(a []Roomer, elem Roomer) []Roomer {
 func (m *Manager) AnswerQuestion(a *pmsg.Answer) {
 	for _, v := range m.Rooms {
 		if v.GetID() == int(a.RoomID) {
+			log.Debug("找到答题房间%d", v.GetID())
 			v.Answer(a)
 			break
 		}

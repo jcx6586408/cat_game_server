@@ -167,6 +167,7 @@ func GetSelf(c echo.Context) error {
 	oldR.WorldRank = GetSelfWorldRank(r.UID)
 	oldR.CityRank = GetSelfCityRank(results.City, r.UID)
 	oldR.City = results.City
+	oldR.Province = results.Region
 	return c.JSON(http.StatusOK, oldR)
 }
 

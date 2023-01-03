@@ -13,9 +13,14 @@ import (
 // var Processor network.Processor
 var Processor = json.NewProcessor()
 
+// var ProbufProcessor = protobuf.NewProcessor()
+
 func init() {
 	// 登录消息
 	Processor.Register(&Login{})
+	// ProbufProcessor.Register(&pmsg.RoomPreAddRequest{})
+	// ProbufProcessor.Register(&pmsg.RoomPreAddReply{})
+	// ProbufProcessor.Register(&pmsg.RoomInfoGetRequest{})
 
 	// 排行榜消息
 	Processor.Register(&RankSelfRequest{})

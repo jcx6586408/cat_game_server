@@ -22,8 +22,17 @@ var wxConf *config.Config
 func init() {
 	handleMsg(&msg.WXCode{}, login)
 	handleMsg(&pmsg.RoomPreAddRequest{}, preCreateRoom)
+	handleMsg(&pmsg.RoomInfoGetRequest{}, protobufTest)
 
 	wxConf = config.Read()
+}
+
+func protobufTest(args []interface{}) {
+	log.Debug("收到protobuf消息======================")
+	data := args[0].(*pmsg.RoomInfoGetRequest)
+	log.Debug("%v", data.RoomID)
+	a := args[1].(gate.Agent)
+	a.WriteMsg(&pmsg.RoomInfoGetRequest{RoomID: data.RoomID})
 }
 
 func login(args []interface{}) {

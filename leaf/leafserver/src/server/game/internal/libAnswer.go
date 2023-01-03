@@ -48,10 +48,25 @@ func (q *QuestionLib) Run() {
 	}, func() {})
 }
 
+func (l *LibAnswer) GetRightAnswer(r string, obj *pmsg.Question) string {
+	switch r {
+	case "A":
+		return obj.AnswerA
+	case "B":
+		return obj.AnswerB
+	case "C":
+		return obj.AnswerC
+	case "D":
+		return obj.AnswerD
+	default:
+		return ""
+	}
+}
+
 func (l *LibAnswer) ToString() string {
 	var str = []string{}
 	for i, v := range l.Answers {
-		str = append(str, fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, v.RightAnswer))
+		str = append(str, fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, l.GetRightAnswer(v.RightAnswer, v)))
 	}
 	return fmt.Sprintln(str)
 }
@@ -59,7 +74,7 @@ func (l *LibAnswer) ToString() string {
 func (l *LibAnswer) SingleToString() string {
 	i := l.Progress
 	v := l.Answers[l.Progress]
-	return fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, v.RightAnswer)
+	return fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, l.GetRightAnswer(v.RightAnswer, v))
 }
 
 func GetAnswerLib() Answers {
@@ -133,32 +148,42 @@ func RandAnswerLib(count int, arr []*pmsg.Question) *LibAnswer {
 		}
 	}
 
+	ex := []*pmsg.Question{}
+	ex = append(ex, arr[startIndex:startIndex+count]...)
 	// 返回子数组
 	return &LibAnswer{
-		Answers:  arr[startIndex : startIndex+count],
+		Answers:  ex,
 		Progress: 0,
 	}
 }
 
-func (m *QuestionLib) RandAnswerLib(id, count int) *LibAnswer {
-	l := GetIDByLevel(id)
-	log.Debug("************************输入段位:%v|%v", id, l)
+func (m *QuestionLib) RandAnswerLib(l, count int) *LibAnswer {
 	var lib = m.GetQuestions(l, count)
 	return RandAnswerLib(count, lib)
 }
 
-func (m *QuestionLib) _getQuestions(id int) []*pmsg.Question {
+func (m *QuestionLib) _getQuestions(id int, usedids []int) ([]*pmsg.Question, []int) {
 	arr := []*pmsg.Question{}
 	ids, ok := m.PhaseQuestionLib[id]
 	if ok {
 		for _, phase := range ids {
-			for _, v := range m.Question[phase] {
-				arr = append(arr, v.Q)
+			var used = false
+			for _, v := range usedids {
+				if v == phase {
+					used = true
+					log.Debug("段位题库: %d, 已经被搜索过，无需再次搜索", used)
+					break
+				}
+			}
+			if !used {
+				for _, v := range m.Question[phase] {
+					arr = append(arr, v.Q)
+				}
 			}
 		}
 	}
 
-	return arr
+	return arr, ids
 }
 
 // 根据段位获取题库
@@ -166,9 +191,12 @@ func (m *QuestionLib) GetQuestions(id, total int) []*pmsg.Question {
 	ARR := []*pmsg.Question{}
 	count := id
 	c := 0
+	var used = []int{}
 	for {
 		if len(ARR) <= total {
-			ARR = append(ARR, m._getQuestions(count)...)
+			sub, ids := m._getQuestions(count, used)
+			used = append(used, ids...)
+			ARR = append(ARR, sub...)
 			count--
 			if count < 0 {
 				count = 12

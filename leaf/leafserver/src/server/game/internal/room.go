@@ -80,7 +80,6 @@ func (r *Room) Matching() {
 }
 
 func (r *Room) MatchingCancel() bool {
-	r.BattleRoom = nil
 	bo := BattleManager.MatchRoomzCancel(r)
 	r.SendRoomMatchCancel(bo)
 	return bo
@@ -172,6 +171,7 @@ func (m *Room) delete(a []*pmsg.Member, elem *pmsg.Member) []*pmsg.Member {
 
 func (m *Room) Answer(a *pmsg.Answer) {
 	if m.BattleRoom != nil {
+		log.Debug("找到答题战斗房间")
 		m.BattleRoom.Answer(a)
 	}
 }

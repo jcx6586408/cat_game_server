@@ -63,7 +63,6 @@ func (m *BattleRoom) SendLeave(lmember *pmsg.Member) {
 // 发送复活
 func (m *BattleRoom) SendRelive(uuid string) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
-		log.Debug("%v复活答案: %v", uuid, member.Answer[m.LibAnswer.Progress].Result)
 		target := room.GetMemeber(uuid)
 		if target != nil {
 			a.WriteMsg(&pmsg.MemberReliveReply{

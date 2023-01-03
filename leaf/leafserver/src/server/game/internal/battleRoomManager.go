@@ -146,6 +146,7 @@ func (m *BattleRoomManager) MatchRoom(room Roomer) BattleRoomer {
 
 func (m *BattleRoomManager) MatchRoomzCancel(room Roomer) bool {
 	for _, v := range m.Rooms {
+		log.Debug("取消匹配成功，移除房间:%v", room.GetID())
 		return v.DeleRoom(room)
 	}
 	log.Debug("管理器找不到匹配取消的房间 %v", room.GetID())

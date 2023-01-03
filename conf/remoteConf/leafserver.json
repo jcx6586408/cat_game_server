@@ -1,5 +1,5 @@
 {
-	"LogLevel": "debug",
+	"LogLevel": "release",
 	"LogPath": "",
 	"TCPAddr": "",
 	"WSAddr": ":5100",

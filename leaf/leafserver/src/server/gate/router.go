@@ -18,6 +18,8 @@ func init() {
 	// 登录
 	msg.Processor.SetRouter(&msg.WXCode{}, game.ChanRPC)
 
+	// msg.ProbufProcessor.SetRouter(&pmsg.RoomInfoGetRequest{}, login.ChanRPC)
+
 	// 房间创建消息
 	msg.Processor.SetRouter(&pmsg.RoomPreAddRequest{}, login.ChanRPC)     // 房间预创建
 	msg.Processor.SetRouter(&pmsg.CreateRoomRequest{}, game.ChanRPC)      // 房间创建
@@ -33,4 +35,5 @@ func init() {
 	msg.Processor.SetRouter(&pmsg.MemberReliveRequest{}, game.ChanRPC)    // 复活注册
 	msg.Processor.SetRouter(&pmsg.RoomInfoGetRequest{}, game.ChanRPC)     // 房间信息主动获取
 	msg.Processor.SetRouter(&msg.TableCount{}, game.ChanRPC)              // 表格统计注册
+
 }

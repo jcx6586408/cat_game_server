@@ -1,7 +1,7 @@
 {
     "rank": {
         "Port": ":5200",
-        "RedisUrl": "118.195.244.48:6379",
+        "RedisUrl": "10.2.0.13:5200",
         "worldRankCount": 100,
         "countryRankCount": 100,
         "provinceRankCount": 100,
@@ -22,7 +22,7 @@
         "MaxIdle": 5
     },
     "Urls": [
-        "wss://kampfiregames.cn:5100"
+        "wss://sheepgame.kampfiregames.cn:5100"
     ],
     "SeverType":"gate"
 }

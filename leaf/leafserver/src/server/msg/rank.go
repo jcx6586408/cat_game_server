@@ -9,6 +9,7 @@ type Rank struct {
 	NickName     string
 	Country      string
 	CountryShort string
+	Province     string
 	City         string
 }
 

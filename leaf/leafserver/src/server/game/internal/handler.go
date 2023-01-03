@@ -15,7 +15,7 @@ import (
 func init() {
 	// 数据库连接
 	// storage.Connect()
-	redis.ConnectReids()
+	// redis.ConnectReids()
 	// 模块初始化
 	RankInit()
 	ConstInit()

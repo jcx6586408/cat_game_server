@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sort"
 	"sync"
 	"syscall"
 
+	"github.com/name5566/leaf/db/mongodb"
 	"github.com/name5566/leaf/log"
 )
 
@@ -33,6 +35,8 @@ var (
 	results       = []string{"A", "B", "C", "D"}
 	RoomConf      *config.RoomConfig
 	Questions     *QuestionLib
+
+	MD *mongodb.DialContext
 )
 
 func ConstInit() {
@@ -73,7 +77,12 @@ func ExcelConfigUpdate() {
 		FailChan:         make(chan int),
 		Done:             make(chan interface{}),
 	}
-	for i, v := range RoomConf.Question {
+
+	sort.SliceStable(LevelLib, func(i, j int) bool {
+		return LevelLib[i].ID < LevelLib[j].ID
+	})
+
+	for i, v := range LevelLib {
 		Questions.PhaseQuestionLib[i+1] = v.AnswerPhase
 		rates := []float32{}
 		for _, ran := range v.WinRate {
@@ -82,10 +91,12 @@ func ExcelConfigUpdate() {
 		Questions.WinRates[i+1] = rates
 		Questions.Question[i+1] = make([]*Question, 0)
 	}
+
 	AnswerLibs = []Answers{}
 	AnswerLibs = append(AnswerLibs, ToAnswerLib("question1"))
+	// MongoConnect()  // 数据库连接
 	Questions.Run() // 题库监听
-
+	log.Debug("段位长度: %d", len(LevelLib))
 	log.Debug("皮肤数量: %v", len(Skins))
 	log.Debug("名字数量: %v", len(NamesLib))
 	log.Debug("Icon数量: %v", len(IconLib))
