@@ -31,6 +31,7 @@ type Wx struct {
 type Rank struct {
 	Port              string `json:"Port"`
 	RedisUrl          string `json:"RedisUrl"`
+	RedisPassword     string `json:"RedisPassword"`
 	WorldRankCount    int    `json:"worldRankCount"`
 	CountryRankCount  int    `json:"countryRankCount"`
 	ProvinceRankCount int    `json:"provinceRankCount"`

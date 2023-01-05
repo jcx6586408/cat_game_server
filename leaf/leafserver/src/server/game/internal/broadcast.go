@@ -113,6 +113,26 @@ func (m *BattleRoom) Send(msgID int, change *pmsg.Member) {
 	})
 }
 
+func (m *BattleRoom) SendStart() {
+	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
+		a.WriteMsg(&pmsg.RoomInfoReply{
+			RoomID:         int32(room.GetID()),
+			PrepareMembers: m.GetPrepareMembers(),
+			PlayingMembers: m.GetPlayingMembers(),
+			Progress:       int32(m.Cur),
+			TotolQuestion:  int32(m.QuestionCount),
+			CurQuestion:    int32(m.GetProgress() + 1),
+			ChangeMemeber:  nil,
+			MsgID:          int32(remotemsg.ROOMSTARTPLAY),
+			Question:       m.GetQuestion(),
+			ToTalTime:      int32(m.GetPlayTime()),
+			MaxMemeber:     int32(m.Max),
+			BattleRoomID:   int32(m.ID),
+			SceneID:        int32(RandScene(Scenes).ID),
+		})
+	})
+}
+
 func (m *Room) Send(msgID int, change *pmsg.Member) {
 	m.sendbase(func(a Agent) {
 		a.WriteMsg(&pmsg.RoomInfoReply{

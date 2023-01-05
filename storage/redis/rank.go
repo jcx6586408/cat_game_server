@@ -35,10 +35,10 @@ var (
 func ConnectReids() {
 	conf = config.Read()
 	Max = int64(conf.Rank.Max)
-
+	println("最大排行数量: ", Max)
 	Rdb = redis.NewClient(&redis.Options{
 		Addr:     conf.Rank.RedisUrl,
-		Password: "",
+		Password: conf.Rank.RedisPassword,
 		DB:       0,
 		PoolSize: 1000,
 	})
@@ -98,7 +98,7 @@ func GetFailTableRank(min, max int) *msg.BackTable {
 func AddRank(key, uid string, score float64) {
 	Rdb.ZAdd(ctx, key, &redis.Z{Score: score, Member: uid})
 	count := Rdb.ZCard(ctx, key)
-	if count.Val() > Max {
+	if count.Val() < Max {
 		Rdb.ZRemRangeByRank(ctx, key, Max, -1)
 	}
 }
@@ -139,9 +139,6 @@ func RankUpdate(c echo.Context) error {
 	r := &msg.Rank{}
 	// 解析body
 	ParseNetBody(r, c.Request().Body)
-	addr := c.RealIP()
-	results, _ := DB.Get_all(addr)
-	r.City = results.City
 	UpdateRank(r.City, r.UID, float64(r.Val))
 	return c.JSON(http.StatusOK, r)
 }
@@ -151,9 +148,10 @@ func RankPull(c echo.Context) error {
 }
 
 func RankCityPull(c echo.Context) error {
-	addr := c.RealIP()
-	results, _ := DB.Get_all(addr)
-	backInfo := GetCityRank(results.City, 0, int64(conf.Rank.CityRankCount))
+	r := &msg.Rank{}
+	// 解析body
+	ParseNetBody(r, c.Request().Body)
+	backInfo := GetCityRank(r.City, 0, int64(conf.Rank.CityRankCount))
 	return c.JSON(http.StatusOK, backInfo)
 }
 
@@ -162,12 +160,10 @@ func GetSelf(c echo.Context) error {
 	// 解析body
 	ParseNetBody(r, c.Request().Body)
 	addr := c.RealIP()
-	results, _ := DB.Get_all(addr)
 	oldR := &msg.Rank{}
 	oldR.WorldRank = GetSelfWorldRank(r.UID)
-	oldR.CityRank = GetSelfCityRank(results.City, r.UID)
-	oldR.City = results.City
-	oldR.Province = results.Region
+	oldR.CityRank = GetSelfCityRank(r.City, r.UID)
+	oldR.Addr = addr
 	return c.JSON(http.StatusOK, oldR)
 }
 

@@ -21,11 +21,11 @@ type UserStorageDB struct {
 }
 
 type UserStorage struct {
-	Uid      string
-	Nickname string
-	Icon     string
-	Online   int
-	Forever  map[string]string
+	Uid      string            `bson:"uid"`
+	Nickname string            `bson:"nickname"`
+	Icon     string            `bson:"icon"`
+	Online   int               `bson:"online"`
+	Forever  map[string]string `bson:"forever"`
 }
 
 var (

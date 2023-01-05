@@ -203,6 +203,7 @@ message RoomInfoReply {
     int32 ToTalTime = 10;       // 答题总时间
     int32 MaxMemeber = 11;
     int32 BattleRoomID = 12;     // 战斗房间ID
+    int32 SceneID = 13;             // 场景ID
 }
 
 message RoomChangeState {

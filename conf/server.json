@@ -2,6 +2,7 @@
     "rank": {
         "Port": ":5200",
         "RedisUrl": "localhost:6379",
+        "RedisPassword": "",
         "worldRankCount": 100,
         "countryRankCount": 100,
         "provinceRankCount": 100,

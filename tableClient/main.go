@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -28,7 +30,34 @@ type Z struct {
 	Member interface{} `json:"Member"`
 }
 
+func GetCityInfo() {
+	host := "http://api01.aliyun.venuscn.com"
+	path := "/ip"
+	url := host + path
+	querys := "ip=218.18.228.178"
+	appcode := "c7adf888186e4ceba75f3841a009b17f"
+	url = url + "?" + querys
+	println("请求路径:", url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		println("============================")
+		panic(err)
+	}
+	req.Header.Add("Authorization", "APPCODE "+appcode)
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		println("============================")
+		panic(err)
+	}
+	body, _ := ioutil.ReadAll(response.Body)
+	println("请求返回：", response.Status, len(body), string(body))
+}
+
 func main() {
+	GetCityInfo()
+}
+
+func Connect() {
 	url := "ws://localhost:3653/" //服务器地址
 	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {

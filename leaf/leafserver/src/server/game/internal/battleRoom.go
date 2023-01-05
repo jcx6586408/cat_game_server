@@ -235,7 +235,7 @@ func (r *BattleRoom) Play() {
 
 	// 转移成员到开始玩
 	r.SetDefaultAnswer() // 设置默认答案
-	r.Send(remotemsg.ROOMSTARTPLAY, nil)
+	r.SendStart()
 	log.Debug("开始比赛: %v|题库数量: %v|答题时间: %v", r.ID, levelConf.QuestionNumber, levelConf.QuestionTime)
 	r.PlayRun()
 }
@@ -249,6 +249,14 @@ func (m *BattleRoom) SendEndPlay() {
 }
 
 func (m *BattleRoom) endjudge() {
+	// 检查是否所有人都死亡
+	if m.CheckAllDead() {
+		// 回归所有成员状态
+		m.SendEndPlay()
+		m.OnPlayEnd()
+		m.Cancel = nil
+		return
+	}
 	if m.LibAnswer == nil || m.LibAnswer.Progress >= m.QuestionCount-1 {
 		log.Debug("答题结束: %v", m.ID)
 		// 回归所有成员状态
@@ -349,6 +357,9 @@ func (m *BattleRoom) foreachMembers(call func(v *pmsg.Member, room Roomer)) {
 func (m *BattleRoom) CheckAllDead() bool {
 	all := true
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
+		if v.State == int32(MEMEBERPREPARE) {
+			return
+		}
 		if !v.IsDead {
 			all = false
 		}
@@ -359,6 +370,9 @@ func (m *BattleRoom) CheckAllDead() bool {
 func (m *BattleRoom) CheckRoomAllDead(room Roomer) bool {
 	all := true
 	for _, v := range room.GetMembers() {
+		if v.State == int32(MEMEBERPREPARE) {
+			continue
+		}
 		if !v.IsDead {
 			all = false
 		}
@@ -430,12 +444,7 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 
 			if room != nil {
 				// 检查房间是否所有人死亡
-				log.Debug("检测所有人死亡的房间ID: %d|%d", room.GetID(), len(room.GetMembers()))
-				for _, subV := range room.GetMembers() {
-					if !subV.IsDead {
-						allDead = false
-					}
-				}
+				allDead = m.CheckRoomAllDead(room)
 				if allDead {
 					log.Debug("发送319消息*****************************************")
 					m.WaitRoomRelive(room, func() {

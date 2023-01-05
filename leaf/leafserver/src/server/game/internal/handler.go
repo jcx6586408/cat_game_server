@@ -14,6 +14,7 @@ import (
 
 func init() {
 	// 数据库连接
+	MongoConnect()
 	// storage.Connect()
 	// redis.ConnectReids()
 	// 模块初始化

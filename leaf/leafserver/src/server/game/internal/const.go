@@ -27,6 +27,7 @@ var (
 	IconLib    []*Icon
 	LevelLib   []*Level
 	AnswerLibs []Answers
+	Scenes     []*Scene
 
 	RoomManager   Managerer
 	manager       *Manager
@@ -68,6 +69,7 @@ func ExcelConfigUpdate() {
 	NamesLib = ToNameLib()
 	IconLib = ToIconLib()
 	LevelLib = ToLevelLib()
+	Scenes = ToSceneLib()
 	Questions = &QuestionLib{
 		QuestionMap:      make(map[int]*Question),
 		Question:         make(map[int][]*Question),

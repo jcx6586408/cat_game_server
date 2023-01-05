@@ -86,6 +86,7 @@ func (m *BattleRoom) AddRobot(count int) {
 			IsMaster: false,
 			IsRobot:  true,
 			SkinID:   int32(skinID),
+			State:    int32(MEMBERPLAYING),
 		})
 	}
 }

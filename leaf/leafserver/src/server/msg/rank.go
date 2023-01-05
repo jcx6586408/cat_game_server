@@ -11,6 +11,7 @@ type Rank struct {
 	CountryShort string
 	Province     string
 	City         string
+	Addr         string
 }
 
 type RankSelfRequest struct {

@@ -94,3 +94,9 @@ type BackTable struct {
 	Arr  []predis.Z
 	Name string
 }
+
+type DataUpdate struct {
+	Uuid  string
+	Key   string
+	Value string
+}

@@ -39,5 +39,6 @@ func rpcCloseAgent(args []interface{}) {
 	delete(Users, guid)
 	delete(AgentUsers, a)
 	manager.OfflineMemeber(guid)
-
+	offlineHanlde(guid)
+	a.Close()
 }
