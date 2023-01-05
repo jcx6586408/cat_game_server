@@ -29,7 +29,7 @@
         "MaxIdle": 5
     },
     "Urls": [
-        "wss://kampfiregames.cn:5100"
+        "https://yinghuo-1.easygame2021.com:5100"
     ],
     "SeverType":"gate"
 }

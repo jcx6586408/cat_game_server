@@ -24,8 +24,8 @@ type Managerer interface {
 	MatchingCancel(roomID int) bool // 取消房间创建
 
 	// 成员处理
-	AddMember(roomID int, member *pmsg.Member) (Roomer, int, error) // 添加成员
-	LeaveMember(roomID int, member Memberer) (Roomer, error)        // 添加成员
+	AddMember(roomID int, member *pmsg.Member) (Roomer, int, error)
+	LeaveMember(roomID int, member Memberer) (Roomer, error)
 
 	AnswerQuestion(a *pmsg.Answer) // 回答问题
 }

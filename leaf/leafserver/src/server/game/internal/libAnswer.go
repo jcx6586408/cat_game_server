@@ -30,7 +30,7 @@ type QuestionLib struct {
 	WinRates         map[int][]float32   // 各个段位对应胜率
 	WinChan          chan int            // 统计管道
 	FailChan         chan int            // 统计管道
-	Done             chan interface{}
+	Done             chan interface{}    // 完成管道
 }
 
 func (q *QuestionLib) Run() {

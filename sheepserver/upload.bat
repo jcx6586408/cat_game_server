@@ -5,3 +5,4 @@ start .\update.bat 2
 start .\update.bat 3
 start .\update.bat 4
 start .\update.bat 5
+start .\update.bat 6

@@ -7,6 +7,9 @@ import (
 )
 
 func loginHandle(member Memberer) {
+	if MD == nil {
+		return
+	}
 	user, ok := Users[member.GetUuid()]
 	if ok {
 		user.Data = &storage.UserStorage{
@@ -29,6 +32,9 @@ func loginHandle(member Memberer) {
 }
 
 func offlineHanlde(uuid string) {
+	if MD == nil {
+		return
+	}
 	user, ok := Users[uuid]
 	if ok {
 		user.Update()

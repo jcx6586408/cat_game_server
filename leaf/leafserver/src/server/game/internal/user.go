@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"storage"
 
 	"github.com/name5566/leaf/db/mongodb"
@@ -20,22 +21,27 @@ var (
 
 	AgentUsers = make(map[gate.Agent]string)
 
-	DBNAME = "sheep"
+	DBNAME string
 
-	COLLECT = "user"
+	COLLECT string
 )
 
 func MongoConnect() {
-	c, err := mongodb.Dial("localhost:27017", 100)
+	c, err := mongodb.Dial(ServerConf.MongoDB.Url, ServerConf.MongoDB.SessionNum)
 	if err != nil {
-		panic(err)
+		return
 	}
 	// c.Close()
+	DBNAME = ServerConf.MongoDB.DB
+	COLLECT = ServerConf.MongoDB.Collection
 	log.Debug("芒果数据库连接成功********************")
 	MD = c
 }
 
 func (u *User) Save() {
+	if MD == nil {
+		return
+	}
 	var s = MD.Ref()
 	var c = s.DB(DBNAME).C(COLLECT)
 	e := c.Insert(u.Data)
@@ -46,6 +52,9 @@ func (u *User) Save() {
 }
 
 func (u *User) Update() error {
+	if MD == nil {
+		return errors.New("")
+	}
 	var s = MD.Ref()
 	var c = s.DB(DBNAME).C(COLLECT)
 	selector := bson.M{"uid": u.Data.Uid}
@@ -59,6 +68,9 @@ func (u *User) Update() error {
 }
 
 func (u *User) UpdateMap(key, value string) {
+	if MD == nil {
+		return
+	}
 	if u.Data.Forever == nil {
 		u.Data.Forever = make(map[string]string)
 	}
@@ -66,6 +78,9 @@ func (u *User) UpdateMap(key, value string) {
 }
 
 func (u *User) Query() (*storage.UserStorage, error) {
+	if MD == nil {
+		return nil, errors.New("")
+	}
 	var s = MD.Ref()
 	var c = s.DB(DBNAME).C(COLLECT)
 	var result *storage.UserStorage

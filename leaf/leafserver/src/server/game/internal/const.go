@@ -36,12 +36,15 @@ var (
 	results       = []string{"A", "B", "C", "D"}
 	RoomConf      *config.RoomConfig
 	Questions     *QuestionLib
-
-	MD *mongodb.DialContext
+	ServerConf    *config.Config
+	MD            *mongodb.DialContext
 )
 
 func ConstInit() {
 	RoomConf = config.ReadRoom()
+	ServerConf = config.Read()
+	// 数据库连接
+	MongoConnect()
 	manager = new(Manager)
 	manager.IDManager = NewIDManager()
 	manager.Pool = sync.Pool{
@@ -106,6 +109,7 @@ func ExcelConfigUpdate() {
 }
 
 func OnExit() {
+	// util.DeepClone(Users)
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGKILL, syscall.SIGINT)
 

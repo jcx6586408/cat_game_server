@@ -13,10 +13,16 @@
         "appid": "wxb5aaac64384fb62d",
         "appSecret": "13ac91bad735351927f6eae6f38432ba"
     },
+    "MongoDB": {
+        "url": "localhost:27017",
+        "SessionNum": 100,
+        "DB": "sheep",
+        "Collection": "user"
+    },
     "DB": {
         "User":"root",
         "Password": "111111",
-        "Host":"127.0.0.1:3306",
+        "Host":"localhost:3306",
         "DB": "user",
         "MinAlive":100,
         "MaxAlive": 400,

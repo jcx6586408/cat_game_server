@@ -75,7 +75,7 @@ func init() {
 	// 表格消息注册
 	Processor.Register(&TableCount{})
 	Processor.Register(&BackTable{})
-
+	Processor.Register(&DataUpdate{})
 }
 
 type WXCode struct {

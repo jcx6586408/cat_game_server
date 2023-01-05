@@ -13,8 +13,6 @@ import (
 )
 
 func init() {
-	// 数据库连接
-	MongoConnect()
 	// storage.Connect()
 	// redis.ConnectReids()
 	// 模块初始化
@@ -42,11 +40,18 @@ func init() {
 	handler(&pmsg.MemberReliveRequest{}, roomMatchMemberRelive)
 	handler(&pmsg.RoomInfoGetRequest{}, roomInfoGet)
 	handler(&msg.TableCount{}, tableCount)
-
+	handler(&msg.DataUpdate{}, dataUpdate)
 }
 
 func handler(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
+}
+
+func dataUpdate(args []interface{}) {
+	req := args[0].(*msg.DataUpdate)
+	// a := args[1].(gate.Agent)
+	u := Users[req.Uuid]
+	u.UpdateMap(req.Key, req.Value)
 }
 
 func tableCount(args []interface{}) {
