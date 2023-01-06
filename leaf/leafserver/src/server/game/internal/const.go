@@ -44,7 +44,7 @@ func ConstInit() {
 	RoomConf = config.ReadRoom()
 	ServerConf = config.Read()
 	// 数据库连接
-	MongoConnect()
+	// MongoConnect()
 	manager = new(Manager)
 	manager.IDManager = NewIDManager()
 	manager.Pool = sync.Pool{

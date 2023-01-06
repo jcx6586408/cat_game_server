@@ -17,6 +17,7 @@ import (
 func main() {
 	println("启动leaf服务器-------------------------------------------------")
 	conf.ConfPath = os.Args[1]
+	conf.Read()
 	config.ConfPath = os.Args[2]
 	config.RoomConfPath = os.Args[3]
 	excel.TablePath = os.Args[4]
@@ -28,7 +29,6 @@ func main() {
 		conf.Server.KeyFile = os.Args[7]
 	}
 	println("配置加载完成-------------------------------------------------")
-	conf.Read()
 	log.Debug("服务器启动配置路径:\r\n %s\r\n %s\r\n %s\r\n %s", conf.ConfPath, config.ConfPath, config.RoomConfPath, excel.TablePath)
 	lconf.LeafServerPath = conf.ConfPath
 	lconf.ServerPath = config.ConfPath

@@ -18,6 +18,7 @@ import (
 
 func main() {
 	conf.ConfPath = os.Args[1]
+	conf.Read()
 	config.ConfPath = os.Args[2]
 	config.RoomConfPath = os.Args[3]
 	excel.TablePath = os.Args[4]
