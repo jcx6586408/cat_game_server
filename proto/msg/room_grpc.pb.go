@@ -59,7 +59,7 @@ func (c *roomClient) Connect(ctx context.Context, in *RoomServerConnectRequest, 
 }
 
 type Room_ConnectClient interface {
-	Recv() (*CreateRoomReply, error)
+	Recv() (*RoomInfoReply, error)
 	grpc.ClientStream
 }
 
@@ -67,8 +67,8 @@ type roomConnectClient struct {
 	grpc.ClientStream
 }
 
-func (x *roomConnectClient) Recv() (*CreateRoomReply, error) {
-	m := new(CreateRoomReply)
+func (x *roomConnectClient) Recv() (*RoomInfoReply, error) {
+	m := new(RoomInfoReply)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func _Room_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
 }
 
 type Room_ConnectServer interface {
-	Send(*CreateRoomReply) error
+	Send(*RoomInfoReply) error
 	grpc.ServerStream
 }
 
@@ -250,7 +250,7 @@ type roomConnectServer struct {
 	grpc.ServerStream
 }
 
-func (x *roomConnectServer) Send(m *CreateRoomReply) error {
+func (x *roomConnectServer) Send(m *RoomInfoReply) error {
 	return x.ServerStream.SendMsg(m)
 }
 

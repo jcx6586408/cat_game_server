@@ -31,5 +31,6 @@
     "Urls": [
         "ws://192.168.50.240:3653"
     ],
+    "gameCenterUrl": "127.0.0.1:5000",
     "SeverType":"gate"
 }
