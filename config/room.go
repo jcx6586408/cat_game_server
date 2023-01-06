@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 )
 
+var RoomConfPath string
+
 type RoomConfig struct {
 	PrepareTime           int // 比赛准备时间
 	AnswerTime            int // 单次回答问题时间
@@ -17,7 +19,7 @@ type RoomConfig struct {
 
 func ReadRoom() *RoomConfig {
 	conf := &RoomConfig{}
-	data, err := ioutil.ReadFile("./conf/room.json")
+	data, err := ioutil.ReadFile(RoomConfPath)
 	if err != nil {
 		panic(err)
 	}

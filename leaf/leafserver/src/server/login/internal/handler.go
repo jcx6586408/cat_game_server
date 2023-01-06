@@ -24,7 +24,6 @@ func init() {
 	handleMsg(&pmsg.RoomPreAddRequest{}, preCreateRoom)
 	handleMsg(&pmsg.RoomInfoGetRequest{}, protobufTest)
 
-	wxConf = config.Read()
 }
 
 func protobufTest(args []interface{}) {

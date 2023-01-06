@@ -18,6 +18,7 @@ var Processor = json.NewProcessor()
 func init() {
 	// 登录消息
 	Processor.Register(&Login{})
+	Processor.Register(&LoginRequest{})
 	// ProbufProcessor.Register(&pmsg.RoomPreAddRequest{})
 	// ProbufProcessor.Register(&pmsg.RoomPreAddReply{})
 	// ProbufProcessor.Register(&pmsg.RoomInfoGetRequest{})
@@ -76,6 +77,8 @@ func init() {
 	Processor.Register(&TableCount{})
 	Processor.Register(&BackTable{})
 	Processor.Register(&DataUpdate{})
+	Processor.Register(&DataRequest{})
+	Processor.Register(&DataReply{})
 }
 
 type WXCode struct {
@@ -98,5 +101,14 @@ type BackTable struct {
 type DataUpdate struct {
 	Uuid  string
 	Key   string
+	Value string
+}
+
+type DataRequest struct {
+	Uuid string
+	Key  string
+}
+
+type DataReply struct {
 	Value string
 }

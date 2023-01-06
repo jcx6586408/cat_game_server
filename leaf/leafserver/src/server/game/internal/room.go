@@ -105,7 +105,6 @@ func (r *Room) AddMember(member *pmsg.Member) bool {
 		return false
 	}
 	log.Debug("加入新成员*************2")
-	loginHandle(member) // 登录处理
 	member.RoomID = int32(r.GetID())
 	member.IsMaster = (r.GetMemberCount() <= 0) // 第一个人设置为房主
 	member.State = int32(MEMEBERPREPARE)

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"config"
 	"leafserver/src/server/base"
 
 	"github.com/name5566/leaf/module"
@@ -18,6 +19,7 @@ type Module struct {
 
 func (m *Module) OnInit() {
 	m.Skeleton = skeleton
+	wxConf = config.Read()
 }
 
 func (m *Module) OnDestroy() {

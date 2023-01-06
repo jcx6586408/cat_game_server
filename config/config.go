@@ -5,6 +5,9 @@ import (
 	"io/ioutil"
 )
 
+var ConfPath string
+var IPLocationPath string
+
 type Config struct {
 	Rank      *Rank    `json:"rank"`      // 排行榜配置
 	Wx        *Wx      `json:"wx"`        // 微信openid配置
@@ -49,7 +52,7 @@ type Rank struct {
 
 func Read() *Config {
 	conf := &Config{}
-	data, err := ioutil.ReadFile("./conf/server.json")
+	data, err := ioutil.ReadFile(ConfPath)
 	if err != nil {
 		panic(err)
 	}

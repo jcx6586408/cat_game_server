@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"config"
 	"io/ioutil"
 	"leafserver/src/server/msg"
 	"net/http"
@@ -13,13 +12,7 @@ import (
 )
 
 func init() {
-	// storage.Connect()
-	// redis.ConnectReids()
-	// 模块初始化
-	RankInit()
-	ConstInit()
-	// RoomManagerInit()
-	wxConf = config.Read()
+
 	// 向当前模块（game 模块）注册 Hello 消息的消息处理函数 handleHello
 	handler(&msg.RankSelfRequest{}, GetSelf)
 	handler(&msg.Rank{}, RankUpdate)
@@ -41,6 +34,8 @@ func init() {
 	handler(&pmsg.RoomInfoGetRequest{}, roomInfoGet)
 	handler(&msg.TableCount{}, tableCount)
 	handler(&msg.DataUpdate{}, dataUpdate)
+	handler(&msg.DataRequest{}, dataRequest)
+	handler(&msg.LoginRequest{}, loginRequst)
 }
 
 func handler(m interface{}, h interface{}) {
@@ -54,6 +49,16 @@ func dataUpdate(args []interface{}) {
 	u.UpdateMap(req.Key, req.Value)
 }
 
+func dataRequest(args []interface{}) {
+	req := args[0].(*msg.DataRequest)
+	a := args[1].(gate.Agent)
+	u := Users[req.Uuid]
+	val := u.GetData(req.Key)
+	a.WriteMsg(&msg.DataReply{
+		Value: val,
+	})
+}
+
 func tableCount(args []interface{}) {
 	req := args[0].(*msg.TableCount)
 	a := args[1].(gate.Agent)
@@ -61,13 +66,11 @@ func tableCount(args []interface{}) {
 	a.WriteMsg(redis.GetFailTableRank(req.Min, req.Max))
 }
 
-var wxConf *config.Config
-
 func login(args []interface{}) {
 	a := args[1].(gate.Agent)
 	wxcode := &msg.WXCode{}
-	resp, _ := http.Get("https://api.weixin.qq.com/sns/jscode2session?appid=" + wxConf.Wx.Appid +
-		"&secret=" + wxConf.Wx.AppSecret +
+	resp, _ := http.Get("https://api.weixin.qq.com/sns/jscode2session?appid=" + ServerConf.Wx.Appid +
+		"&secret=" + ServerConf.Wx.AppSecret +
 		"&js_code=" + wxcode.Code +
 		"&grant_type=authorization_code")
 

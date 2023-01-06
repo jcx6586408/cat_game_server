@@ -18,6 +18,9 @@ type Module struct {
 
 func (m *Module) OnInit() {
 	m.Skeleton = skeleton
+	// 模块初始化
+	RankInit()
+	ConstInit()
 }
 
 func (m *Module) OnDestroy() {

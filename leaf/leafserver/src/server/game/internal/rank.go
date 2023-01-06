@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"config"
 	"errors"
 	"leafserver/src/server/msg"
 	"sort"
@@ -37,7 +38,7 @@ func RankInit() {
 	db, err := ip2location.OpenDB("../../../.././IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
 	if err != nil {
 		// catLog.Log(err)
-		db, err = ip2location.OpenDB("./IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
+		db, err = ip2location.OpenDB(config.IPLocationPath)
 		if err != nil {
 			return
 		}

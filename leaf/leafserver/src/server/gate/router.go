@@ -36,5 +36,7 @@ func init() {
 	msg.Processor.SetRouter(&pmsg.RoomInfoGetRequest{}, game.ChanRPC)     // 房间信息主动获取
 	msg.Processor.SetRouter(&msg.TableCount{}, game.ChanRPC)              // 表格统计注册
 	msg.Processor.SetRouter(&msg.DataUpdate{}, game.ChanRPC)              // 数据存储更新
+	msg.Processor.SetRouter(&msg.DataRequest{}, game.ChanRPC)             // 数据存储更新
+	msg.Processor.SetRouter(&msg.LoginRequest{}, game.ChanRPC)            // 数据存储更新
 
 }

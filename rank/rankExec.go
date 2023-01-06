@@ -1,6 +1,8 @@
 package main
 
 import (
+	"config"
+	"excel"
 	"fmt"
 	"leafserver/src/server/conf"
 	"net/http"
@@ -15,6 +17,17 @@ import (
 )
 
 func main() {
+	conf.ConfPath = os.Args[1]
+	config.ConfPath = os.Args[2]
+	config.RoomConfPath = os.Args[3]
+	excel.TablePath = os.Args[4]
+	rank.IPLocationPath = os.Args[5]
+	if len(os.Args) >= 7 {
+		conf.Server.CertFile = os.Args[6]
+	}
+	if len(os.Args) >= 8 {
+		conf.Server.KeyFile = os.Args[7]
+	}
 	e := echo.New()
 	DefaultCORSConfig := middleware.CORSConfig{
 		Skipper:          nil,

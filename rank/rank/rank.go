@@ -42,13 +42,17 @@ var DB *ip2location.DB
 
 var rankInfo = &RankInfo{}
 
-var Conf = config.Read()
+var Conf *config.Config
+
+var IPLocationPath string
 
 func RankInit() {
+	Conf = config.Read()
+
 	db, err := ip2location.OpenDB("../../../.././IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
 	if err != nil {
 		// catLog.Log(err)
-		db, err = ip2location.OpenDB("./IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
+		db, err = ip2location.OpenDB(IPLocationPath)
 		if err != nil {
 			return
 		}

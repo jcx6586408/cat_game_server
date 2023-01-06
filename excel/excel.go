@@ -45,9 +45,11 @@ func (m *ExcelManager) GetCell(tableName string, attributeName string, line int)
 	return nil
 }
 
+var TablePath string
+
 func Read() *ExcelManager {
 	tableMap := make(map[string]*ExcelConfig)
-	err := filepath.Walk("./table",
+	err := filepath.Walk(TablePath,
 		func(path string, f os.FileInfo, err error) error {
 			if err != nil {
 				return err

@@ -58,7 +58,7 @@ func (u *User) Update() error {
 	var s = MD.Ref()
 	var c = s.DB(DBNAME).C(COLLECT)
 	selector := bson.M{"uid": u.Data.Uid}
-	update := bson.M{"$set": bson.M{"uid": u.Data.Uid, "icon": u.Data.Icon, "nickname": u.Data.Nickname, "online": 1, "forever": u.Data.Forever}}
+	update := bson.M{"$set": bson.M{"uid": u.Data.Uid, "icon": u.Data.Icon, "nickname": u.Data.Nickname, "online": 0, "forever": u.Data.Forever}}
 	if err := c.Update(selector, update); err != nil {
 		MD.UnRef(s)
 		return err
@@ -75,6 +75,14 @@ func (u *User) UpdateMap(key, value string) {
 		u.Data.Forever = make(map[string]string)
 	}
 	u.Data.Forever[key] = value
+}
+
+func (u *User) GetData(key string) string {
+	val, ok := u.Data.Forever[key]
+	if !ok {
+		return ""
+	}
+	return val
 }
 
 func (u *User) Query() (*storage.UserStorage, error) {
