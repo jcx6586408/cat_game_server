@@ -19,6 +19,8 @@ var (
 		MaxConnNum  int
 		ConsolePort int
 		ProfilePath string
+		ListenAddr  string
+		ConnAddrs   []string
 	}
 
 	ConfPath string

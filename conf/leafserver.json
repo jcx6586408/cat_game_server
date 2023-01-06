@@ -5,5 +5,7 @@
 	"WSAddr": ":3653",
 	"HttpAddr": ":5600",
 	"ConsolePort": 3333,
+	"ListenAddr":":5000",
+	"ConnAddrs": ["localhost:5000"],
 	"MaxConnNum": 2000000
 }
