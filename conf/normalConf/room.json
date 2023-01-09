@@ -3,7 +3,7 @@
     "AnswerTime": 15,
     "MaxMember": 48,
     "MaxInvite": 12,
-    "ReliveWaitTime": 6,
+    "ReliveWaitTime": 8,
     "QuestionCountMinLimit": 100,
     "QuestionCountDur": 100
 }

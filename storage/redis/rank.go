@@ -4,6 +4,7 @@ import (
 	"config"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"leafserver/src/server/msg"
@@ -38,16 +39,22 @@ func ConnectReids() {
 	conf = config.Read()
 	Max = int64(conf.Rank.Max)
 	println("最大排行数量: ", Max)
+	fmt.Println("redis连接参数 :", conf.Rank.RedisUrl, conf.Rank.RedisPassword)
 	Rdb = redis.NewClient(&redis.Options{
 		Addr:     conf.Rank.RedisUrl,
 		Password: conf.Rank.RedisPassword,
 		DB:       0,
 		PoolSize: 1000,
 	})
-
+	result, err := Rdb.Ping(ctx).Result()
+	if err != nil {
+		fmt.Println("redis数据库连接错误 :", err)
+		return
+	}
+	println(result)
 	// Rdb = rdb.Pipeline()
 	// Pipe.ZAdd()
-	println("******************redis数据库连接成功******************")
+	fmt.Printf("******************redis数据库连接成功******************")
 	iplocationInit()
 }
 

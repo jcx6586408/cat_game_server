@@ -59,9 +59,18 @@ for /r %sslLocalPath% %%i in (*) do (scp -r %%i %user%@%centerhost%:%sslRemotePa
 for /r %sslLocalPath% %%i in (*) do (scp -r %%i %user%@%gamehost%:%sslRemotePath%)
 
 :keystore
-scp -r  %keyLocalPath%  %user%@%host%:%keyRemotePath%
+@REM scp -r  %keyLocalPath%  %user%@%host%:%keyRemotePath%
 scp -r ./kill.sh %user%@%centerhost%:%remoteBase%
 scp -r ./run.sh %user%@%centerhost%:%remoteBase%
+scp -r ./runLeaf.sh %user%@%centerhost%:%remoteBase%
+scp -r ./runRank.sh %user%@%centerhost%:%remoteBase%
+scp -r ./runCenter.sh %user%@%centerhost%:%remoteBase%
+
+scp -r ./kill.sh %user%@%gamehost%:%remoteBase%
+scp -r ./run.sh %user%@%gamehost%:%remoteBase%
+scp -r ./runLeaf.sh %user%@%gamehost%:%remoteBase%
+scp -r ./runRank.sh %user%@%gamehost%:%remoteBase%
+scp -r ./runCenter.sh %user%@%gamehost%:%remoteBase%
 
 :end
 exit

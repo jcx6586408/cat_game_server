@@ -34,7 +34,7 @@ func MongoConnect() {
 	// c.Close()
 	DBNAME = ServerConf.MongoDB.DB
 	COLLECT = ServerConf.MongoDB.Collection
-	log.Debug("芒果数据库连接成功********************")
+	log.Release("芒果数据库连接成功********************")
 	MD = c
 }
 

@@ -2,7 +2,7 @@
     "rank": {
         "Port": ":5200",
         "RedisUrl": "10.2.0.13:5200",
-        "RedisPassword": "H9w5cV2UEjWMAoRsvpNd",
+        "RedisPassword": "yinghuo@H9w5cV2UEjWMAoRsvpNd",
         "worldRankCount": 100,
         "countryRankCount": 100,
         "provinceRankCount": 100,

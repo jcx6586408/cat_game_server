@@ -99,7 +99,7 @@ func ExcelConfigUpdate() {
 
 	AnswerLibs = []Answers{}
 	AnswerLibs = append(AnswerLibs, ToAnswerLib("question1"))
-	// MongoConnect()  // 数据库连接
+	MongoConnect()  // 数据库连接
 	Questions.Run() // 题库监听
 	log.Debug("段位长度: %d", len(LevelLib))
 	log.Debug("皮肤数量: %v", len(Skins))

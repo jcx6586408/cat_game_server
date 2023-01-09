@@ -135,7 +135,9 @@ func (r *BattleRoom) Relive(uuid string) {
 		for _, v := range room.GetMembers() {
 			if v.Uuid == uuid {
 				if v.IsDead {
+					log.Debug("*************************复活成功**************************%v", uuid)
 					v.IsDead = false
+					v.State = int32(MEMBERPLAYING)
 					if r.LibAnswer == nil {
 						return
 					}
@@ -242,21 +244,16 @@ func (r *BattleRoom) Play() {
 
 func (m *BattleRoom) SendEndPlay() {
 	// 回归所有成员状态
+	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
+		v.State = int32(MEMEBERPREPARE)
+	})
+	m.Send(remotemsg.ROOMENDPLAY, nil)
 	for _, v := range m.Rooms {
 		v.OnEndPlay()
 	}
-	m.Send(remotemsg.ROOMENDPLAY, nil)
 }
 
 func (m *BattleRoom) endjudge() {
-	// 检查是否所有人都死亡
-	if m.CheckAllDead() {
-		// 回归所有成员状态
-		m.SendEndPlay()
-		m.OnPlayEnd()
-		m.Cancel = nil
-		return
-	}
 	if m.LibAnswer == nil || m.LibAnswer.Progress >= m.QuestionCount-1 {
 		log.Debug("答题结束: %v", m.ID)
 		// 回归所有成员状态
@@ -446,13 +443,13 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 				// 检查房间是否所有人死亡
 				allDead = m.CheckRoomAllDead(room)
 				if allDead {
-					log.Debug("发送319消息*****************************************")
 					m.WaitRoomRelive(room, func() {
 
 					}, func() {
 						log.Debug("全员死亡，退出战斗房间, 退出房间ID: %v", room.GetID())
-						m.DeleRoom(room) // 移除房间
+						room.ChangeMemberState(MEMEBERPREPARE)
 						room.Send(remotemsg.ROOMALLFAIL, nil)
+						m.DeleRoom(room) // 移除房间
 					})
 
 				}
@@ -531,7 +528,7 @@ func (m *BattleRoom) WaitRoomRelive(room Roomer, success, fail func()) {
 					success()
 				}
 				return
-			case <-time.After(time.Millisecond * time.Duration(20)):
+			case <-time.After(time.Millisecond * time.Duration(500)):
 				if !m.CheckRoomAllDead(room) {
 					cancel()
 				}
@@ -554,7 +551,7 @@ func (m *BattleRoom) WaitRelive(success, fail func()) {
 					success()
 				}
 				return
-			case <-time.After(time.Millisecond * time.Duration(20)):
+			case <-time.After(time.Millisecond * time.Duration(500)):
 				if !m.CheckAllDead() {
 					cancel()
 				}

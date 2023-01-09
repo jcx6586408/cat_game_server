@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	println("启动leaf服务器-------------------------------------------------")
+	log.Release("启动leaf服务器-------------------------------------------------")
 	conf.ConfPath = os.Args[1]
 	conf.Read()
 	config.ConfPath = os.Args[2]
@@ -28,8 +28,8 @@ func main() {
 	if len(os.Args) >= 8 {
 		conf.Server.KeyFile = os.Args[7]
 	}
-	println("配置加载完成-------------------------------------------------")
-	log.Debug("服务器启动配置路径:\r\n %s\r\n %s\r\n %s\r\n %s", conf.ConfPath, config.ConfPath, config.RoomConfPath, excel.TablePath)
+	log.Release("配置加载完成-------------------------------------------------")
+	log.Release("服务器启动配置路径:\r\n %s\r\n %s\r\n %s\r\n %s", conf.ConfPath, config.ConfPath, config.RoomConfPath, excel.TablePath)
 	lconf.LeafServerPath = conf.ConfPath
 	lconf.ServerPath = config.ConfPath
 	lconf.RoomPath = config.RoomConfPath

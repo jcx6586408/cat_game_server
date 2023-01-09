@@ -179,5 +179,7 @@ func (m *Room) Answer(a *pmsg.Answer) {
 func (m *Room) Relive(uuid string) {
 	if m.BattleRoom != nil {
 		m.BattleRoom.Relive(uuid)
+	} else {
+		log.Debug("战斗房间为, 复活失败, 战斗房间ID")
 	}
 }

@@ -114,6 +114,7 @@ func (m *BattleRoom) Send(msgID int, change *pmsg.Member) {
 }
 
 func (m *BattleRoom) SendStart() {
+	sceneID := RandScene(Scenes).ID
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
 		a.WriteMsg(&pmsg.RoomInfoReply{
 			RoomID:         int32(room.GetID()),
@@ -128,7 +129,7 @@ func (m *BattleRoom) SendStart() {
 			ToTalTime:      int32(m.GetPlayTime()),
 			MaxMemeber:     int32(m.Max),
 			BattleRoomID:   int32(m.ID),
-			SceneID:        int32(RandScene(Scenes).ID),
+			SceneID:        int32(sceneID),
 		})
 	})
 }
