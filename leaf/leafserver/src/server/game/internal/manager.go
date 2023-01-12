@@ -128,6 +128,42 @@ func (m *Manager) LeaveMember(roomID int, member Memberer) (Roomer, error) {
 	return nil, errors.New("")
 }
 
+func (m *Manager) MemberReady(roomID int, uuid string) (Roomer, error) {
+	for _, v := range m.Rooms {
+		if v.GetID() == roomID {
+			bo := v.MemberReady(uuid)
+			if !bo {
+				return nil, errors.New("")
+			}
+			return v, nil
+		}
+	}
+	return nil, errors.New("")
+}
+
+func (m *Manager) MemberReadyCancel(roomID int, uuid string) (Roomer, error) {
+	for _, v := range m.Rooms {
+		if v.GetID() == roomID {
+			bo := v.MemberReadyCancel(uuid)
+			if !bo {
+				return nil, errors.New("")
+			}
+			return v, nil
+		}
+	}
+	return nil, errors.New("")
+}
+
+func (m *Manager) MemberLevelChange(roomID int, level int32, uuid string) (Roomer, error) {
+	for _, v := range m.Rooms {
+		if v.GetID() == roomID {
+			v.MemberLevelChange(uuid, level)
+			return v, nil
+		}
+	}
+	return nil, errors.New("")
+}
+
 func (m *Manager) OfflineMemeber(uuid string) {
 	for _, v := range m.Rooms {
 		v.OfflinHanlder(uuid)

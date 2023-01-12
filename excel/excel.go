@@ -112,7 +112,7 @@ func Read() *ExcelManager {
 								v, err := strconv.Atoi(s)
 								if err != nil {
 									println("整型", sheetName, v, s, attributeNames[j])
-									panic("字段解析错误")
+									panic("整型字段解析错误")
 								}
 								sMap[attributeNames[j]] = v
 								aMap = append(aMap, v)
@@ -120,7 +120,7 @@ func Read() *ExcelManager {
 								v, err := strconv.ParseFloat(s, 64)
 								if err != nil {
 									println("浮点型", sheetName, v)
-									panic("字段解析错误")
+									panic("浮点型字段解析错误")
 								}
 
 								sMap[attributeNames[j]] = v

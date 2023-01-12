@@ -19,15 +19,20 @@ var (
 	ROOMNULL    = 2 // 没找到对应得房间
 	ROOMSTARTED = 3 // 房间已经开始游戏
 
-	MEMEBERPREPARE = 1 // 成员正在等待
-	MEMBERPLAYING  = 2 // 成员正在游玩
+	MEMEBERPREPARE     = 1 // 成员正在等待
+	MEMBERPLAYING      = 2 // 成员正在游玩
+	MEMEBENONERPREPARE = 3 // 成员未准备
+	MEMBERMATCHING     = 4 // 成员匹配
 
-	Skins      []*Skin
-	NamesLib   []*Names
-	IconLib    []*Icon
-	LevelLib   []*Level
-	AnswerLibs []Answers
-	Scenes     []*Scene
+	MATCHINGTIME = 5 // 匹配最长时间
+
+	Skins            []*Skin
+	NamesLib         []*Names
+	IconLib          []*Icon
+	LevelLib         []*Level
+	AnswerLibs       []Answers // 标准题库
+	LowestAnswerLibs Answers   // 文盲题库
+	Scenes           []*Scene
 
 	RoomManager   Managerer
 	manager       *Manager
@@ -38,6 +43,7 @@ var (
 	Questions     *QuestionLib
 	ServerConf    *config.Config
 	MD            *mongodb.DialContext
+	MAX           int // 最大段位等级
 )
 
 func ConstInit() {
@@ -88,6 +94,7 @@ func ExcelConfigUpdate() {
 	})
 
 	for i, v := range LevelLib {
+		log.Debug("段位等级: ", i+1)
 		Questions.PhaseQuestionLib[i+1] = v.AnswerPhase
 		rates := []float32{}
 		for _, ran := range v.WinRate {
@@ -96,16 +103,19 @@ func ExcelConfigUpdate() {
 		Questions.WinRates[i+1] = rates
 		Questions.Question[i+1] = make([]*Question, 0)
 	}
-
+	MAX = len(LevelLib)
 	AnswerLibs = []Answers{}
 	AnswerLibs = append(AnswerLibs, ToAnswerLib("question1"))
+	LowestAnswerLibs = ToBaseAnswerLib("question0", nil)
+	log.Debug("新手题库数量: %v", len(LowestAnswerLibs))
+	log.Debug("标准题库数量: %v", len(AnswerLibs[0]))
 	MongoConnect()  // 数据库连接
 	Questions.Run() // 题库监听
 	log.Debug("段位长度: %d", len(LevelLib))
 	log.Debug("皮肤数量: %v", len(Skins))
 	log.Debug("名字数量: %v", len(NamesLib))
 	log.Debug("Icon数量: %v", len(IconLib))
-	OnExit()
+	// OnExit()
 }
 
 func OnExit() {

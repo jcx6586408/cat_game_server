@@ -155,7 +155,7 @@ func (r *BattleRoom) GetPlayingMembers() []*pmsg.Member {
 	var members = []*pmsg.Member{}
 	for _, room := range r.Rooms {
 		for _, v := range room.GetMembers() {
-			if v.State == int32(MEMBERPLAYING) {
+			if v.State == int32(MEMBERPLAYING) || v.State == int32(MEMBERMATCHING) {
 				members = append(members, v)
 			}
 		}
@@ -222,14 +222,18 @@ func (r *BattleRoom) Play() {
 	r.isStart = true
 	battleManager.Play(r)
 	// 设置所有成员状态为游玩
-	for _, v := range r.Rooms {
-		v.ChangeMemberState(MEMBERPLAYING)
-	}
+	r.foreachMembers(func(v *pmsg.Member, room Roomer) {
+		// 未准备成员跳过
+		if v.State == int32(MEMEBENONERPREPARE) {
+			return
+		}
+		v.State = int32(MEMBERPLAYING)
+	})
 
 	// 获取题库
-	var max = r.GetMaxLevel()
-	l := GetIDByLevel(max)
-	var levelConf = LevelLib[l-1]
+	var max = r.GetMaxLevel()     // 获得最高等级
+	l := GetIDByLevel(max)        // 获得段位
+	var levelConf = LevelLib[l-1] // 获得段位配置
 	r.LibAnswer = Questions.RandAnswerLib(l, levelConf.QuestionNumber)
 	r.AnswerTime = levelConf.QuestionTime
 	log.Debug("%s", r.LibAnswer.ToString())
@@ -245,9 +249,12 @@ func (r *BattleRoom) Play() {
 func (m *BattleRoom) SendEndPlay() {
 	// 回归所有成员状态
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
+		if v.State == int32(MEMEBENONERPREPARE) {
+			return
+		}
 		v.State = int32(MEMEBERPREPARE)
 	})
-	m.Send(remotemsg.ROOMENDPLAY, nil)
+	m.SendEnd()
 	for _, v := range m.Rooms {
 		v.OnEndPlay()
 	}
@@ -380,6 +387,7 @@ func (m *BattleRoom) CheckRoomAllDead(room Roomer) bool {
 func (m *BattleRoom) GetMaxLevel() int {
 	var i = 1
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
+		log.Debug("玩家等级: %v|%v", v.Level, v.Uuid)
 		if v.Level > int32(i) {
 			i = int(v.Level)
 		}
@@ -388,6 +396,7 @@ func (m *BattleRoom) GetMaxLevel() int {
 		log.Debug("非法段位0**********************")
 		i = 1
 	}
+	log.Debug("最后采用等级: %v", i)
 	return i
 }
 
@@ -408,15 +417,15 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			return
 		}
 		playerAnswer := v.Answer[m.LibAnswer.Progress]
-		// tip := ""
-		// if q == playerAnswer.Result {
-		// 	tip = "true---------------"
-		// }
-		// if v.IsMaster {
-		// 	log.Debug("房主***玩家uuid %v: 第%v题,  正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
-		// } else {
-		// 	log.Debug("玩家uuid %v: 第%v题, 正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
-		// }
+		tip := ""
+		if q == playerAnswer.Result {
+			tip = "true---------------"
+		}
+		if v.IsMaster {
+			log.Debug("房主***玩家uuid %v: 第%v题,  正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
+		} else {
+			log.Debug("玩家uuid %v: 第%v题, 正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
+		}
 		right := (q == playerAnswer.Result)
 		if right {
 			allWrong = false
@@ -447,7 +456,7 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 
 					}, func() {
 						log.Debug("全员死亡，退出战斗房间, 退出房间ID: %v", room.GetID())
-						room.ChangeMemberState(MEMEBERPREPARE)
+						room.ResetToPrepare()
 						room.Send(remotemsg.ROOMALLFAIL, nil)
 						m.DeleRoom(room) // 移除房间
 					})

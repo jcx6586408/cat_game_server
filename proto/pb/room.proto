@@ -77,6 +77,13 @@ message MemberReliveReply {
     Answer Answer = 2;  
 }
 
+// 等级变更消息
+message MemberLevelChange {
+    string Uuid = 1;
+    int32 RoomID = 2;
+    int32 Level = 3;
+}
+
 
 //-----------------成员匹配---------------------
 message MatchMemberRequest {
@@ -164,13 +171,28 @@ message Question {
     string AnswerD = 6;     // 答案D
     string RightAnswer = 7; // 正确答案
     string table = 8;       // 表
+    int32 RightNumber = 9;  // 正确统计
+    int32 WrongNumber = 10; // 错误统计
 }
 
 message MemberRequest {
     string Uuid = 1;            // 用户服务端uuid
-    int32 RoomID = 11;          // 房间ID
-    int32 BattleRoomID = 12;    // 战斗房间ID
+    int32 RoomID = 2;          // 房间ID
+    int32 BattleRoomID = 3;    // 战斗房间ID
 }
+
+// 准备
+message MemberReadyRequest {
+    string Uuid = 1;            // 用户服务端uuid
+    int32 RoomID = 2;          // 房间ID
+}
+
+// 取消准备
+message MemberReadyCancelRequest {
+    string Uuid = 1;            // 用户服务端uuid
+    int32 RoomID = 2;          // 房间ID
+}
+
 
 //-----------------成员---------------------
 message Member {

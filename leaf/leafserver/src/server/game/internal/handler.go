@@ -6,7 +6,7 @@ import (
 	"net/http"
 	pmsg "proto/msg"
 	"reflect"
-	"storage/redis"
+	"sort"
 
 	"github.com/name5566/leaf/gate"
 )
@@ -29,9 +29,12 @@ func init() {
 	handler(&pmsg.MatchMemberRequest{}, roomMatchMember)
 	handler(&pmsg.MatchRoomCancelRequest{}, roomMatchCanel)
 	handler(&pmsg.MatchMemberCancelRequest{}, roomMatchMemberCanel)
+	handler(&pmsg.MemberReadyRequest{}, roomMemberReady)
+	handler(&pmsg.MemberReadyCancelRequest{}, roomMemberReadyCancel)
 	handler(&msg.RoomStartPlay{}, roomStartPlay)
 	handler(&pmsg.MemberReliveRequest{}, roomMatchMemberRelive)
 	handler(&pmsg.RoomInfoGetRequest{}, roomInfoGet)
+	handler(&pmsg.MemberLevelChange{}, roomMemberLevelChange)
 	handler(&msg.TableCount{}, tableCount)
 	handler(&msg.DataUpdate{}, dataUpdate)
 	handler(&msg.DataRequest{}, dataRequest)
@@ -62,8 +65,25 @@ func dataRequest(args []interface{}) {
 func tableCount(args []interface{}) {
 	req := args[0].(*msg.TableCount)
 	a := args[1].(gate.Agent)
-	a.WriteMsg(redis.GetWinTableRank(req.Min, req.Max))
-	a.WriteMsg(redis.GetFailTableRank(req.Min, req.Max))
+	back := &msg.TableGet{Questions: []*msg.QuestionCount{}}
+	total := []*msg.QuestionCount{}
+	for _, v := range Questions.QuestionMap {
+		total = append(total, &msg.QuestionCount{ID: int(v.Q.ID), Win: v.win, Fail: v.fail})
+	}
+	sort.Slice(total, func(i, j int) bool {
+		return total[i].ID > total[j].ID
+	})
+	if req.Min >= len(total) {
+		a.WriteMsg(back)
+		return
+	}
+	if req.Max >= len(total) {
+		back.Questions = total[req.Min:]
+		a.WriteMsg(back)
+		return
+	}
+	back.Questions = total[req.Min:req.Max]
+	a.WriteMsg(back)
 }
 
 func login(args []interface{}) {

@@ -11,10 +11,12 @@ type Level struct {
 	QuestionTime   int   // 答题时间
 	WinRate        []int // 胜率
 	AnswerPhase    []int // 对应题库
+	RightNumber    int   // 正确数量
+	WrongNumber    int   // 错误数量
 }
 
 func ToLevelLib() []*Level {
-	tableConf, ok := manager.TableManager.GetTable("level")
+	tableConf, ok := manager.TableManager.GetTable("Rank")
 	arr := []*Level{}
 	if ok {
 		for _, cell := range tableConf.Excel {
@@ -51,4 +53,14 @@ func GetIDByLevel(level int) int {
 		}
 	}
 	return LevelLib[len(LevelLib)-1].ID
+}
+
+func GetMaxLevel() int {
+	max := 1
+	for _, v := range LevelLib {
+		if v.Level > max {
+			max = v.Level
+		}
+	}
+	return max
 }

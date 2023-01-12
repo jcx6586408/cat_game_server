@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"leafserver/src/server/msg"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -54,7 +54,11 @@ func GetCityInfo() {
 }
 
 func main() {
-	GetCityInfo()
+	Connect()
+}
+
+type BackNew struct {
+	TableGet *msg.TableGet
 }
 
 func Connect() {
@@ -63,7 +67,9 @@ func Connect() {
 	if err != nil {
 		log.Fatal("%v", err)
 	}
-	url = os.Args[1]
+	if len(os.Args) > 1 {
+		url = os.Args[1]
+	}
 	min, _ := strconv.Atoi(os.Args[2])
 	max, _ := strconv.Atoi(os.Args[3])
 
@@ -78,33 +84,35 @@ func Connect() {
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGKILL, syscall.SIGINT)
-
+	count := 0
 	go func() {
 		for {
 			_, data, err := ws.ReadMessage()
 			if err != nil {
 				log.Fatal("%v", err)
 			}
-			tableData := &Back{}
+			tableData := &BackNew{}
 			err = json.Unmarshal(data, tableData)
 			if err != nil {
 				panic("解析json文件出错")
 			}
-			log.Debug("receive: %v", string(data))
-			if tableData.BackTable != nil {
-				log.Debug("数组长度: %d", len(tableData.BackTable.Arr))
+			log.Debug("返回数据: %v", tableData)
+			if tableData.TableGet != nil {
+				log.Debug("数组长度: %d", len(tableData.TableGet.Questions))
 				excelData := [][]string{}
-				for _, v := range tableData.BackTable.Arr {
-					log.Debug("%v|%v", v.Member, v.Score)
-					str := strings.Split(fmt.Sprintf("%v", v.Member), "_")
-					subData := []string{str[0], str[1], fmt.Sprintf("%v", v.Score)}
+				for _, v := range tableData.TableGet.Questions {
+					// str := strings.Split(fmt.Sprintf("%v", v.Member), "_")
+					subData := []string{fmt.Sprintf("%v", v.ID), fmt.Sprintf("%v", v.Win), fmt.Sprintf("%v", v.Fail)}
 					excelData = append(excelData, subData)
 				}
-				CreateXlS(excelData, tableData.BackTable.Name, []string{"tableName", "questionID", "count"})
-				if tableData.BackTable.Name == "fail" {
-					os.Exit(2)
-					return
+				if len(tableData.TableGet.Questions) > 0 {
+					log.Debug("写入表格==============")
+					CreateXlS(excelData, os.Args[4], []string{"ID", "rightNumber", "wrongNumber"})
+					log.Debug("写入表格==============完成")
 				}
+				count++
+				ws.Close()
+				os.Exit(2)
 			}
 		}
 	}()

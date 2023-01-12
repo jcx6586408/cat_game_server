@@ -24,9 +24,6 @@ func ToSkinLib() []*Skin {
 					obj.Picture = cell[index].(string)
 				case "group":
 					obj.Group = cell[index].(string)
-				case "method":
-					obj.Method = cell[index].(int)
-
 				}
 			}
 			arr = append(arr, obj)

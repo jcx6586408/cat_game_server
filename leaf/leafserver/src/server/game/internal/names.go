@@ -38,7 +38,7 @@ func RandName(count int, arr []*Names) []*Names {
 	}
 
 	// 长度不够则补充
-	if count >= length {
+	if count >= length && len(arr) > 0 {
 		for i := 0; i < count; i++ {
 			arr = append(arr, arr[0])
 		}

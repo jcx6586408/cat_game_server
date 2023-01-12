@@ -167,6 +167,10 @@ type WXCode struct {
 	Code string
 }
 
+type OpenID struct {
+	Openid string `json:"openid"`
+}
+
 func GetOpenID(c echo.Context) error {
 	wxcode := &WXCode{}
 	ParseNetBody(wxcode, c.Request().Body)
@@ -178,9 +182,10 @@ func GetOpenID(c echo.Context) error {
 		return c.String(http.StatusOK, "")
 	}
 	defer resp.Body.Close()
-
 	body, _ := ioutil.ReadAll(resp.Body)
-	return c.String(http.StatusOK, string(body))
+	openid := &OpenID{}
+	json.Unmarshal(body, openid)
+	return c.JSON(http.StatusOK, openid)
 }
 
 func ParseNetBody(i interface{}, r io.ReadCloser) {

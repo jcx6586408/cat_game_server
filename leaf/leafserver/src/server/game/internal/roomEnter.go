@@ -92,6 +92,30 @@ func roomMatchMember(args []interface{}) {
 	room.Send(remotemsg.ROOMMATCH, nil)
 }
 
+func roomMemberReady(args []interface{}) {
+	req := args[0].(*pmsg.MemberReadyRequest)
+	log.Debug("房间个人准备消息----------------------------------%v", req.Uuid)
+	room, err := manager.MemberReady(int(req.RoomID), req.Uuid)
+	if err == nil {
+		room.Send(remotemsg.ROOMMEMBERSTATE, nil)
+	}
+}
+
+func roomMemberReadyCancel(args []interface{}) {
+	req := args[0].(*pmsg.MemberReadyCancelRequest)
+	log.Debug("房间个人取消准备消息----------------------------------%v", req.Uuid)
+	room, err := manager.MemberReadyCancel(int(req.RoomID), req.Uuid)
+	if err == nil {
+		room.Send(remotemsg.ROOMMEMBERSTATE, nil)
+	}
+}
+
+func roomMemberLevelChange(args []interface{}) {
+	req := args[0].(*pmsg.MemberLevelChange)
+	log.Debug("房间个人等级改变消息----------------------------------%v", req.Uuid)
+	manager.MemberLevelChange(int(req.RoomID), req.Level, req.Uuid)
+}
+
 // 房间匹配取消
 func roomMatchCanel(args []interface{}) {
 	req := args[0].(*pmsg.MatchRoomCancelRequest)

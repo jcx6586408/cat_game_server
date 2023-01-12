@@ -10,8 +10,8 @@
         "Max": 1000   
     },
     "wx": {
-        "appid": "wxb5aaac64384fb62d",
-        "appSecret": "13ac91bad735351927f6eae6f38432ba"
+        "appid": "wx43aafb42439d77c9",
+        "appSecret": "f7f441021fad14b4fd4f37a131c855e4"
     },
     "MongoDB": {
         "url": "localhost:27017",

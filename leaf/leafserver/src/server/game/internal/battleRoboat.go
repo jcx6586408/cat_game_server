@@ -14,7 +14,7 @@ import (
 
 // 匹配加入机器人
 func (m *BattleRoom) matching() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(5))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(MATCHINGTIME))
 	m.MatchCancel = cancel
 	cur := 0
 	skeleton.Go(func() {
@@ -48,10 +48,26 @@ func (m *BattleRoom) matching() {
 					cancel()
 				}
 				cur++
-				if cur <= 5 {
-					m.AddRandomCountRobots(4, 7, func() { cancel() })
-				} else {
-					m.AddRandomCountRobots(1, 3, func() { cancel() })
+				if cur <= MATCHINGTIME {
+					switch cur {
+					case 1:
+						if m.GetMemberCount() <= 20 {
+							m.AddRandomCountRobots(4, 8, func() { cancel() })
+						}
+					case 2:
+						if m.GetMemberCount() <= 20 {
+							m.AddRandomCountRobots(4, 8, func() { cancel() })
+						}
+					case 3:
+						if m.GetMemberCount() <= 30 {
+							m.AddRandomCountRobots(4, 6, func() { cancel() })
+						}
+					case 4:
+						if m.GetMemberCount() <= 30 {
+							m.AddRandomCountRobots(4, 6, func() { cancel() })
+						}
+					}
+
 				}
 			}
 		}

@@ -29,7 +29,14 @@ func main() {
 		conf.Server.KeyFile = os.Args[7]
 	}
 	log.Release("配置加载完成-------------------------------------------------")
-	log.Release("服务器启动配置路径:\r\n %s\r\n %s\r\n %s\r\n %s", conf.ConfPath, config.ConfPath, config.RoomConfPath, excel.TablePath)
+	log.Release("服务器启动配置路径:\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n",
+		conf.ConfPath,
+		config.ConfPath,
+		config.RoomConfPath,
+		excel.TablePath,
+		config.IPLocationPath,
+		conf.Server.CertFile,
+		conf.Server.KeyFile)
 	lconf.LeafServerPath = conf.ConfPath
 	lconf.ServerPath = config.ConfPath
 	lconf.RoomPath = config.RoomConfPath

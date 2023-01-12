@@ -21,13 +21,17 @@ func init() {
 	// msg.ProbufProcessor.SetRouter(&pmsg.RoomInfoGetRequest{}, login.ChanRPC)
 
 	// 房间创建消息
-	msg.Processor.SetRouter(&pmsg.RoomPreAddRequest{}, login.ChanRPC)     // 房间预创建
-	msg.Processor.SetRouter(&pmsg.CreateRoomRequest{}, game.ChanRPC)      // 房间创建
-	msg.Processor.SetRouter(&msg.RoomStartPlay{}, game.ChanRPC)           // 房间主动开始游戏
-	msg.Processor.SetRouter(&pmsg.AddRequest{}, game.ChanRPC)             // 加入房间注册
-	msg.Processor.SetRouter(&pmsg.LeaveRequest{}, game.ChanRPC)           // 离开房间注册
-	msg.Processor.SetRouter(&pmsg.MatchRoomRequest{}, game.ChanRPC)       // 房间匹配请求
-	msg.Processor.SetRouter(&pmsg.MatchMemberRequest{}, game.ChanRPC)     // 成员匹配请求
+	msg.Processor.SetRouter(&pmsg.RoomPreAddRequest{}, login.ChanRPC) // 房间预创建
+	msg.Processor.SetRouter(&pmsg.CreateRoomRequest{}, game.ChanRPC)  // 房间创建
+	msg.Processor.SetRouter(&msg.RoomStartPlay{}, game.ChanRPC)       // 房间主动开始游戏
+	msg.Processor.SetRouter(&pmsg.AddRequest{}, game.ChanRPC)         // 加入房间注册
+	msg.Processor.SetRouter(&pmsg.LeaveRequest{}, game.ChanRPC)       // 离开房间注册
+	msg.Processor.SetRouter(&pmsg.MatchRoomRequest{}, game.ChanRPC)   // 房间匹配请求
+	msg.Processor.SetRouter(&pmsg.MatchMemberRequest{}, game.ChanRPC) // 成员匹配请求
+
+	msg.Processor.SetRouter(&pmsg.MemberReadyRequest{}, game.ChanRPC)       // 房间准备请求
+	msg.Processor.SetRouter(&pmsg.MemberReadyCancelRequest{}, game.ChanRPC) // 成员取消准备请求
+
 	msg.Processor.SetRouter(&pmsg.MatchRoomCancelRequest{}, game.ChanRPC) // 成员匹配请求
 	msg.Processor.SetRouter(&pmsg.Answer{}, game.ChanRPC)                 // 回答问题请求注册
 	msg.Processor.SetRouter(&pmsg.OverRequest{}, game.ChanRPC)            // 房间解散注册
@@ -38,5 +42,7 @@ func init() {
 	msg.Processor.SetRouter(&msg.DataUpdate{}, game.ChanRPC)              // 数据存储更新
 	msg.Processor.SetRouter(&msg.DataRequest{}, game.ChanRPC)             // 数据存储更新
 	msg.Processor.SetRouter(&msg.LoginRequest{}, game.ChanRPC)            // 数据存储更新
+
+	msg.Processor.SetRouter(&pmsg.MemberLevelChange{}, game.ChanRPC) // 等级改变消息
 
 }

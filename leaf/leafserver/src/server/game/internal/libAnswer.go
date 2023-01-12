@@ -82,7 +82,7 @@ func GetAnswerLib() Answers {
 	return AnswerLibs[ran]
 }
 
-func ToAnswerLib(table string) Answers {
+func ToBaseAnswerLib(table string, callback func(obj *pmsg.Question)) Answers {
 	tableConf, ok := manager.TableManager.GetTable(table)
 	arr := []*pmsg.Question{}
 	if ok {
@@ -113,27 +113,42 @@ func ToAnswerLib(table string) Answers {
 					default:
 						log.Error("%v|%v|%v非法答案, %v", table, obj.ID, obj.Question, obj.RightAnswer)
 					}
+				case "rightNumber":
+					obj.RightNumber = int32(cell[index].(int))
+				case "wrongNumber":
+					obj.WrongNumber = int32(cell[index].(int))
 				}
 			}
 			arr = append(arr, obj)
-			q := &Question{
-				Q: obj,
-			}
-			Questions.QuestionMap[int(obj.ID)] = q
-			subA, ok := Questions.Question[1]
-			if !ok {
-				subA = make([]*Question, 0)
-				subA = append(subA, q)
-				Questions.Question[1] = subA
-			} else {
-				Questions.Question[1] = append(Questions.Question[1], q)
+			if callback != nil {
+				callback(obj)
 			}
 		}
 	}
 	return arr
 }
 
+func ToAnswerLib(table string) Answers {
+	return ToBaseAnswerLib(table, func(obj *pmsg.Question) {
+		q := &Question{
+			Q:    obj,
+			win:  int(obj.RightNumber),
+			fail: int(obj.WrongNumber),
+		}
+		Questions.QuestionMap[int(obj.ID)] = q
+		subA, ok := Questions.Question[1]
+		if !ok {
+			subA = make([]*Question, 0)
+			subA = append(subA, q)
+			Questions.Question[1] = subA // 初始默认设置为段位1的题库
+		} else {
+			Questions.Question[1] = append(Questions.Question[1], q)
+		}
+	})
+}
+
 func RandAnswerLib(count int, arr []*pmsg.Question) *LibAnswer {
+	log.Debug("-------------------随机题库长度: %v", len(arr))
 	// 获得其实随机数
 	startIndex := 0
 	length := len(arr)
@@ -142,7 +157,7 @@ func RandAnswerLib(count int, arr []*pmsg.Question) *LibAnswer {
 	}
 
 	// 长度不够则补充
-	if count >= length {
+	if count >= length && len(arr) > 0 {
 		for i := 0; i < count; i++ {
 			arr = append(arr, arr[0])
 		}
@@ -158,6 +173,12 @@ func RandAnswerLib(count int, arr []*pmsg.Question) *LibAnswer {
 }
 
 func (m *QuestionLib) RandAnswerLib(l, count int) *LibAnswer {
+	log.Debug("传入进来的等级: %v", l)
+	if l == 1 {
+		log.Debug("新手题库----------------------------")
+		return RandAnswerLib(count, LowestAnswerLibs)
+	}
+	log.Debug("正规题库----------------------------")
 	var lib = m.GetQuestions(l, count)
 	return RandAnswerLib(count, lib)
 }
@@ -182,7 +203,6 @@ func (m *QuestionLib) _getQuestions(id int, usedids []int) ([]*pmsg.Question, []
 			}
 		}
 	}
-
 	return arr, ids
 }
 
@@ -199,10 +219,10 @@ func (m *QuestionLib) GetQuestions(id, total int) []*pmsg.Question {
 			ARR = append(ARR, sub...)
 			count--
 			if count < 0 {
-				count = 12
+				count = MAX
 			}
 			c++
-			if c >= 12 {
+			if c >= MAX {
 				break
 			}
 		} else {
@@ -216,6 +236,7 @@ func (m *QuestionLib) WinCount(id int) {
 	q, ok := m.QuestionMap[id]
 	if ok {
 		q.win++
+		q.Q.WrongNumber++
 		m.updateLib(q)
 	}
 }
@@ -224,6 +245,7 @@ func (m *QuestionLib) FailCount(id int) {
 	q, ok := m.QuestionMap[id]
 	if ok {
 		q.fail++
+		q.Q.WrongNumber++
 		m.updateLib(q)
 	}
 }

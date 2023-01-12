@@ -36,4 +36,5 @@ const (
 	ROOMGET               = 317 // 主动请求房间信息
 	ROOMANSWERSTART       = 318 // 单次答题开始
 	ROOMALLFAIL           = 319 // 该房间所有人都失败了
+	ROOMMEMBERSTATE       = 320 // 该房间所有人状态
 )

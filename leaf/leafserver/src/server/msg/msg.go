@@ -57,6 +57,9 @@ func init() {
 	Processor.Register(&pmsg.MatchMemberRequest{}) // 成员匹配请求
 	Processor.Register(&pmsg.MatchMemberReply{})   // 成员匹配请求回复
 
+	Processor.Register(&pmsg.MemberReadyRequest{})       // 成员准备请求
+	Processor.Register(&pmsg.MemberReadyCancelRequest{}) // 成员准备取消请求回复
+
 	Processor.Register(&pmsg.MatchRoomCancelRequest{}) // 房间匹配取请求
 	Processor.Register(&pmsg.MatchRoomCancelReply{})   // 房间匹配取消请求回复
 
@@ -73,12 +76,15 @@ func init() {
 	Processor.Register(&WXcodeReply{})        // 微信请求
 	Processor.Register(&pmsg.RoomAddFail{})   // 房间加入失败返回
 
+	Processor.Register(&pmsg.MemberLevelChange{}) // 房间加入失败返回
+
 	// 表格消息注册
 	Processor.Register(&TableCount{})
 	Processor.Register(&BackTable{})
 	Processor.Register(&DataUpdate{})
 	Processor.Register(&DataRequest{})
 	Processor.Register(&DataReply{})
+	Processor.Register(&TableGet{})
 }
 
 type WXCode struct {
@@ -93,6 +99,17 @@ type TableCount struct {
 	Min int
 	Max int
 }
+
+type TableGet struct {
+	Questions []*QuestionCount
+}
+
+type QuestionCount struct {
+	ID   int
+	Win  int
+	Fail int
+}
+
 type BackTable struct {
 	Arr  []predis.Z
 	Name string
