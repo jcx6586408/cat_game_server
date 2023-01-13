@@ -76,9 +76,16 @@ func (m *Room) SendLeave(member *pmsg.Member) {
 
 // 战斗中离开
 func (m *BattleRoom) SendLeave(lmember *pmsg.Member) {
-	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
+	for _, room := range m.Rooms {
 		room.SendLeave(lmember)
-	})
+	}
+}
+
+// 战斗中加入
+func (m *BattleRoom) SendAdd(lmember *pmsg.Member) {
+	for _, room := range m.Rooms {
+		room.Send(remotemsg.ROOMADD, lmember) // 广播加入房间
+	}
 }
 
 // 发送复活

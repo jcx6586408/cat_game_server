@@ -17,6 +17,7 @@ type Roomer interface {
 	GetMembers() []*pmsg.Member          // 获取所有成员
 	GetMemeber(uuid string) *pmsg.Member // 获取单个成员
 	SendLeave(member *pmsg.Member)       // 发送玩家离开
+	GetPlayingMembers() []*pmsg.Member   // 获取战斗成员
 	OnEndPlay()                          // 游戏结束处理
 	Send(msgID int, change *pmsg.Member)
 	Relive(uuid string)
@@ -51,13 +52,7 @@ func (r *Room) OnClose() {
 }
 
 func (r *Room) GetMembers() []*pmsg.Member {
-	var members = []*pmsg.Member{}
-	for _, v := range r.Members {
-		if v.State == int32(MEMBERPLAYING) || v.State == int32(MEMBERMATCHING) {
-			members = append(members, v)
-		}
-	}
-	return members
+	return r.Members
 }
 
 func (r *Room) GetPrepareMembers() []*pmsg.Member {
@@ -71,7 +66,13 @@ func (r *Room) GetPrepareMembers() []*pmsg.Member {
 }
 
 func (r *Room) GetPlayingMembers() []*pmsg.Member {
-	return r.Members
+	var members = []*pmsg.Member{}
+	for _, v := range r.Members {
+		if v.State == int32(MEMBERPLAYING) || v.State == int32(MEMBERMATCHING) {
+			members = append(members, v)
+		}
+	}
+	return members
 }
 
 func (r *Room) GetMemeber(uuid string) *pmsg.Member {
@@ -96,6 +97,9 @@ func (r *Room) Matching() {
 	master := r.GetMaster()
 	// 游戏状态不运行匹配
 	if master != nil && master.State == int32(MEMBERPLAYING) {
+		return
+	}
+	if r.BattleRoom != nil {
 		return
 	}
 	br := BattleManager.MatchRoom(r)
@@ -136,7 +140,7 @@ func (r *Room) AddMember(member *pmsg.Member) bool {
 	r.Members = append(r.Members, member)
 	if r.BattleRoom != nil {
 		log.Debug("加入新成员*************3")
-		r.BattleRoom.Send(remotemsg.ROOMADD, member)
+		r.BattleRoom.SendAdd(member)
 		a := Users[member.Uuid]
 		if a != nil {
 			a.WriteMsg(&pmsg.RoomInfoReply{
@@ -161,12 +165,21 @@ func (r *Room) AddMember(member *pmsg.Member) bool {
 	return true
 }
 
+func (r *Room) IsHaveMaster() bool {
+	for _, v := range r.Members {
+		if v.IsMaster {
+			return true
+		}
+	}
+	return false
+}
+
 func (r *Room) LeaveMember(member *pmsg.Member) {
 	log.Debug("玩家离开房间, %v", member.GetUuid())
 	member.RoomID = 0
 	r.Members = r.delete(r.Members, member)
 	// 如果离开的人是房主，则进行房主转移
-	if member.GetIsMaster() {
+	if !r.IsHaveMaster() {
 		if r.GetMemberCount() > 0 {
 			log.Debug("转移房主, %v", member.GetUuid())
 			r.Members[0].IsMaster = true

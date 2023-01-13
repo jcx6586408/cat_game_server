@@ -21,6 +21,7 @@ type BattleRoomer interface {
 	SendLeave(member *pmsg.Member)       // 发送离开消息
 	OnLeave(Roomer, *pmsg.Member)        // 监听成员离开
 	Send(msgID int, change *pmsg.Member) // 发送消息
+	SendAdd(member *pmsg.Member)         // 发送加入消息
 }
 
 type BattleRoom struct {
@@ -123,6 +124,11 @@ func (r *BattleRoom) OnLeave(room Roomer, member *pmsg.Member) {
 	if room.GetMemberCount() <= 0 {
 		// r.Rooms = r.delete(r.Rooms, room)
 		r.DeleRoom(room)
+		return
+	}
+	if len(room.GetPlayingMembers()) <= 0 {
+		r.DeleRoom(room)
+		return
 	}
 }
 
@@ -361,7 +367,7 @@ func (m *BattleRoom) foreachMembers(call func(v *pmsg.Member, room Roomer)) {
 func (m *BattleRoom) CheckAllDead() bool {
 	all := true
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
-		if v.State == int32(MEMEBERPREPARE) {
+		if v.State == int32(MEMEBERPREPARE) || v.State == int32(MEMEBENONERPREPARE) {
 			return
 		}
 		if !v.IsDead {
@@ -374,7 +380,7 @@ func (m *BattleRoom) CheckAllDead() bool {
 func (m *BattleRoom) CheckRoomAllDead(room Roomer) bool {
 	all := true
 	for _, v := range room.GetMembers() {
-		if v.State == int32(MEMEBERPREPARE) {
+		if v.State == int32(MEMEBERPREPARE) || v.State == int32(MEMEBENONERPREPARE) {
 			continue
 		}
 		if !v.IsDead {
@@ -387,6 +393,9 @@ func (m *BattleRoom) CheckRoomAllDead(room Roomer) bool {
 func (m *BattleRoom) GetMaxLevel() int {
 	var i = 1
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
+		if v.State == int32(MEMEBERPREPARE) || v.State == int32(MEMEBENONERPREPARE) {
+			return
+		}
 		log.Debug("玩家等级: %v|%v", v.Level, v.Uuid)
 		if v.Level > int32(i) {
 			i = int(v.Level)
@@ -409,6 +418,9 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			return
 		}
 		if v.IsDead {
+			return
+		}
+		if v.State == int32(MEMEBERPREPARE) || v.State == int32(MEMEBENONERPREPARE) {
 			return
 		}
 		q := m.GetQuestion().RightAnswer

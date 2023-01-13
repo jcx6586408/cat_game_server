@@ -11,5 +11,6 @@ main.exe %excelLocalPath% 4001 5000 question5
 main.exe %excelLocalPath% 5001 6000 question6
 main.exe %excelLocalPath% 6001 7000 question7
 main.exe %excelLocalPath% 7001 8000 question8
-
-copy *.xls question.xlsx
+main.exe %excelLocalPath% 8001 9000 question8
+main.exe %excelLocalPath% 9001 10000 question8
+main.exe %excelLocalPath% 10001 11000 question8

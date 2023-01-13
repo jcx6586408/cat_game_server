@@ -1,2 +1,2 @@
 @echo off
-copy *.xlsx question.xlsx
+copy *.csv question.csv
