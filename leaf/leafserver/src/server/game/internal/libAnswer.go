@@ -18,9 +18,10 @@ type LibAnswer struct {
 }
 
 type Question struct {
-	Q    *pmsg.Question
-	win  int
-	fail int
+	Q           *pmsg.Question
+	win         int
+	fail        int
+	updateCount int
 }
 
 type QuestionLib struct {
@@ -48,7 +49,7 @@ func (q *QuestionLib) Run() {
 	}, func() {})
 }
 
-func (l *LibAnswer) GetRightAnswer(r string, obj *pmsg.Question) string {
+func GetRightAnswer(r string, obj *pmsg.Question) string {
 	switch r {
 	case "A":
 		return obj.AnswerA
@@ -63,10 +64,39 @@ func (l *LibAnswer) GetRightAnswer(r string, obj *pmsg.Question) string {
 	}
 }
 
+func GetTestQuestion(label string, level int) *pmsg.Question {
+	if level == 1 {
+		lib := LowestAnswerLibs
+		var ran = rand.Intn(len(lib))
+		return lib[ran]
+	}
+	var lib = Questions.Question[level]
+	if len(lib) > 0 {
+		var ran = rand.Intn(len(lib))
+		return lib[ran].Q
+	}
+	return nil
+}
+
+func GetRightNumberAnswer(r string, obj *pmsg.Question) int {
+	switch r {
+	case "A":
+		return 0
+	case "B":
+		return 1
+	case "C":
+		return 2
+	case "D":
+		return 3
+	default:
+		return 0
+	}
+}
+
 func (l *LibAnswer) ToString() string {
 	var str = []string{}
 	for i, v := range l.Answers {
-		str = append(str, fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, l.GetRightAnswer(v.RightAnswer, v)))
+		str = append(str, fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, GetRightAnswer(v.RightAnswer, v)))
 	}
 	return fmt.Sprintln(str)
 }
@@ -74,7 +104,7 @@ func (l *LibAnswer) ToString() string {
 func (l *LibAnswer) SingleToString() string {
 	i := l.Progress
 	v := l.Answers[l.Progress]
-	return fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, l.GetRightAnswer(v.RightAnswer, v))
+	return fmt.Sprintf("\n问题%d: %s------答案：%s", i+1, v.Question, GetRightAnswer(v.RightAnswer, v))
 }
 
 func GetAnswerLib() Answers {
@@ -117,6 +147,8 @@ func ToBaseAnswerLib(table string, callback func(obj *pmsg.Question)) Answers {
 					obj.RightNumber = int32(cell[index].(int))
 				case "wrongNumber":
 					obj.WrongNumber = int32(cell[index].(int))
+				case "label":
+					obj.Label = cell[index].(string)
 				}
 			}
 			arr = append(arr, obj)
@@ -250,26 +282,39 @@ func (m *QuestionLib) FailCount(id int) {
 	}
 }
 
-func (m *QuestionLib) updateLib(q *Question) {
-	total := q.win + q.fail
-	// 统计大于100且每格100次更新一次题库
-	if total >= RoomConf.QuestionCountMinLimit && total%RoomConf.QuestionCountDur == 0 {
-		// 计算题库正确率
-		rate := float32(q.win) * 100 / (float32(q.win) + float32(q.fail))
-		for i, v := range m.WinRates {
-			if rate >= v[0] && rate < v[1] {
-				// 找到原有题库
-				for k, questions := range m.Question {
-					for _, subQ := range questions {
-						if subQ.Q.ID == int32(q.Q.ID) {
-							m.Question[k] = m.delete(questions, subQ)   // 移除该题库
-							m.Question[i] = append(m.Question[i], subQ) // 加入新题库
-							break
-						}
+func (m *QuestionLib) updateQuestion(q *Question) {
+	rate := float32(q.win) * 100 / (float32(q.win) + float32(q.fail))
+	for i, v := range m.WinRates {
+		if rate >= v[0] && rate < v[1] {
+			// 找到原有题库
+			for k, questions := range m.Question {
+				for _, subQ := range questions {
+					if subQ.Q.ID == int32(q.Q.ID) {
+						m.Question[k] = m.delete(questions, subQ)   // 移除该题库
+						m.Question[i] = append(m.Question[i], subQ) // 加入新题库
+						break
 					}
 				}
-				return
 			}
+			return
+		}
+	}
+}
+
+func (m *QuestionLib) updateLib(q *Question) {
+	total := q.win + q.fail
+	if q.updateCount > 1 {
+		// 统计大于100且每格100次更新一次题库
+		if total >= RoomConf.QuestionCountMinLimit && total%RoomConf.QuestionCountDur == 0 {
+			q.updateCount++
+			// 计算题库正确率
+			m.updateQuestion(q)
+		}
+	} else {
+		if total >= 5 {
+			q.updateCount = 2
+			// 计算题库正确率
+			m.updateQuestion(q)
 		}
 	}
 }

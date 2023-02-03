@@ -38,6 +38,15 @@ func MongoConnect() {
 	MD = c
 }
 
+func NewUserStorageData(uid, nickname, icon string) *storage.UserStorage {
+	r := &storage.UserStorage{}
+	r.Uid = uid
+	r.Nickname = nickname
+	r.Icon = icon
+	r.Forever = make(map[string]string)
+	return r
+}
+
 func (u *User) Save() {
 	if MD == nil {
 		return
@@ -55,9 +64,13 @@ func (u *User) Update() error {
 	if MD == nil {
 		return errors.New("")
 	}
+	if u.Data == nil {
+		return errors.New("")
+	}
 	var s = MD.Ref()
 	var c = s.DB(DBNAME).C(COLLECT)
 	selector := bson.M{"uid": u.Data.Uid}
+	log.Debug("离线保存数据=============: %v", u.Data.Uid)
 	update := bson.M{"$set": bson.M{"uid": u.Data.Uid, "icon": u.Data.Icon, "nickname": u.Data.Nickname, "online": 0, "forever": u.Data.Forever}}
 	if err := c.Update(selector, update); err != nil {
 		MD.UnRef(s)
@@ -71,14 +84,29 @@ func (u *User) UpdateMap(key, value string) {
 	if MD == nil {
 		return
 	}
+	if u.Data == nil {
+		return
+	}
 	if u.Data.Forever == nil {
 		u.Data.Forever = make(map[string]string)
 	}
+	log.Debug("存储数据***********: %v|%v", key, value)
 	u.Data.Forever[key] = value
 }
 
 func (u *User) GetData(key string) string {
+	// 数据库不存在，直接返回空
+	if MD == nil {
+		return ""
+	}
+	if u.Data == nil {
+		return ""
+	}
+	if u.Data.Forever == nil {
+		u.Data.Forever = make(map[string]string)
+	}
 	val, ok := u.Data.Forever[key]
+	log.Debug("获取数据----------: %v|%v", key, val)
 	if !ok {
 		return ""
 	}
@@ -94,8 +122,10 @@ func (u *User) Query() (*storage.UserStorage, error) {
 	var result *storage.UserStorage
 	if err := c.Find(bson.M{"uid": u.Data.Uid}).One(&result); err != nil {
 		MD.UnRef(s)
+		log.Debug("查找玩家数据失败----: %v", u.Data.Uid)
 		return nil, err
 	}
 	MD.UnRef(s)
+	log.Debug("查找玩家数据++++: %v", u.Data)
 	return result, nil
 }

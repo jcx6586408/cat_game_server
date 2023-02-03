@@ -6,6 +6,7 @@ type Login struct {
 
 type LoginRequest struct {
 	Uuid     string
+	Uid      string
 	Icon     string
 	Nickname string
 }

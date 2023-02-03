@@ -45,6 +45,7 @@ func main() {
 	e.POST("/update", rank.RankUpdate)
 	e.POST("/roomCreate", rank.RoomCreate)
 	e.POST("/openid", rank.GetOpenID)
+	e.POST("/bytedanceopenid", rank.GetBytedanceOpenID)
 
 	sysType := runtime.GOOS
 

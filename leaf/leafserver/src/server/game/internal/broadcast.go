@@ -169,6 +169,24 @@ func (m *BattleRoom) SendEnd() {
 	}
 }
 
+func (m *BattleRoom) Say(uuid, word string) {
+	m.sendbase(func(a Agent, r Roomer, m *pmsg.Member) {
+		a.WriteMsg(&pmsg.Say{
+			Uuid: uuid,
+			Word: word,
+		})
+	})
+}
+
+func (m *Room) SayBroadcast(uuid, word string) {
+	m.sendbase(func(a Agent) {
+		a.WriteMsg(&pmsg.Say{
+			Uuid: uuid,
+			Word: word,
+		})
+	})
+}
+
 func (m *BattleRoom) SendStart() {
 	sceneID := RandScene(Scenes).ID
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {

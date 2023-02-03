@@ -75,6 +75,8 @@ scp -r ./runCenter.sh %user%@%centerhost%:%remoteBase%
 scp -r ./dockerRunLeaf.sh %user%@%centerhost%:%remoteBase%
 scp -r ./dockerRunRank.sh %user%@%centerhost%:%remoteBase%
 scp -r ./dockerRunCenter.sh %user%@%centerhost%:%remoteBase%
+scp -r ./dockerfilebuild.sh %user%@%centerhost%:%remoteBase%
+scp -r ./Dockerfile %user%@%centerhost%:%remoteBase%
 
 @REM 游戏服配置文件
 scp -r ./kill.sh %user%@%gamehost%:%remoteBase%
@@ -91,6 +93,8 @@ scp -r ./runCenter.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerRunLeaf.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerRunRank.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerRunCenter.sh %user%@%gamehost%:%remoteBase%
+scp -r ./dockerfilebuild.sh %user%@%gamehost%:%remoteBase%
+scp -r ./Dockerfile %user%@%gamehost%:%remoteBase%
 
 :end
 exit

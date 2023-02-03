@@ -26,6 +26,7 @@ type Roomer interface {
 	MemberReady(uuid string) bool
 	MemberReadyCancel(uuid string) bool
 	MemberLevelChange(uuid string, level int32)
+	Say(uuid, word string)
 	Roombaseer
 }
 
@@ -247,6 +248,14 @@ func (m *Room) Relive(uuid string) {
 		m.BattleRoom.Relive(uuid)
 	} else {
 		log.Debug("战斗房间为, 复活失败, 战斗房间ID")
+	}
+}
+
+func (m *Room) Say(uuid, word string) {
+	if m.BattleRoom != nil {
+		m.BattleRoom.Say(uuid, word)
+	} else {
+		m.SayBroadcast(uuid, word)
 	}
 }
 

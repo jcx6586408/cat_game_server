@@ -1,21 +1,22 @@
 #!/bin/bash
-chmod 777 ./bin/leaf
-chmod 777 ./bin/rank
-chmod 777 ./bin/center
-chmod 777 ./run.sh
-chmod 777 ./kill.sh
-chmod 777 ./copy.sh
+chmod u+x ./bin/leaf
+chmod u+x ./bin/rank
+chmod u+x ./bin/center
+chmod u+x ./run.sh
+chmod u+x ./kill.sh
+chmod u+x ./copy.sh
 
 
-chmod 777 ./dirCreate.sh
-chmod 777 ./runRank.sh
-chmod 777 ./runCenter.sh
-chmod 777 ./runLeaf.sh
+chmod u+x ./dirCreate.sh
+chmod u+x ./runRank.sh
+chmod u+x ./runCenter.sh
+chmod u+x ./runLeaf.sh
 
-chmod 777 ./dockercreate.sh
-chmod 777 ./dockerrmi.sh
-chmod 777 ./dockerdele.sh
+chmod u+x ./dockercreate.sh
+chmod u+x ./dockerrmi.sh
+chmod u+x ./dockerdele.sh
 
-chmod 777 ./dockerRunCenter.sh
-chmod 777 ./dockerRunLeaf.sh
-chmod 777 ./dockerRunRank.sh
+chmod u+x ./dockerRunCenter.sh
+chmod u+x ./dockerRunLeaf.sh
+chmod u+x ./dockerRunRank.sh
+chmod u+x ./dockerfilebuild.sh

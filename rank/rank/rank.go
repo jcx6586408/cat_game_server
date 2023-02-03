@@ -167,10 +167,14 @@ type WXCode struct {
 	Code string
 }
 
+type BytedanceCode struct {
+}
+
 type OpenID struct {
 	Openid string `json:"openid"`
 }
 
+// 微信
 func GetOpenID(c echo.Context) error {
 	wxcode := &WXCode{}
 	ParseNetBody(wxcode, c.Request().Body)
@@ -178,6 +182,24 @@ func GetOpenID(c echo.Context) error {
 		"&secret=" + Conf.Wx.AppSecret +
 		"&js_code=" + wxcode.Code +
 		"&grant_type=authorization_code")
+	if err != nil {
+		return c.String(http.StatusOK, "")
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	openid := &OpenID{}
+	json.Unmarshal(body, openid)
+	return c.JSON(http.StatusOK, openid)
+}
+
+// 字节跳动
+func GetBytedanceOpenID(c echo.Context) error {
+	wxcode := &WXCode{}
+	ParseNetBody(wxcode, c.Request().Body)
+	resp, err := http.Get("https://minigame.zijieapi.com/mgplatform/api/apps/jscode2session?appid=" + Conf.Bytedance.Appid +
+		"&secret=" + Conf.Bytedance.AppSecret +
+		"&code=" + wxcode.Code +
+		"&anonymous_code=")
 	if err != nil {
 		return c.String(http.StatusOK, "")
 	}

@@ -35,10 +35,19 @@ func init() {
 	handler(&pmsg.MemberReliveRequest{}, roomMatchMemberRelive)
 	handler(&pmsg.RoomInfoGetRequest{}, roomInfoGet)
 	handler(&pmsg.MemberLevelChange{}, roomMemberLevelChange)
+	handler(&pmsg.Say{}, roomSay)
 	handler(&msg.TableCount{}, tableCount)
 	handler(&msg.DataUpdate{}, dataUpdate)
 	handler(&msg.DataRequest{}, dataRequest)
 	handler(&msg.LoginRequest{}, loginRequst)
+	handler(&msg.QuestionLibRequest{}, getQuestionLib)
+}
+
+func getQuestionLib(args []interface{}) {
+	req := args[0].(*msg.QuestionLibRequest)
+	a := args[1].(gate.Agent)
+	q := GetTestQuestion(req.Type, req.Level)
+	a.WriteMsg(q)
 }
 
 func handler(m interface{}, h interface{}) {
@@ -58,6 +67,7 @@ func dataRequest(args []interface{}) {
 	u := Users[req.Uuid]
 	val := u.GetData(req.Key)
 	a.WriteMsg(&msg.DataReply{
+		Key:   req.Key,
 		Value: val,
 	})
 }

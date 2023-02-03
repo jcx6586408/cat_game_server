@@ -200,3 +200,13 @@ func (m *Manager) Relive(roomID int, uuid string) {
 	}
 	log.Debug("找不到所在房间, 复活失败, 房间ID: %v, uuid: %v", roomID, uuid)
 }
+
+func (m *Manager) Say(roomID int, uuid, word string) {
+	for _, v := range m.Rooms {
+		if v.GetID() == roomID {
+			v.Say(uuid, word)
+			return
+		}
+	}
+	log.Debug("找不到所在房间, 复活失败, 房间ID: %v, uuid: %v", roomID, uuid)
+}

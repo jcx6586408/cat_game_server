@@ -77,8 +77,10 @@ func init() {
 	Processor.Register(&pmsg.RoomAddFail{})   // 房间加入失败返回
 
 	Processor.Register(&pmsg.MemberLevelChange{}) // 房间加入失败返回
+	Processor.Register(&pmsg.Say{})               // 房间发送说话内容
 
 	// 表格消息注册
+	Processor.Register(&QuestionLibRequest{}) // 房间发送说话内容
 	Processor.Register(&TableCount{})
 	Processor.Register(&BackTable{})
 	Processor.Register(&DataUpdate{})
@@ -127,5 +129,11 @@ type DataRequest struct {
 }
 
 type DataReply struct {
+	Key   string
 	Value string
+}
+
+type QuestionLibRequest struct {
+	Type  string
+	Level int
 }

@@ -22,6 +22,7 @@ type BattleRoomer interface {
 	OnLeave(Roomer, *pmsg.Member)        // 监听成员离开
 	Send(msgID int, change *pmsg.Member) // 发送消息
 	SendAdd(member *pmsg.Member)         // 发送加入消息
+	Say(uuid, word string)
 }
 
 type BattleRoom struct {
@@ -30,6 +31,7 @@ type BattleRoom struct {
 	Rooms          []Roomer
 	Max            int
 	LibAnswer      *LibAnswer // 当前题库
+	Level          int        // 题库段位
 	QuestionCount  int
 	AnswerTime     int // 单次回答问题时间
 	Cur            int
@@ -237,8 +239,9 @@ func (r *BattleRoom) Play() {
 	})
 
 	// 获取题库
-	var max = r.GetMaxLevel()     // 获得最高等级
-	l := GetIDByLevel(max)        // 获得段位
+	var max = r.GetMaxLevel() // 获得最高等级
+	l := GetIDByLevel(max)    // 获得段位
+	r.Level = l
 	var levelConf = LevelLib[l-1] // 获得段位配置
 	r.LibAnswer = Questions.RandAnswerLib(l, levelConf.QuestionNumber)
 	r.AnswerTime = levelConf.QuestionTime
@@ -291,6 +294,9 @@ func (m *BattleRoom) singleRun() {
 		return
 	}
 	log.Debug("================（单次答题开始%d）===================", m.LibAnswer.Progress+1)
+	num := float32(len(m.Members))
+	min := int(num * RoomConf.RobotActionMin)
+	max := int(num * RoomConf.RobotActionMax)
 	skeleton.Go(func() {
 		for {
 			select {
@@ -335,12 +341,28 @@ func (m *BattleRoom) singleRun() {
 				m.SendTime(cur)
 				if cur > 2 {
 					if cur > 5 {
-						m.RandomRobotAnswer(4, 8, 10) // 机器人答题
+						m.RandomRobotAnswer(min, max, 10) // 机器人答题
 					} else {
-						m.RandomRobotAnswer(3, 5, 7) // 机器人答题
+						// m.RandomRobotAnswer(3, 5, 7) // 机器人答题
+						m.robotAnswer(min, max, 7, func() int {
+							question := m.GetQuestion()
+							q := Questions.QuestionMap[int(question.ID)]
+							log.Debug("0胜率: win: %v|fail: %v", q.win, q.fail)
+							if q.fail+q.win <= 0 {
+								if m.Level <= 1 {
+									return GetRightNumberAnswer(question.RightAnswer, question)
+								} else {
+									return rand.Intn(4)
+								}
+							}
+							rate := float32(q.win) * 100 / (float32(q.win) + float32(q.fail))
+							log.Debug("当前题目胜率: %v|win: %v|fail: %v", rate, q.win, q.fail)
+							if rand.Intn(100) < int(rate) {
+								return GetRightNumberAnswer(question.RightAnswer, question)
+							}
+							return rand.Intn(4)
+						})
 					}
-				} else {
-					// log.Debug("不满足机器人运动条件****************************************")
 				}
 			}
 		}
@@ -423,7 +445,8 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 		if v.State == int32(MEMEBERPREPARE) || v.State == int32(MEMEBENONERPREPARE) {
 			return
 		}
-		q := m.GetQuestion().RightAnswer
+		question := m.GetQuestion()
+		q := question.RightAnswer
 		if v.Answer == nil || len(v.Answer) <= m.LibAnswer.Progress {
 			log.Debug("答题不存在, 或超出数组")
 			return
@@ -433,10 +456,12 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 		if q == playerAnswer.Result {
 			tip = "true---------------"
 		}
+		var resultAnswer = GetRightAnswer(question.RightAnswer, question)
+		var userAnswer = GetRightAnswer(playerAnswer.Result, question)
 		if v.IsMaster {
-			log.Debug("房主***玩家uuid %v: 第%v题,  正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
+			log.Debug("房主***玩家uuid %v: 第%v题,  正确答案: %v, 玩家答案: %v %v", v.Uuid, m.LibAnswer.Progress, resultAnswer, userAnswer, tip)
 		} else {
-			log.Debug("玩家uuid %v: 第%v题, 正确答案: %v, 玩家答案%v %v", v.Uuid, m.LibAnswer.Progress, q, playerAnswer.Result, tip)
+			log.Debug("玩家uuid %v: 第%v题, 正确答案: %v, 玩家答案: %v %v", v.Uuid, m.LibAnswer.Progress, resultAnswer, userAnswer, tip)
 		}
 		right := (q == playerAnswer.Result)
 		if right {

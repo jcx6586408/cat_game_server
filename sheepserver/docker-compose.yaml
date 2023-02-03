@@ -1,0 +1,127 @@
+version: '3'
+services:
+  game1:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5101:5100
+   command: /bin/sheep/runLeaf.sh
+  game2:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5102:5100
+   command: /bin/sheep/runLeaf.sh
+  game3:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5103:5100
+   command: /bin/sheep/runLeaf.sh
+  game4:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5104:5100
+   command: /bin/sheep/runLeaf.sh
+  game5:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5105:5100
+   command: /bin/sheep/runLeaf.sh
+  game6:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5106:5100
+   command: /bin/sheep/runLeaf.sh
+  game7:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5107:5100
+   command: /bin/sheep/runLeaf.sh
+  game8:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5108:5100
+   command: /bin/sheep/runLeaf.sh
+  game9:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5109:5100
+   command: /bin/sheep/runLeaf.sh
+  game10:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5110:5100
+   command: /bin/sheep/runLeaf.sh
+  game11:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5111:5100
+   command: /bin/sheep/runLeaf.sh
+  game12:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5112:5100
+   command: /bin/sheep/runLeaf.sh
+  game13:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5113:5100
+   command: /bin/sheep/runLeaf.sh
+  game14:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5114:5100
+   command: /bin/sheep/runLeaf.sh
+  game15:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5115:5100
+   command: /bin/sheep/runLeaf.sh
+  game16:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5116:5100
+   command: /bin/sheep/runLeaf.sh
+  game17:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5117:5100
+   command: /bin/sheep/runLeaf.sh
+  game18:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5118:5100
+   command: /bin/sheep/runLeaf.sh
+  game19:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5119:5100
+   command: /bin/sheep/runLeaf.sh
+  game20:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5120:5100
+   command: /bin/sheep/runLeaf.sh
+networks:
+ front-tier:
+  driver: bridge
+ back-tier:
+  driver: bridge

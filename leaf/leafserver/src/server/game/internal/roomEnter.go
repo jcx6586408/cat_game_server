@@ -75,6 +75,11 @@ func roomOver(args []interface{}) {
 
 }
 
+func roomSay(args []interface{}) {
+	req := args[0].(*pmsg.Say)
+	manager.Say(int(req.RoomID), req.Uuid, req.Word)
+}
+
 // 房间匹配
 func roomMatch(args []interface{}) {
 	req := args[0].(*pmsg.MatchRoomRequest)
@@ -141,3 +146,4 @@ func roomMatchMemberRelive(args []interface{}) {
 	// 	room.SendRelive(req)
 	// }
 }
+

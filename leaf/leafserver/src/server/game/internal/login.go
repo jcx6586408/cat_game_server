@@ -9,6 +9,7 @@ import (
 
 func loginRequst(args []interface{}) {
 	req := args[0].(*msg.LoginRequest)
+	log.Debug("玩家登录请求: uuid: %v", req.Uuid)
 	loginHandle(req)
 }
 
@@ -19,7 +20,7 @@ func loginHandle(member *msg.LoginRequest) {
 	user, ok := Users[member.Uuid]
 	if ok {
 		user.Data = &storage.UserStorage{
-			Uid:      member.Uuid,
+			Uid:      member.Uid,
 			Nickname: member.Nickname,
 			Icon:     member.Icon,
 			Online:   1,
@@ -34,9 +35,11 @@ func loginHandle(member *msg.LoginRequest) {
 			r.Nickname = member.Nickname
 			r.Icon = member.Icon
 			user.Data = r
+			log.Debug("玩家登录时的数据: %v", user.Data)
 		}
 	} else {
 		log.Debug("找不到用户")
+		// user.Data = NewUserStorageData(member.Uid, member.Nickname, member.Icon)
 	}
 }
 

@@ -1,6 +1,6 @@
-@echo on
+@echo off
 call kill.bat
-start /min "leaf" .\bin\leaf.exe ^
+start /min "leaf"  .\bin\leaf.exe ^
 ./conf/leafserver.json ^
 ./conf/server.json ^
 ./conf/room.json ^

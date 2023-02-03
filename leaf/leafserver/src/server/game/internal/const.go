@@ -94,7 +94,6 @@ func ExcelConfigUpdate() {
 	})
 
 	for i, v := range LevelLib {
-		log.Debug("段位等级: ", i+1)
 		Questions.PhaseQuestionLib[i+1] = v.AnswerPhase
 		rates := []float32{}
 		for _, ran := range v.WinRate {

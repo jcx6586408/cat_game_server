@@ -36,9 +36,9 @@ func rpcCloseAgent(args []interface{}) {
 	guid := AgentUsers[a]
 	log.Debug("玩家离线--------------------uuid: %v", guid)
 	// storage.OfflineHandle(Users[guid].Data) // 离线保存
+	offlineHanlde(guid)
 	delete(Users, guid)
 	delete(AgentUsers, a)
 	manager.OfflineMemeber(guid)
-	offlineHanlde(guid)
 	a.Close()
 }

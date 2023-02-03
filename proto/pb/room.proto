@@ -162,6 +162,12 @@ message AnswerEndReply {
     RoomInfoReply RoomInfo = 1;
 }
 
+message Say {
+    int32 RoomID = 1;           // 对应的房间ID
+    string Uuid = 2;            // 用户服务端uuid
+    string word = 3;            // 说话内容
+}
+
 message Question {
     int32 ID = 1;           // 题库ID
     string Question = 2;    // 问题
@@ -173,6 +179,7 @@ message Question {
     string table = 8;       // 表
     int32 RightNumber = 9;  // 正确统计
     int32 WrongNumber = 10; // 错误统计
+    string Label = 11;      // 标签
 }
 
 message MemberRequest {

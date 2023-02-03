@@ -5,5 +5,7 @@
     "MaxInvite": 12,
     "ReliveWaitTime": 8,
     "QuestionCountMinLimit": 3,
-    "QuestionCountDur": 3
+    "QuestionCountDur": 3,
+    "RobotActionMin": 0.1,
+    "RobotActionMax": 0.3
 }

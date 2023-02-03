@@ -15,6 +15,8 @@ type RoomConfig struct {
 	ReliveWaitTime        int // 房间复活等待时间
 	QuestionCountMinLimit int
 	QuestionCountDur      int
+	RobotActionMin        float32
+	RobotActionMax        float32
 }
 
 func ReadRoom() *RoomConfig {

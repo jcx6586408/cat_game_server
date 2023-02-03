@@ -11,6 +11,7 @@ var IPLocationPath string
 type Config struct {
 	Rank      *Rank    `json:"rank"`      // 排行榜配置
 	Wx        *Wx      `json:"wx"`        // 微信openid配置
+	Bytedance *Wx      `json:"bytedance"` // 字节跳动openid配置
 	MongoDB   *MongoDB `json:"MongoDB"`   // mongodb数据库参数
 	DB        *DB      `json:"DB"`        // 数据库连接路径
 	Urls      []string `json:"Urls"`      // 游戏房间服务器路径

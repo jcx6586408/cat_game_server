@@ -108,7 +108,7 @@ func (m *BattleRoom) AddRobot(count int) {
 }
 
 // 随机机器人答案
-func (m *BattleRoom) RandomRobotAnswer(min, max, count int) {
+func (m *BattleRoom) robotAnswer(min, max, count int, result func() int) {
 	lenRobot := rand.Intn(max) + min
 	startIndex := 0
 	if len(m.Members)-lenRobot > 0 {
@@ -122,19 +122,24 @@ func (m *BattleRoom) RandomRobotAnswer(min, max, count int) {
 	}
 	subArr := m.Members[startIndex : startIndex+lenRobot]
 	for _, v := range subArr {
-		result := rand.Intn(4)
-
-		var action = rand.Intn(10)
-		if action >= count {
-			return
-		}
+		// var action = rand.Intn(10)
+		// if action >= count {
+		// 	return
+		// }
 		m.Answer(&pmsg.Answer{
 			Uuid:       v.Uuid,
 			RoomID:     int32(m.ID),
 			QuestionID: m.GetQuestion().ID,
-			Result:     results[result],
+			Result:     results[result()],
 		})
 	}
+}
+
+// 随机机器人答案
+func (m *BattleRoom) RandomRobotAnswer(min, max, count int) {
+	m.robotAnswer(min, max, count, func() int {
+		return rand.Intn(4)
+	})
 }
 
 func (m *BattleRoom) RandomRobotTargetAnswer(right string) {
@@ -151,6 +156,7 @@ func (m *BattleRoom) RandomRobotTargetAnswer(right string) {
 	}
 	subArr := m.Members[startIndex : startIndex+lenRobot]
 	for _, v := range subArr {
+		log.Debug("%v机器人答题: ", v.Uuid)
 		m.Answer(&pmsg.Answer{
 			Uuid:       v.Uuid,
 			RoomID:     int32(m.ID),
