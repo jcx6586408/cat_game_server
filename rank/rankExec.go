@@ -23,11 +23,12 @@ func main() {
 	config.RoomConfPath = os.Args[3]
 	excel.TablePath = os.Args[4]
 	rank.IPLocationPath = os.Args[5]
-	if len(os.Args) >= 7 {
-		conf.Server.CertFile = os.Args[6]
-	}
+	port := os.Args[6]
 	if len(os.Args) >= 8 {
-		conf.Server.KeyFile = os.Args[7]
+		conf.Server.CertFile = os.Args[7]
+	}
+	if len(os.Args) >= 9 {
+		conf.Server.KeyFile = os.Args[8]
 	}
 	e := echo.New()
 	DefaultCORSConfig := middleware.CORSConfig{
@@ -43,6 +44,7 @@ func main() {
 	e.POST("/pull", rank.RankPull)
 	e.POST("/cityPull", rank.RankCityPull)
 	e.POST("/update", rank.RankUpdate)
+	e.POST("/cityDele", rank.RankDele)
 	e.POST("/roomCreate", rank.RoomCreate)
 	e.POST("/openid", rank.GetOpenID)
 	e.POST("/bytedanceopenid", rank.GetBytedanceOpenID)
@@ -53,12 +55,12 @@ func main() {
 
 	if sysType == "linux" {
 		// LINUX系统
-		e.Logger.Fatal(e.StartTLS(conf.Server.HttpAddr, conf.Server.CertFile, conf.Server.KeyFile))
+		e.Logger.Fatal(e.StartTLS(port, conf.Server.CertFile, conf.Server.KeyFile))
 	}
 
 	if sysType == "windows" {
 		// windows系统
-		e.Logger.Fatal(e.Start(conf.Server.HttpAddr))
+		e.Logger.Fatal(e.Start(port))
 	}
 
 }

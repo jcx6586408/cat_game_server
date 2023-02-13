@@ -3,6 +3,7 @@ package internal
 import (
 	"excel"
 	"fmt"
+	"runtime"
 )
 
 func init() {
@@ -12,6 +13,7 @@ func init() {
 	skeleton.RegisterCommand("excelUpdate", "update excel config", commandExcelUpdate)
 	skeleton.RegisterCommand("toExcel", "to question excel count", commandToQuestionExcel)
 	skeleton.RegisterCommand("msg", "to question excel count", commandMsgExports)
+	skeleton.RegisterCommand("go", "count goruntine number", commandGoruntine)
 }
 
 func commandEcho(args []interface{}) interface{} {
@@ -29,6 +31,10 @@ func commandMsgExports(args []interface{}) interface{} {
 	// 	str += fmt.Sprintf("%v|%v\r\n", id, t)
 	// })
 	return str
+}
+
+func commandGoruntine(args []interface{}) interface{} {
+	return fmt.Sprintf("goruntineCount: %v", runtime.NumGoroutine())
 }
 
 // 看房间情况

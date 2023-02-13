@@ -112,6 +112,13 @@ func AddRank(key, uid string, score float64) {
 	}
 }
 
+func DeleRank(city, uid string) {
+	var r = GetSelfCityRank(city, uid)
+	if r < Max {
+		Rdb.ZRemRangeByRank(ctx, city, r-1, r-1)
+	}
+}
+
 // 获取自身世界排行
 func GetSelfWorldRank(uid string) int64 {
 	return Rdb.ZRevRank(ctx, worldRank, uid).Val() + 1
@@ -162,6 +169,22 @@ func RankCityPull(c echo.Context) error {
 	ParseNetBody(r, c.Request().Body)
 	backInfo := GetCityRank(r.City, 0, int64(conf.Rank.CityRankCount))
 	return c.JSON(http.StatusOK, backInfo)
+}
+
+func RankSheepCityPull(c echo.Context) error {
+	r := &msg.Rank{}
+	// 解析body
+	ParseNetBody(r, c.Request().Body)
+	backInfo := GetCityRank(r.City, 0, 35)
+	return c.JSON(http.StatusOK, backInfo)
+}
+
+func RankCityDele(c echo.Context) error {
+	r := &msg.Rank{}
+	// 解析body
+	ParseNetBody(r, c.Request().Body)
+	DeleRank(r.City, r.UID)
+	return c.JSON(http.StatusOK, "")
 }
 
 func GetSelf(c echo.Context) error {

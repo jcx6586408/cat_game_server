@@ -7,9 +7,9 @@ import (
 	"io"
 	"io/ioutil"
 	"leafserver/src/server/msg"
-	"math/rand"
 	"net/http"
 	"sort"
+	"sync"
 
 	pmsg "proto/msg"
 
@@ -38,26 +38,26 @@ type UpScore struct {
 	State bool `json:"state"`
 }
 
-var DB *ip2location.DB
+var (
+	DB *ip2location.DB
 
-var rankInfo = &RankInfo{}
+	rankInfo = &RankInfo{}
 
-var Conf *config.Config
+	Conf *config.Config
 
-var IPLocationPath string
+	IPLocationPath string
+
+	serversMax int
+
+	curServer int
+
+	lock sync.RWMutex
+)
 
 func RankInit() {
 	Conf = config.Read()
-
-	db, err := ip2location.OpenDB("../../../.././IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
-	if err != nil {
-		// catLog.Log(err)
-		db, err = ip2location.OpenDB(IPLocationPath)
-		if err != nil {
-			return
-		}
-	}
-	DB = db
+	serversMax = len(Conf.Urls)
+	curServer = 0
 	rankInfo.WorldRank = []*msg.Rank{}
 	rankInfo.CountryRank = make(map[string]*[]*msg.Rank)
 	rankInfo.ProvinceRank = make(map[string]*[]*msg.Rank)
@@ -73,8 +73,7 @@ func getRankDataBy(ranks *[]*msg.Rank, uid string) (*msg.Rank, error) {
 	return nil, errors.New("找不到排行")
 }
 
-func handle(ranks *[]*msg.Rank, count int, r *msg.Rank) {
-
+func handleDele(l *sync.RWMutex, ranks *[]*msg.Rank, count int, r *msg.Rank) {
 	// 如果数值比最后一名还小，则舍去更新
 	if len(*ranks) >= count {
 		lastR := (*ranks)[len((*ranks))-1]
@@ -100,6 +99,51 @@ func handle(ranks *[]*msg.Rank, count int, r *msg.Rank) {
 		oldR.NickName = r.NickName
 		oldR.Icon = r.Icon
 		oldR.City = r.City
+		oldR.Skin = r.Skin
+	}
+
+	// 更新排行
+	if len(*ranks) > 1 {
+		sort.SliceStable((*ranks), func(i, j int) bool {
+			return (*ranks)[i].Val > (*ranks)[j].Val
+		})
+
+		(*ranks) = delete((*ranks), oldR)
+
+		if len((*ranks)) > count {
+			(*ranks) = (*ranks)[:count]
+		}
+	}
+}
+
+func handle(l *sync.RWMutex, ranks *[]*msg.Rank, count int, r *msg.Rank) {
+	// 如果数值比最后一名还小，则舍去更新
+	if len(*ranks) >= count {
+		lastR := (*ranks)[len((*ranks))-1]
+		if lastR.Val > r.Val {
+			return
+		}
+	}
+
+	oldR, err := getRankDataBy(ranks, r.UID)
+
+	if err != nil {
+		oldR = &msg.Rank{}
+		oldR.NickName = r.NickName
+		oldR.UID = r.UID
+		oldR.Icon = r.Icon
+		oldR.Val = r.Val
+		oldR.Country = r.Country
+		oldR.CountryShort = r.CountryShort
+		oldR.City = r.City
+		oldR.Skin = r.Skin
+		(*ranks) = append((*ranks), oldR) // 加入排行
+	} else {
+		oldR.Val = r.Val
+		oldR.NickName = r.NickName
+		oldR.Icon = r.Icon
+		oldR.City = r.City
+		oldR.Skin = r.Skin
 	}
 
 	// 更新排行
@@ -118,20 +162,36 @@ func RankUpdate(c echo.Context) error {
 	r := &msg.Rank{}
 	// 解析body
 	ParseNetBody(r, c.Request().Body)
-	addr := c.RealIP()
-	results, _ := DB.Get_all(addr)
-	r.Country = results.Country_long
-	r.CountryShort = results.Country_short
-	r.City = results.City
-	handle(&rankInfo.WorldRank, Conf.Rank.WorldRankCount, r) // 全服排行更新
 
+	lock.RLock()
 	// 城市
 	cityRanks, ok := rankInfo.CityRank[r.City]
+	lock.RUnlock()
 	if !ok {
 		cityRanks = &([]*msg.Rank{})
 	}
-	handle(cityRanks, Conf.Rank.CityRankCount, r) // 城市排行更新
-	rankInfo.CityRank[r.City] = cityRanks         // 重新赋值
+	lock.Lock()
+	handle(&lock, cityRanks, Conf.Rank.CityRankCount, r) // 城市排行更新
+	rankInfo.CityRank[r.City] = cityRanks                // 重新赋值
+	lock.Unlock()
+	return c.JSON(http.StatusOK, r)
+}
+
+func RankDele(c echo.Context) error {
+	r := &msg.Rank{}
+	// 解析body
+	ParseNetBody(r, c.Request().Body)
+	// 城市
+	lock.RLock()
+	cityRanks, ok := rankInfo.CityRank[r.City]
+	lock.RUnlock()
+	if !ok {
+		cityRanks = &([]*msg.Rank{})
+	}
+	lock.Lock()
+	handleDele(&lock, cityRanks, Conf.Rank.CityRankCount, r) // 城市排行更新
+	rankInfo.CityRank[r.City] = cityRanks                    // 重新赋值
+	lock.Unlock()
 	return c.JSON(http.StatusOK, r)
 }
 
@@ -140,24 +200,34 @@ func RankPull(c echo.Context) error {
 }
 
 func RankCityPull(c echo.Context) error {
-	addr := c.RealIP()
-	results, _ := DB.Get_all(addr)
-	backInfo := rankInfo.CityRank[results.City]
-	return c.JSON(http.StatusOK, backInfo)
+	r := &msg.Rank{}
+	// 解析body
+	ParseNetBody(r, c.Request().Body)
+	lock.RLock()
+	backInfo, ok := rankInfo.CityRank[r.City]
+	lock.RUnlock()
+	if !ok {
+		return c.JSON(http.StatusOK, "")
+	}
+
+	var max int = len(*backInfo)
+	if len(*backInfo) > 35 {
+		max = 35
+	}
+	return c.JSON(http.StatusOK, (*backInfo)[0:max])
 }
 
 func GetSelf(c echo.Context) error {
-	addr := c.RealIP()
-	results, _ := DB.Get_all(addr)
 	oldR := &msg.Rank{}
-	oldR.Country = results.Country_long
-	oldR.CountryShort = results.Country_short
 	return c.JSON(http.StatusOK, oldR)
 }
 
 func RoomCreate(c echo.Context) error {
-	ran := rand.Intn(len(Conf.Urls))
-	url := Conf.Urls[ran]
+	url := Conf.Urls[curServer]
+	curServer++
+	if curServer >= serversMax {
+		curServer = 0
+	}
 	return c.JSON(http.StatusOK, &pmsg.RoomPreAddReply{
 		Url: url,
 	})
@@ -213,4 +283,15 @@ func GetBytedanceOpenID(c echo.Context) error {
 func ParseNetBody(i interface{}, r io.ReadCloser) {
 	d, _ := ioutil.ReadAll(r)
 	json.Unmarshal(d, i)
+}
+
+func delete(a []*msg.Rank, elem *msg.Rank) []*msg.Rank {
+	for i := 0; i < len(a); i++ {
+		if a[i] == elem {
+			a = append(a[:i], a[i+1:]...)
+			i--
+			break
+		}
+	}
+	return a
 }

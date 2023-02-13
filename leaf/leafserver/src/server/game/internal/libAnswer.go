@@ -25,12 +25,12 @@ type Question struct {
 }
 
 type QuestionLib struct {
-	QuestionMap      map[int]*Question
+	QuestionMap      map[string]*Question
 	Question         map[int][]*Question // 段位题库
 	PhaseQuestionLib map[int][]int       // 各个段位对于的题库
 	WinRates         map[int][]float32   // 各个段位对应胜率
-	WinChan          chan int            // 统计管道
-	FailChan         chan int            // 统计管道
+	WinChan          chan string         // 统计管道
+	FailChan         chan string         // 统计管道
 	Done             chan interface{}    // 完成管道
 }
 
@@ -122,7 +122,8 @@ func ToBaseAnswerLib(table string, callback func(obj *pmsg.Question)) Answers {
 			for index, v := range tableConf.AttributeNames {
 				switch v {
 				case "ID":
-					obj.ID = int32(cell[index].(int))
+					// obj.ID = int32(cell[index].(int))
+					obj.ID = fmt.Sprintf("%v_%v", table, int32(cell[index].(int)))
 				case "question":
 					obj.Question = cell[index].(string)
 				case "answerA":
@@ -161,13 +162,13 @@ func ToBaseAnswerLib(table string, callback func(obj *pmsg.Question)) Answers {
 }
 
 func ToAnswerLib(table string) Answers {
-	return ToBaseAnswerLib(table, func(obj *pmsg.Question) {
+	var as = ToBaseAnswerLib(table, func(obj *pmsg.Question) {
 		q := &Question{
 			Q:    obj,
 			win:  int(obj.RightNumber),
 			fail: int(obj.WrongNumber),
 		}
-		Questions.QuestionMap[int(obj.ID)] = q
+		Questions.QuestionMap[obj.ID] = q
 		subA, ok := Questions.Question[1]
 		if !ok {
 			subA = make([]*Question, 0)
@@ -177,6 +178,11 @@ func ToAnswerLib(table string) Answers {
 			Questions.Question[1] = append(Questions.Question[1], q)
 		}
 	})
+	// 更新题库
+	for _, v := range Questions.QuestionMap {
+		Questions.updateLib(v)
+	}
+	return as
 }
 
 func RandAnswerLib(count int, arr []*pmsg.Question) *LibAnswer {
@@ -264,7 +270,7 @@ func (m *QuestionLib) GetQuestions(id, total int) []*pmsg.Question {
 	return ARR
 }
 
-func (m *QuestionLib) WinCount(id int) {
+func (m *QuestionLib) WinCount(id string) {
 	q, ok := m.QuestionMap[id]
 	if ok {
 		q.win++
@@ -273,7 +279,7 @@ func (m *QuestionLib) WinCount(id int) {
 	}
 }
 
-func (m *QuestionLib) FailCount(id int) {
+func (m *QuestionLib) FailCount(id string) {
 	q, ok := m.QuestionMap[id]
 	if ok {
 		q.fail++
@@ -288,8 +294,11 @@ func (m *QuestionLib) updateQuestion(q *Question) {
 		if rate >= v[0] && rate < v[1] {
 			// 找到原有题库
 			for k, questions := range m.Question {
+				if k == i {
+					continue
+				}
 				for _, subQ := range questions {
-					if subQ.Q.ID == int32(q.Q.ID) {
+					if subQ.Q.ID == q.Q.ID {
 						m.Question[k] = m.delete(questions, subQ)   // 移除该题库
 						m.Question[i] = append(m.Question[i], subQ) // 加入新题库
 						break
@@ -308,6 +317,7 @@ func (m *QuestionLib) updateLib(q *Question) {
 		if total >= RoomConf.QuestionCountMinLimit && total%RoomConf.QuestionCountDur == 0 {
 			q.updateCount++
 			// 计算题库正确率
+
 			m.updateQuestion(q)
 		}
 	} else {

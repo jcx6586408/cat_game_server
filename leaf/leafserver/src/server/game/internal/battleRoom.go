@@ -346,7 +346,11 @@ func (m *BattleRoom) singleRun() {
 						// m.RandomRobotAnswer(3, 5, 7) // 机器人答题
 						m.robotAnswer(min, max, 7, func() int {
 							question := m.GetQuestion()
-							q := Questions.QuestionMap[int(question.ID)]
+							q, ok := Questions.QuestionMap[question.ID]
+							if !ok {
+								log.Debug("找不到题库: %v", question.ID)
+								return rand.Intn(4)
+							}
 							log.Debug("0胜率: win: %v|fail: %v", q.win, q.fail)
 							if q.fail+q.win <= 0 {
 								if m.Level <= 1 {
@@ -470,7 +474,7 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			skeleton.Go(func() {
 				if !v.IsRobot {
 					// redis.AddWinTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
-					Questions.WinChan <- int(m.GetQuestion().ID)
+					Questions.WinChan <- m.GetQuestion().ID
 				}
 			}, func() {})
 
@@ -478,7 +482,7 @@ func (m *BattleRoom) CheckAndHandleDead() bool {
 			skeleton.Go(func() {
 				if !v.IsRobot {
 					// redis.AddFailTable(fmt.Sprintf("%v_%v", m.GetQuestion().Table, m.GetQuestion().ID), 1)
-					Questions.FailChan <- int(m.GetQuestion().ID)
+					Questions.FailChan <- m.GetQuestion().ID
 				}
 			}, func() {})
 			// 标记死亡
@@ -531,7 +535,7 @@ func (m *BattleRoom) SetDefaultAnswer() {
 			aa = &pmsg.Answer{
 				Uuid:       v.Uuid,
 				RoomID:     int32(m.ID),
-				QuestionID: int32(m.LibAnswer.Progress),
+				QuestionID: "",
 				Result:     ranAnswer,
 			}
 			v.Answer[i] = aa

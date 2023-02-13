@@ -1,11 +1,8 @@
 package internal
 
 import (
-	"leafserver/src/server/msg"
-
 	"github.com/google/uuid"
 	"github.com/name5566/leaf/gate"
-	"github.com/name5566/leaf/log"
 )
 
 func init() {
@@ -21,24 +18,10 @@ func rpcNewAgent(args []interface{}) {
 		Uuid:  guid,
 		Agent: a,
 	}
-	Users[guid] = u
-	// 反注册
-	AgentUsers[a] = guid
-	log.Debug("玩家登录--------------------uuid: %v", guid)
-	// 下发uuid
-	a.WriteMsg(&msg.Login{
-		Uuid: guid,
-	})
+	AddUser(guid, u)
 }
 
 func rpcCloseAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
-	guid := AgentUsers[a]
-	log.Debug("玩家离线--------------------uuid: %v", guid)
-	// storage.OfflineHandle(Users[guid].Data) // 离线保存
-	offlineHanlde(guid)
-	delete(Users, guid)
-	delete(AgentUsers, a)
-	manager.OfflineMemeber(guid)
-	a.Close()
+	DeleUser(a)
 }

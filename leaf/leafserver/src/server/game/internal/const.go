@@ -80,12 +80,12 @@ func ExcelConfigUpdate() {
 	LevelLib = ToLevelLib()
 	Scenes = ToSceneLib()
 	Questions = &QuestionLib{
-		QuestionMap:      make(map[int]*Question),
+		QuestionMap:      make(map[string]*Question),
 		Question:         make(map[int][]*Question),
 		PhaseQuestionLib: make(map[int][]int),
 		WinRates:         make(map[int][]float32),
-		WinChan:          make(chan int),
-		FailChan:         make(chan int),
+		WinChan:          make(chan string),
+		FailChan:         make(chan string),
 		Done:             make(chan interface{}),
 	}
 
@@ -104,10 +104,16 @@ func ExcelConfigUpdate() {
 	}
 	MAX = len(LevelLib)
 	AnswerLibs = []Answers{}
-	AnswerLibs = append(AnswerLibs, ToAnswerLib("question1"))
-	LowestAnswerLibs = ToBaseAnswerLib("question0", nil)
+	tables := ServerConf.QuestionTables
+	for _, v := range tables {
+		AnswerLibs = append(AnswerLibs, ToAnswerLib(v))
+	}
+	LowestAnswerLibs = ToBaseAnswerLib(ServerConf.NewerTable, nil)
 	log.Debug("新手题库数量: %v", len(LowestAnswerLibs))
-	log.Debug("标准题库数量: %v", len(AnswerLibs[0]))
+	log.Debug("标准题库数量: %v", len(Questions.QuestionMap))
+	for i, v := range Questions.Question {
+		log.Debug("段位: %v --> %v", i, len(v))
+	}
 	MongoConnect()  // 数据库连接
 	Questions.Run() // 题库监听
 	log.Debug("段位长度: %d", len(LevelLib))

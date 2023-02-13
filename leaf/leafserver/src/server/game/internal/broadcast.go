@@ -102,7 +102,7 @@ func (m *BattleRoom) SendRelive(uuid string) {
 }
 
 // 发送答题
-func (m *BattleRoom) SendAnswer(uuid string, qid int32, result string) {
+func (m *BattleRoom) SendAnswer(uuid string, qid string, result string) {
 	m.sendbase(func(a Agent, room Roomer, member *pmsg.Member) {
 		a.WriteMsg(&pmsg.Answer{
 			Uuid:       uuid,

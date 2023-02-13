@@ -1,7 +1,6 @@
 @echo off
 
 set host=118.195.244.48
-set centerhost=82.157.137.166
 set gamehost=82.156.167.77
 set user=root
 
@@ -35,49 +34,26 @@ if %1==6 (goto keystore)
 
 
 :program
-for /r %localPath% %%i in (*) do (scp -r %%i %user%@%centerhost%:%remotePath%)
 for /r %localPath% %%i in (*) do (scp -r %%i %user%@%gamehost%:%remotePath%)
 goto end
 
 :conf
-for /r %conflocalPath% %%i in (*) do (scp -r %%i %user%@%centerhost%:%confPath%)
 for /r %conflocalPath% %%i in (*) do (scp -r %%i %user%@%gamehost%:%confPath%)
 goto end
 
 :excel
-for /r %excelLocalPath% %%i in (*) do (scp -r %%i %user%@%centerhost%:%excelRemotePath%)
 for /r %excelLocalPath% %%i in (*) do (scp -r %%i %user%@%gamehost%:%excelRemotePath%)
 goto end
 
 :iplocation
-for /r %iplocationLocalPath% %%i in (*) do (scp -r %%i %user%@%centerhost%:%iplocationRemotePath%)
 for /r %iplocationLocalPath% %%i in (*) do (scp -r %%i %user%@%gamehost%:%iplocationRemotePath%)
 goto end
 
 :ssl
-for /r %sslLocalPath% %%i in (*) do (scp -r %%i %user%@%centerhost%:%sslRemotePath%)
 for /r %sslLocalPath% %%i in (*) do (scp -r %%i %user%@%gamehost%:%sslRemotePath%)
 goto end
 
 :keystore
-@REM 中心服配置文件
-scp -r ./kill.sh %user%@%centerhost%:%remoteBase%
-scp -r ./run.sh %user%@%centerhost%:%remoteBase%
-scp -r ./copy.sh %user%@%centerhost%:%remoteBase%
-scp -r ./dockercreate.sh %user%@%centerhost%:%remoteBase%
-scp -r ./dockerrmi.sh %user%@%centerhost%:%remoteBase%
-scp -r ./dockerdele.sh %user%@%centerhost%:%remoteBase%
-
-scp -r ./runLeaf.sh %user%@%centerhost%:%remoteBase%
-scp -r ./runRank.sh %user%@%centerhost%:%remoteBase%
-scp -r ./runCenter.sh %user%@%centerhost%:%remoteBase%
-
-scp -r ./dockerRunLeaf.sh %user%@%centerhost%:%remoteBase%
-scp -r ./dockerRunRank.sh %user%@%centerhost%:%remoteBase%
-scp -r ./dockerRunCenter.sh %user%@%centerhost%:%remoteBase%
-scp -r ./dockerfilebuild.sh %user%@%centerhost%:%remoteBase%
-scp -r ./Dockerfile %user%@%centerhost%:%remoteBase%
-
 @REM 游戏服配置文件
 scp -r ./kill.sh %user%@%gamehost%:%remoteBase%
 scp -r ./run.sh %user%@%gamehost%:%remoteBase%
@@ -95,6 +71,7 @@ scp -r ./dockerRunRank.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerRunCenter.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerfilebuild.sh %user%@%gamehost%:%remoteBase%
 scp -r ./Dockerfile %user%@%gamehost%:%remoteBase%
+scp -r ./docker-compose.yaml %user%@%centerhost%:%remoteBase%
 
 :end
 exit

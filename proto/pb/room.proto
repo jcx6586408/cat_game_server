@@ -154,7 +154,7 @@ message OverReply {
 message Answer {
     int32 RoomID = 1;           // 对应的房间ID
     string Uuid = 2;            // 用户服务端uuid
-    int32 QuestionID = 3;       // 问题ID
+    string QuestionID = 3;       // 问题ID
     string Result = 4;          // 回答结果
 }
 
@@ -169,7 +169,7 @@ message Say {
 }
 
 message Question {
-    int32 ID = 1;           // 题库ID
+    string ID = 1;           // 题库ID
     string Question = 2;    // 问题
     string AnswerA = 3;     // 答案A
     string AnswerB = 4;     // 答案B

@@ -9,13 +9,15 @@ var ConfPath string
 var IPLocationPath string
 
 type Config struct {
-	Rank      *Rank    `json:"rank"`      // 排行榜配置
-	Wx        *Wx      `json:"wx"`        // 微信openid配置
-	Bytedance *Wx      `json:"bytedance"` // 字节跳动openid配置
-	MongoDB   *MongoDB `json:"MongoDB"`   // mongodb数据库参数
-	DB        *DB      `json:"DB"`        // 数据库连接路径
-	Urls      []string `json:"Urls"`      // 游戏房间服务器路径
-	SeverType string   `json:"SeverType"` // 游戏服类型（网关服gate，中心服center，房间服room）
+	Rank           *Rank    `json:"rank"`           // 排行榜配置
+	Wx             *Wx      `json:"wx"`             // 微信openid配置
+	Bytedance      *Wx      `json:"bytedance"`      // 字节跳动openid配置
+	MongoDB        *MongoDB `json:"MongoDB"`        // mongodb数据库参数
+	DB             *DB      `json:"DB"`             // 数据库连接路径
+	Urls           []string `json:"Urls"`           // 游戏房间服务器路径
+	QuestionTables []string `json:"QuestionTables"` // 游戏答题表
+	NewerTable     string   `json:"NewerTable"`     // 新手题库
+	SeverType      string   `json:"SeverType"`      // 游戏服类型（网关服gate，中心服center，房间服room）
 }
 
 type DB struct {

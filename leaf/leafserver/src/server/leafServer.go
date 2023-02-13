@@ -7,6 +7,7 @@ import (
 	"leafserver/src/server/game"
 	"leafserver/src/server/gate"
 	"leafserver/src/server/login"
+	_ "net/http/pprof"
 	"os"
 
 	"github.com/name5566/leaf"
@@ -15,7 +16,10 @@ import (
 )
 
 func main() {
-	log.Release("启动leaf服务器-------------------------------------------------")
+	// log.Release("启动leaf服务器-------------------------------------------------")
+	// go func() {
+	// 	http.ListenAndServe("localhost:6060", nil)
+	// }()
 	conf.ConfPath = os.Args[1]
 	conf.Read()
 	config.ConfPath = os.Args[2]

@@ -45,6 +45,8 @@ func init() {
 
 	msg.Processor.SetRouter(&pmsg.MemberLevelChange{}, game.ChanRPC) // 等级改变消息
 	msg.Processor.SetRouter(&pmsg.Say{}, game.ChanRPC)               // 房间说话
-	msg.Processor.SetRouter(&msg.QuestionLibRequest{}, game.ChanRPC) // 房间说话
+	msg.Processor.SetRouter(&msg.QuestionLibRequest{}, game.ChanRPC) // 题库刷题
+	msg.Processor.SetRouter(&msg.Ping{}, game.ChanRPC)               // ping
+	msg.Processor.SetRouter(&msg.Pong{}, game.ChanRPC)               // pong
 
 }

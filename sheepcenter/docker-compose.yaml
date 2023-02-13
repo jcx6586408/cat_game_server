@@ -1,0 +1,25 @@
+version: '3'
+services:
+  center:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5600:5600
+   command: /bin/sheep/runCenter.sh
+  rank:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5200:5200
+   command: /bin/sheep/runRank.sh
+  sheep:
+   image: "sheepserver:v1"
+   restart: "unless-stopped"
+   ports: 
+      - 5601:5601
+   command: /bin/sheep/runSheep.sh
+networks:
+ front-tier:
+  driver: bridge
+ back-tier:
+  driver: bridge

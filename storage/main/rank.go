@@ -40,6 +40,8 @@ func main() {
 	e.POST("/self", redis.GetSelf)
 	e.POST("/pull", redis.RankPull)
 	e.POST("/cityPull", redis.RankCityPull)
+	e.POST("/sheepCityPull", redis.RankSheepCityPull)
+	e.POST("/cityDele", redis.RankCityDele)
 	e.POST("/update", redis.RankUpdate)
 
 	sysType := runtime.GOOS

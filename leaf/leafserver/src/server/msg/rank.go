@@ -6,6 +6,7 @@ type Rank struct {
 	WorldRank    int64
 	CityRank     int64
 	Icon         string
+	Skin         int
 	NickName     string
 	Country      string
 	CountryShort string
@@ -19,6 +20,7 @@ type RankSelfRequest struct {
 	Val      int
 	Icon     string
 	NickName string
+	Skin     int
 }
 
 type BackRankInfo struct {

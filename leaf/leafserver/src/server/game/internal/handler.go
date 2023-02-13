@@ -36,6 +36,7 @@ func init() {
 	handler(&pmsg.RoomInfoGetRequest{}, roomInfoGet)
 	handler(&pmsg.MemberLevelChange{}, roomMemberLevelChange)
 	handler(&pmsg.Say{}, roomSay)
+	handler(&msg.Ping{}, Hearbeat)
 	handler(&msg.TableCount{}, tableCount)
 	handler(&msg.DataUpdate{}, dataUpdate)
 	handler(&msg.DataRequest{}, dataRequest)
@@ -57,19 +58,23 @@ func handler(m interface{}, h interface{}) {
 func dataUpdate(args []interface{}) {
 	req := args[0].(*msg.DataUpdate)
 	// a := args[1].(gate.Agent)
-	u := Users[req.Uuid]
-	u.UpdateMap(req.Key, req.Value)
+	u, ok := Users[req.Uuid]
+	if ok {
+		u.UpdateMap(req.Key, req.Value)
+	}
 }
 
 func dataRequest(args []interface{}) {
 	req := args[0].(*msg.DataRequest)
 	a := args[1].(gate.Agent)
-	u := Users[req.Uuid]
-	val := u.GetData(req.Key)
-	a.WriteMsg(&msg.DataReply{
-		Key:   req.Key,
-		Value: val,
-	})
+	u, ok := Users[req.Uuid]
+	if ok {
+		val := u.GetData(req.Key)
+		a.WriteMsg(&msg.DataReply{
+			Key:   req.Key,
+			Value: val,
+		})
+	}
 }
 
 func tableCount(args []interface{}) {
@@ -78,7 +83,7 @@ func tableCount(args []interface{}) {
 	back := &msg.TableGet{Questions: []*msg.QuestionCount{}}
 	total := []*msg.QuestionCount{}
 	for _, v := range Questions.QuestionMap {
-		total = append(total, &msg.QuestionCount{ID: int(v.Q.ID), Win: v.win, Fail: v.fail})
+		total = append(total, &msg.QuestionCount{ID: v.Q.ID, Win: v.win, Fail: v.fail})
 	}
 	sort.Slice(total, func(i, j int) bool {
 		return total[i].ID > total[j].ID

@@ -87,6 +87,8 @@ func init() {
 	Processor.Register(&DataRequest{})
 	Processor.Register(&DataReply{})
 	Processor.Register(&TableGet{})
+	Processor.Register(&Ping{})
+	Processor.Register(&Pong{})
 }
 
 type WXCode struct {
@@ -107,7 +109,7 @@ type TableGet struct {
 }
 
 type QuestionCount struct {
-	ID   int
+	ID   string
 	Win  int
 	Fail int
 }

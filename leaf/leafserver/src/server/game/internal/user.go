@@ -2,7 +2,9 @@ package internal
 
 import (
 	"errors"
+	"leafserver/src/server/msg"
 	"storage"
+	"time"
 
 	"github.com/name5566/leaf/db/mongodb"
 	"github.com/name5566/leaf/gate"
@@ -14,6 +16,7 @@ type User struct {
 	Uuid string
 	Data *storage.UserStorage // 数据库数据
 	gate.Agent
+	count int
 }
 
 var (
@@ -25,6 +28,29 @@ var (
 
 	COLLECT string
 )
+
+func AddUser(guid string, u *User) {
+	Users[guid] = u
+	// 反注册
+	AgentUsers[u.Agent] = guid
+	log.Debug("玩家登录--------------------uuid: %v", guid)
+	u.Pong()
+	// 下发uuid
+	u.Agent.WriteMsg(&msg.Login{
+		Uuid: guid,
+	})
+}
+
+func DeleUser(a gate.Agent) {
+	guid := AgentUsers[a]
+	log.Debug("玩家离线--------------------uuid: %v", guid)
+	// storage.OfflineHandle(Users[guid].Data) // 离线保存
+	offlineHanlde(guid)
+	delete(Users, guid)
+	delete(AgentUsers, a)
+	manager.OfflineMemeber(guid)
+	a.Close()
+}
 
 func MongoConnect() {
 	c, err := mongodb.Dial(ServerConf.MongoDB.Url, ServerConf.MongoDB.SessionNum)
@@ -45,6 +71,39 @@ func NewUserStorageData(uid, nickname, icon string) *storage.UserStorage {
 	r.Icon = icon
 	r.Forever = make(map[string]string)
 	return r
+}
+
+// 心跳
+func Hearbeat(args []interface{}) {
+	req := args[0].(*msg.Ping)
+	u, ok := Users[req.Uuid]
+	if ok {
+		u.Ping()
+	}
+}
+
+// ping
+func (u *User) Ping() {
+	u.count = 0
+	log.Debug("收到心跳ping: %v", u.Uuid)
+	if u.count > 3 {
+		DeleUser(u.Agent)
+	}
+}
+
+// pong
+func (u *User) Pong() {
+	skeleton.Go(func() {
+		for {
+			u.count++
+			if u.count > 3 {
+				log.Debug("------------------没收到心跳报, 超时断线------------------")
+				DeleUser(u.Agent)
+				break
+			}
+			time.Sleep(time.Millisecond * time.Duration(5000))
+		}
+	}, func() {})
 }
 
 func (u *User) Save() {
