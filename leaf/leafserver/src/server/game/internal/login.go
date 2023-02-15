@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"leafserver/src/server/msg"
 	"storage"
 
@@ -30,12 +31,21 @@ func loginHandle(member *msg.LoginRequest) {
 		if e != nil {
 			log.Debug("找不到用户，新建%v", e)
 			user.Save()
+			user.Agent.WriteMsg(&msg.LoginReply{
+				State: true,
+				Value: "",
+			})
 		} else {
 			// 更新新的名字和头像
 			r.Nickname = member.Nickname
 			r.Icon = member.Icon
 			user.Data = r
 			log.Debug("玩家登录时的数据: %v", user.Data)
+			f, _ := json.Marshal(user.Data.Forever)
+			user.Agent.WriteMsg(&msg.LoginReply{
+				State: false,
+				Value: string(f),
+			})
 		}
 	} else {
 		log.Debug("找不到用户")

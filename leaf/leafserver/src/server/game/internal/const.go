@@ -109,17 +109,17 @@ func ExcelConfigUpdate() {
 		AnswerLibs = append(AnswerLibs, ToAnswerLib(v))
 	}
 	LowestAnswerLibs = ToBaseAnswerLib(ServerConf.NewerTable, nil)
-	log.Debug("新手题库数量: %v", len(LowestAnswerLibs))
-	log.Debug("标准题库数量: %v", len(Questions.QuestionMap))
+	log.Release("新手题库数量: %v", len(LowestAnswerLibs))
+	log.Release("标准题库数量: %v", len(Questions.QuestionMap))
 	for i, v := range Questions.Question {
-		log.Debug("段位: %v --> %v", i, len(v))
+		log.Release("段位: %v --> %v", i, len(v))
 	}
 	MongoConnect()  // 数据库连接
 	Questions.Run() // 题库监听
-	log.Debug("段位长度: %d", len(LevelLib))
-	log.Debug("皮肤数量: %v", len(Skins))
-	log.Debug("名字数量: %v", len(NamesLib))
-	log.Debug("Icon数量: %v", len(IconLib))
+	log.Release("段位长度: %d", len(LevelLib))
+	log.Release("皮肤数量: %v", len(Skins))
+	log.Release("名字数量: %v", len(NamesLib))
+	log.Release("Icon数量: %v", len(IconLib))
 	// OnExit()
 }
 

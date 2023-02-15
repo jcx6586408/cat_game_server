@@ -61,6 +61,7 @@ scp -r ./copy.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockercreate.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerrmi.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerdele.sh %user%@%gamehost%:%remoteBase%
+scp -r ./chmod.sh %user%@%gamehost%:%remoteBase%
 
 scp -r ./runLeaf.sh %user%@%gamehost%:%remoteBase%
 scp -r ./runRank.sh %user%@%gamehost%:%remoteBase%
@@ -71,7 +72,8 @@ scp -r ./dockerRunRank.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerRunCenter.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerfilebuild.sh %user%@%gamehost%:%remoteBase%
 scp -r ./Dockerfile %user%@%gamehost%:%remoteBase%
-scp -r ./docker-compose.yaml %user%@%centerhost%:%remoteBase%
+scp -r ./docker-compose.yaml %user%@%gamehost%:%remoteBase%
+scp -r ./dockercomposeLogs.sh %user%@%gamehost%:%remoteBase%
 
 :end
 exit

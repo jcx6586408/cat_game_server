@@ -242,6 +242,7 @@ func (r *BattleRoom) Play() {
 	var max = r.GetMaxLevel() // 获得最高等级
 	l := GetIDByLevel(max)    // 获得段位
 	r.Level = l
+	log.Debug("段位长度: %v, 索引: %v", len(LevelLib), l-1)
 	var levelConf = LevelLib[l-1] // 获得段位配置
 	r.LibAnswer = Questions.RandAnswerLib(l, levelConf.QuestionNumber)
 	r.AnswerTime = levelConf.QuestionTime
@@ -417,7 +418,7 @@ func (m *BattleRoom) CheckRoomAllDead(room Roomer) bool {
 }
 
 func (m *BattleRoom) GetMaxLevel() int {
-	var i = 1
+	var i = 0
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
 		if v.State == int32(MEMEBERPREPARE) || v.State == int32(MEMEBENONERPREPARE) {
 			return
@@ -427,10 +428,10 @@ func (m *BattleRoom) GetMaxLevel() int {
 			i = int(v.Level)
 		}
 	})
-	if i <= 0 {
-		log.Debug("非法段位0**********************")
-		i = 1
-	}
+	// if i <= 0 {
+	// 	log.Debug("非法段位0**********************")
+	// 	i = 1
+	// }
 	log.Debug("最后采用等级: %v", i)
 	return i
 }

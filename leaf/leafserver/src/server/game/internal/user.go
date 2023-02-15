@@ -85,7 +85,7 @@ func Hearbeat(args []interface{}) {
 // ping
 func (u *User) Ping() {
 	u.count = 0
-	log.Debug("收到心跳ping: %v", u.Uuid)
+	// log.Debug("收到心跳ping: %v", u.Uuid)
 	if u.count > 3 {
 		DeleUser(u.Agent)
 	}
@@ -97,7 +97,7 @@ func (u *User) Pong() {
 		for {
 			u.count++
 			if u.count > 3 {
-				log.Debug("------------------没收到心跳报, 超时断线------------------")
+				// log.Debug("------------------没收到心跳报, 超时断线------------------")
 				DeleUser(u.Agent)
 				break
 			}
@@ -120,6 +120,7 @@ func (u *User) Save() {
 }
 
 func (u *User) Update() error {
+	defer recover()
 	if MD == nil {
 		return errors.New("")
 	}
@@ -129,7 +130,7 @@ func (u *User) Update() error {
 	var s = MD.Ref()
 	var c = s.DB(DBNAME).C(COLLECT)
 	selector := bson.M{"uid": u.Data.Uid}
-	log.Debug("离线保存数据=============: %v", u.Data.Uid)
+	// log.Debug("离线保存数据=============: %v", u.Data.Uid)
 	update := bson.M{"$set": bson.M{"uid": u.Data.Uid, "icon": u.Data.Icon, "nickname": u.Data.Nickname, "online": 0, "forever": u.Data.Forever}}
 	if err := c.Update(selector, update); err != nil {
 		MD.UnRef(s)
@@ -149,7 +150,7 @@ func (u *User) UpdateMap(key, value string) {
 	if u.Data.Forever == nil {
 		u.Data.Forever = make(map[string]string)
 	}
-	log.Debug("存储数据***********: %v|%v", key, value)
+	// log.Debug("存储数据***********: %v|%v", key, value)
 	u.Data.Forever[key] = value
 }
 
@@ -165,7 +166,7 @@ func (u *User) GetData(key string) string {
 		u.Data.Forever = make(map[string]string)
 	}
 	val, ok := u.Data.Forever[key]
-	log.Debug("获取数据----------: %v|%v", key, val)
+	// log.Debug("获取数据----------: %v|%v", key, val)
 	if !ok {
 		return ""
 	}

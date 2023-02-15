@@ -55,5 +55,19 @@
         "wss://yinghuo-1.easygame2021.com:5119",
         "wss://yinghuo-1.easygame2021.com:5120"
     ],
+    "QuestionTables": [
+        "question-chuantonwenhua",
+        "question-dili",
+        "question-fagui",
+        "question-jiankang",
+        "question-keji",
+        "question-lishi",
+        "question-qita",
+        "question-shenghuochangshi",
+        "question-shengwu",
+        "question-tiyv",
+        "question-yingshi"
+    ],
+    "NewerTable": "question0",
     "SeverType":"gate"
 }

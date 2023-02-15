@@ -118,6 +118,7 @@ func (r *Room) MatchingCancel() bool {
 func (r *Room) OfflinHanlder(uuid string) {
 	for _, v := range r.Members {
 		if v.Uuid == uuid {
+			log.Debug("离开房间: %v|%v", r.ID, v.Uuid)
 			r.LeaveMember(v)
 		}
 	}

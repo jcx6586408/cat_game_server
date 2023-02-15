@@ -78,6 +78,7 @@ scp -r ./dockercomposePs.sh %user%@%centerhost%:%remoteBase%
 scp -r ./dockercomposeRun.sh %user%@%centerhost%:%remoteBase%
 scp -r ./dockercomposeRunD.sh %user%@%centerhost%:%remoteBase%
 scp -r ./dockercomposeStop.sh %user%@%centerhost%:%remoteBase%
+scp -r ./dockercomposeLogs.sh %user%@%centerhost%:%remoteBase%
 
 
 :end

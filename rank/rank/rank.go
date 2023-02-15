@@ -81,7 +81,6 @@ func handleDele(l *sync.RWMutex, ranks *[]*msg.Rank, count int, r *msg.Rank) {
 			return
 		}
 	}
-
 	oldR, err := getRankDataBy(ranks, r.UID)
 
 	if err != nil {
@@ -113,6 +112,10 @@ func handleDele(l *sync.RWMutex, ranks *[]*msg.Rank, count int, r *msg.Rank) {
 		if len((*ranks)) > count {
 			(*ranks) = (*ranks)[:count]
 		}
+	} else {
+
+		(*ranks) = delete((*ranks), oldR)
+
 	}
 }
 

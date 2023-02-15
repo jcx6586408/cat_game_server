@@ -89,6 +89,8 @@ func init() {
 	Processor.Register(&TableGet{})
 	Processor.Register(&Ping{})
 	Processor.Register(&Pong{})
+	Processor.Register(&LoginReply{})
+
 }
 
 type WXCode struct {

@@ -20,3 +20,8 @@ chmod u+x ./dockerRunCenter.sh
 chmod u+x ./dockerRunLeaf.sh
 chmod u+x ./dockerRunRank.sh
 chmod u+x ./dockerfilebuild.sh
+chmod u+x ./dockercomposeLogs.sh
+chmod u+x ./dockercomposeRun.sh
+chmod u+x ./dockercomposeRunD.sh
+chmod u+x ./dockercomposeStop.sh
+chmod u+x ./dockercomposePs.sh

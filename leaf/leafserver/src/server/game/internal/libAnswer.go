@@ -113,6 +113,7 @@ func GetAnswerLib() Answers {
 }
 
 func ToBaseAnswerLib(table string, callback func(obj *pmsg.Question)) Answers {
+	log.Release("读取表格: %s", table)
 	tableConf, ok := manager.TableManager.GetTable(table)
 	arr := []*pmsg.Question{}
 	if ok {
@@ -121,6 +122,11 @@ func ToBaseAnswerLib(table string, callback func(obj *pmsg.Question)) Answers {
 			obj.Table = table
 			for index, v := range tableConf.AttributeNames {
 				switch v {
+				case "lable":
+					obj.Label = cell[index].(string)
+					if obj.Label == "新手" {
+						log.Debug("新手题库**********************")
+					}
 				case "ID":
 					// obj.ID = int32(cell[index].(int))
 					obj.ID = fmt.Sprintf("%v_%v", table, int32(cell[index].(int)))
@@ -148,8 +154,7 @@ func ToBaseAnswerLib(table string, callback func(obj *pmsg.Question)) Answers {
 					obj.RightNumber = int32(cell[index].(int))
 				case "wrongNumber":
 					obj.WrongNumber = int32(cell[index].(int))
-				case "label":
-					obj.Label = cell[index].(string)
+
 				}
 			}
 			arr = append(arr, obj)
@@ -180,6 +185,9 @@ func ToAnswerLib(table string) Answers {
 	})
 	// 更新题库
 	for _, v := range Questions.QuestionMap {
+		if v.Q.Label == "新手" {
+			log.Debug("新手题库出现在错误地方==========================================")
+		}
 		Questions.updateLib(v)
 	}
 	return as

@@ -47,16 +47,22 @@ func ToLevelLib() []*Level {
 }
 
 func GetIDByLevel(level int) int {
+	if level == 0 {
+		return LevelLib[0].ID
+	}
 	for _, v := range LevelLib {
-		if v.Level > level {
-			return v.ID - 1
+		if level <= v.Level {
+			if level == v.Level {
+				return v.ID + 1
+			}
+			return v.ID
 		}
 	}
 	return LevelLib[len(LevelLib)-1].ID
 }
 
 func GetMaxLevel() int {
-	max := 1
+	max := 0
 	for _, v := range LevelLib {
 		if v.Level > max {
 			max = v.Level
