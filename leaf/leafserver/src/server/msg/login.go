@@ -2,6 +2,7 @@ package msg
 
 type Login struct {
 	Uuid string
+	Url  string
 }
 
 type LoginReply struct {

@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"config"
 	"errors"
+	"fmt"
 	"leafserver/src/server/msg"
 	"storage"
 	"time"
@@ -29,15 +31,28 @@ var (
 	COLLECT string
 )
 
+func GetTime() string {
+	now := time.Now()      //获取当前时间
+	year := now.Year()     //年
+	month := now.Month()   //月
+	day := now.Day()       //日
+	hour := now.Hour()     //小时
+	minute := now.Minute() //分钟
+	second := now.Second() //秒
+	return fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second)
+}
+
 func AddUser(guid string, u *User) {
 	Users[guid] = u
 	// 反注册
 	AgentUsers[u.Agent] = guid
 	log.Debug("玩家登录--------------------uuid: %v", guid)
+	log.Debug("下发服务器路径: ", ServerConf.SelfUrl+config.Port)
 	u.Pong()
 	// 下发uuid
 	u.Agent.WriteMsg(&msg.Login{
 		Uuid: guid,
+		Url:  ServerConf.SelfUrl + config.Port,
 	})
 }
 

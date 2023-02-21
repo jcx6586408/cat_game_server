@@ -22,7 +22,7 @@ func main() {
 	config.ConfPath = os.Args[2]
 	config.RoomConfPath = os.Args[3]
 	excel.TablePath = os.Args[4]
-	rank.IPLocationPath = os.Args[5]
+	// rank.IPLocationPath = os.Args[5]
 	port := os.Args[6]
 	if len(os.Args) >= 8 {
 		conf.Server.CertFile = os.Args[7]
@@ -43,6 +43,7 @@ func main() {
 	e.POST("/self", rank.GetSelf)
 	e.POST("/pull", rank.RankPull)
 	e.POST("/cityPull", rank.RankCityPull)
+	e.POST("/cityPullV1", rank.RankCityPull_V1)
 	e.POST("/update", rank.RankUpdate)
 	e.POST("/cityDele", rank.RankDele)
 	e.POST("/roomCreate", rank.RoomCreate)

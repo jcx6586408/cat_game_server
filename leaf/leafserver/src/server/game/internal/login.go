@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"leafserver/src/server/msg"
 	"storage"
+	"time"
 
 	"github.com/name5566/leaf/log"
 )
@@ -21,11 +22,12 @@ func loginHandle(member *msg.LoginRequest) {
 	user, ok := Users[member.Uuid]
 	if ok {
 		user.Data = &storage.UserStorage{
-			Uid:      member.Uid,
-			Nickname: member.Nickname,
-			Icon:     member.Icon,
-			Online:   1,
-			Forever:  make(map[string]string),
+			Uid:          member.Uid,
+			Nickname:     member.Nickname,
+			Icon:         member.Icon,
+			Online:       1,
+			RegisterTime: time.Now(),
+			Forever:      make(map[string]string),
 		}
 		r, e := user.Query()
 		if e != nil {

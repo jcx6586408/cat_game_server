@@ -529,19 +529,19 @@ func (m *BattleRoom) GetProgress() int {
 }
 
 func (m *BattleRoom) SetDefaultAnswer() {
-	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
-		v.Answer = make([]*pmsg.Answer, m.QuestionCount)
-		ranAnswer := results[rand.Intn(4)]
-		for i, aa := range v.Answer {
-			aa = &pmsg.Answer{
-				Uuid:       v.Uuid,
-				RoomID:     int32(m.ID),
-				QuestionID: "",
-				Result:     ranAnswer,
-			}
-			v.Answer[i] = aa
-		}
-	})
+	// m.foreachMembers(func(v *pmsg.Member, room Roomer) {
+	// 	v.Answer = make([]*pmsg.Answer, m.QuestionCount)
+	// 	ranAnswer := results[rand.Intn(4)]
+	// 	for i, aa := range v.Answer {
+	// 		aa = &pmsg.Answer{
+	// 			Uuid:       v.Uuid,
+	// 			RoomID:     int32(m.ID),
+	// 			QuestionID: "",
+	// 			Result:     ranAnswer,
+	// 		}
+	// 		v.Answer[i] = aa
+	// 	}
+	// })
 }
 
 // 答题
@@ -552,11 +552,16 @@ func (m *BattleRoom) Answer(a *pmsg.Answer) {
 	}
 	m.foreachMembers(func(v *pmsg.Member, room Roomer) {
 		if v.Uuid == a.Uuid {
+			// 是否已经答题
+			if v.IsAnswered {
+				return
+			}
 			for i, q := range v.Answer {
-				if i >= m.LibAnswer.Progress {
+				if i == m.LibAnswer.Progress {
 					q.Result = a.Result
 				}
 			}
+			v.IsAnswered = true
 			m.SendAnswer(a.Uuid, a.QuestionID, a.Result)
 			if !v.IsRobot {
 				m.RandomRobotTargetAnswer(a.Result)

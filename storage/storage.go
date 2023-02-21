@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"github.com/go-mysql-org/go-mysql/client"
 	_ "github.com/go-sql-driver/mysql"
@@ -21,11 +22,12 @@ type UserStorageDB struct {
 }
 
 type UserStorage struct {
-	Uid      string            `bson:"uid"`
-	Nickname string            `bson:"nickname"`
-	Icon     string            `bson:"icon"`
-	Online   int               `bson:"online"`
-	Forever  map[string]string `bson:"forever"`
+	Uid          string            `bson:"uid"`
+	Nickname     string            `bson:"nickname"`
+	Icon         string            `bson:"icon"`
+	Online       int               `bson:"online"`
+	RegisterTime time.Time         `bson:"registerTime"`
+	Forever      map[string]string `bson:"forever"`
 }
 
 var (

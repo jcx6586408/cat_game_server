@@ -26,18 +26,21 @@ func main() {
 	config.RoomConfPath = os.Args[3]
 	excel.TablePath = os.Args[4]
 	config.IPLocationPath = os.Args[5]
-	if len(os.Args) >= 7 {
-		conf.Server.CertFile = os.Args[6]
-	}
+	config.Port = os.Args[6]
 	if len(os.Args) >= 8 {
-		conf.Server.KeyFile = os.Args[7]
+		conf.Server.CertFile = os.Args[7]
 	}
+	if len(os.Args) >= 9 {
+		conf.Server.KeyFile = os.Args[8]
+	}
+
 	log.Release("配置加载完成-------------------------------------------------")
-	log.Release("服务器启动配置路径:\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n",
+	log.Release("服务器启动配置路径:\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n %s\r\n",
 		conf.ConfPath,
 		config.ConfPath,
 		config.RoomConfPath,
 		excel.TablePath,
+		config.Port,
 		config.IPLocationPath,
 		conf.Server.CertFile,
 		conf.Server.KeyFile)

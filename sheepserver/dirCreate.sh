@@ -16,7 +16,7 @@ if [ ! -d "$tempPath" ]; then
 mkdir IP2LOCATION-LITE-DB3.IPV6.BIN
 fi
 
-tempPath="table/"
+tempPath="table/"2
 if [ ! -d "$tempPath" ]; then
 mkdir table
 fi

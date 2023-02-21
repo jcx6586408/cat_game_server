@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
 )
 
 func init() {
@@ -47,8 +48,23 @@ func init() {
 func getQuestionLib(args []interface{}) {
 	req := args[0].(*msg.QuestionLibRequest)
 	a := args[1].(gate.Agent)
-	q := GetTestQuestion(req.Type, req.Level)
-	a.WriteMsg(q)
+	q := GetTestQuestion(req.Type, req.Rank)
+	if q != nil {
+		log.Debug("刷题下发数据: \r\n%v\r\n%v\r\n%v\r\n%v\r\n%v\r\n%v\r\n%v\r\n%v\r\n%v\r\n%v\r\n",
+			q.ID,
+			q.Question,
+			q.AnswerA,
+			q.AnswerB,
+			q.AnswerC,
+			q.AnswerD,
+			q.Label,
+			q.RightAnswer,
+			q.RightNumber,
+			q.WrongNumber)
+		a.WriteMsg(q)
+	} else {
+		log.Debug("刷题数据搜索为空")
+	}
 }
 
 func handler(m interface{}, h interface{}) {

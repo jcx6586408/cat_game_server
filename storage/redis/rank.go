@@ -55,24 +55,24 @@ func ConnectReids() {
 	// Rdb = rdb.Pipeline()
 	// Pipe.ZAdd()
 	fmt.Printf("******************redis数据库连接成功******************")
-	iplocationInit()
+	// iplocationInit()
 }
 
 func GetAddr() string {
 	return conf.Rank.Port
 }
 
-func iplocationInit() {
-	db, err := ip2location.OpenDB("../../../.././IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
-	if err != nil {
-		// catLog.Log(err)
-		db, err = ip2location.OpenDB(IPLocationPath)
-		if err != nil {
-			return
-		}
-	}
-	DB = db
-}
+// func iplocationInit() {
+// 	db, err := ip2location.OpenDB("../../../.././IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
+// 	if err != nil {
+// 		// catLog.Log(err)
+// 		db, err = ip2location.OpenDB(IPLocationPath)
+// 		if err != nil {
+// 			return
+// 		}
+// 	}
+// 	DB = db
+// }
 
 func AddWinTable(uid string, score float64) {
 	AddTable(win, uid, score)

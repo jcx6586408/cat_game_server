@@ -65,15 +65,28 @@ func GetRightAnswer(r string, obj *pmsg.Question) string {
 }
 
 func GetTestQuestion(label string, level int) *pmsg.Question {
+	log.Debug("标签: %v; 段位: %v", label, level)
 	if level == 1 {
 		lib := LowestAnswerLibs
 		var ran = rand.Intn(len(lib))
 		return lib[ran]
 	}
 	var lib = Questions.Question[level]
-	if len(lib) > 0 {
-		var ran = rand.Intn(len(lib))
-		return lib[ran].Q
+	var arr []*Question
+	arr = []*Question{}
+	if label == "ALL" {
+		arr = lib
+	} else {
+		for _, v := range lib {
+			if v.Q.Label == label {
+				arr = append(arr, v)
+			}
+		}
+	}
+	log.Debug("类型数组长度: %v|%v", label, len(arr))
+	if len(arr) > 0 {
+		var ran = rand.Intn(len(arr))
+		return arr[ran].Q
 	}
 	return nil
 }
@@ -127,6 +140,7 @@ func ToBaseAnswerLib(table string, callback func(obj *pmsg.Question)) Answers {
 					if obj.Label == "新手" {
 						log.Debug("新手题库**********************")
 					}
+
 				case "ID":
 					// obj.ID = int32(cell[index].(int))
 					obj.ID = fmt.Sprintf("%v_%v", table, int32(cell[index].(int)))

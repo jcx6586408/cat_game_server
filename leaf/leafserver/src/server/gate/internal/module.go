@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"config"
 	"leafserver/src/server/base"
 	"leafserver/src/server/conf"
 	"leafserver/src/server/game"
@@ -26,7 +27,7 @@ func (m *Module) OnInit() {
 		MaxConnNum:      conf.Server.MaxConnNum,
 		PendingWriteNum: conf.PendingWriteNum,
 		MaxMsgLen:       conf.MaxMsgLen,
-		WSAddr:          conf.Server.WSAddr,
+		WSAddr:          config.Port,
 		HTTPTimeout:     conf.HTTPTimeout,
 		CertFile:        conf.Server.CertFile,
 		KeyFile:         conf.Server.KeyFile,

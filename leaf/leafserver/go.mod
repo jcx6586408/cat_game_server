@@ -18,6 +18,7 @@ require (
 )
 
 require (
+	github.com/ThinkingDataAnalytics/go-sdk v1.6.7
 	github.com/go-mysql-org/go-mysql v1.6.0
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/ip2location/ip2location-go v8.3.0+incompatible

@@ -1,4 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/ThinkingDataAnalytics/go-sdk v1.6.7 h1:YA5FRKtzW1wApMu4MpJ25PbLUGVVofnWqYS+bTZ/0G0=
+github.com/ThinkingDataAnalytics/go-sdk v1.6.7/go.mod h1:KfbIdPwFp9R3ySG/13XrczUGvFYg+tzffYJgtiNci6Y=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=
 github.com/cespare/xxhash/v2 v2.1.2/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cznic/golex v0.0.0-20181122101858-9c343928389c/go.mod h1:+bmmJDNmKlhWNG+gwWCkaBoTy39Fs+bzRxVBzoTQbIc=

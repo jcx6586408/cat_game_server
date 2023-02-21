@@ -138,6 +138,6 @@ type DataReply struct {
 }
 
 type QuestionLibRequest struct {
-	Type  string
-	Level int
+	Type string
+	Rank int
 }
