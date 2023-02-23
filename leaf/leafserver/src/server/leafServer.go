@@ -27,11 +27,12 @@ func main() {
 	excel.TablePath = os.Args[4]
 	config.IPLocationPath = os.Args[5]
 	config.Port = os.Args[6]
-	if len(os.Args) >= 8 {
-		conf.Server.CertFile = os.Args[7]
-	}
+	config.CenterUrl = os.Args[7]
 	if len(os.Args) >= 9 {
-		conf.Server.KeyFile = os.Args[8]
+		conf.Server.CertFile = os.Args[8]
+	}
+	if len(os.Args) >= 10 {
+		conf.Server.KeyFile = os.Args[9]
 	}
 
 	log.Release("配置加载完成-------------------------------------------------")

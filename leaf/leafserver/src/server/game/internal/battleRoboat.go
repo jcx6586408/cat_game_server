@@ -51,20 +51,16 @@ func (m *BattleRoom) matching() {
 				if cur <= MATCHINGTIME {
 					switch cur {
 					case 1:
-						if m.GetMemberCount() <= 20 {
-							m.AddRandomCountRobots(4, 8, func() { cancel() })
+						if m.GetMemberCount() <= 10 {
+							m.AddRandomCountRobots(2, 4, func() { cancel() })
 						}
 					case 2:
-						if m.GetMemberCount() <= 20 {
+						if m.GetMemberCount() <= 15 {
 							m.AddRandomCountRobots(4, 8, func() { cancel() })
 						}
 					case 3:
-						if m.GetMemberCount() <= 30 {
-							m.AddRandomCountRobots(4, 6, func() { cancel() })
-						}
-					case 4:
-						if m.GetMemberCount() <= 30 {
-							m.AddRandomCountRobots(4, 6, func() { cancel() })
+						if m.GetMemberCount() <= 20 {
+							m.AddRandomCountRobots(4, 8, func() { cancel() })
 						}
 					}
 
@@ -88,7 +84,9 @@ func (m *BattleRoom) AddRandomCountRobots(min, max int, callback func()) {
 
 func (m *BattleRoom) AddRobot(count int) {
 	subIcon, ir := RandIconClip(count, m.robotIcons)
+	subName, nr := RandNameClip(count, m.robotNames)
 	m.robotIcons = ir
+	m.robotNames = nr
 	for i := 0; i < count; i++ {
 		guid := uuid.New().String()
 		skinID := 1
@@ -96,7 +94,7 @@ func (m *BattleRoom) AddRobot(count int) {
 			skinID = 2 + rand.Intn(len(Skins)-1)
 		}
 		m.Members = append(m.Members, &pmsg.Member{
-			Nickname: "",
+			Nickname: subName[i].Name,
 			Uuid:     guid,
 			Icon:     fmt.Sprintf("%v", subIcon[i].ID),
 			IsMaster: false,
@@ -108,7 +106,7 @@ func (m *BattleRoom) AddRobot(count int) {
 }
 
 // 随机机器人答案
-func (m *BattleRoom) robotAnswer(min, max, count int, result func() int) {
+func (m *BattleRoom) robotAnswer(min, max int, result func() int) {
 	lenRobot := rand.Intn(max) + min
 	startIndex := 0
 	if len(m.Members)-lenRobot > 0 {
@@ -122,10 +120,6 @@ func (m *BattleRoom) robotAnswer(min, max, count int, result func() int) {
 	}
 	subArr := m.Members[startIndex : startIndex+lenRobot]
 	for _, v := range subArr {
-		// var action = rand.Intn(10)
-		// if action >= count {
-		// 	return
-		// }
 		m.Answer(&pmsg.Answer{
 			Uuid:       v.Uuid,
 			RoomID:     int32(m.ID),
@@ -136,34 +130,35 @@ func (m *BattleRoom) robotAnswer(min, max, count int, result func() int) {
 }
 
 // 随机机器人答案
-func (m *BattleRoom) RandomRobotAnswer(min, max, count int) {
-	m.robotAnswer(min, max, count, func() int {
+func (m *BattleRoom) RandomRobotAnswer(min, max int) {
+	m.robotAnswer(min, max, func() int {
 		return rand.Intn(4)
 	})
 }
 
-func (m *BattleRoom) RandomRobotTargetAnswer(right string) {
-	lenRobot := rand.Intn(3) + 1
-	startIndex := 0
-	if len(m.Members)-lenRobot > 0 {
-		startIndex = rand.Intn(len(m.Members) - lenRobot)
-	}
-	if startIndex >= len(m.Members) {
-		return
-	}
-	if startIndex+lenRobot >= len(m.Members) {
-		return
-	}
-	subArr := m.Members[startIndex : startIndex+lenRobot]
-	for _, v := range subArr {
-		log.Debug("%v机器人答题: ", v.Uuid)
-		m.Answer(&pmsg.Answer{
-			Uuid:       v.Uuid,
-			RoomID:     int32(m.ID),
-			QuestionID: m.GetQuestion().ID,
-			Result:     right,
-		})
-	}
+func (m *BattleRoom) RandomRobotAnswerWithRate(min, max int) {
+	m.robotAnswer(min, max, func() int {
+		question := m.GetQuestion()
+		q, ok := Questions.QuestionMap[question.ID]
+		if !ok {
+			// log.Debug("找不到题库: %v", question.ID)
+			return rand.Intn(4)
+		}
+		// log.Debug("0胜率: win: %v|fail: %v", q.win, q.fail)
+		if q.fail+q.win <= 0 {
+			if m.Level <= 1 {
+				return GetRightNumberAnswer(question.RightAnswer, question)
+			} else {
+				return rand.Intn(4)
+			}
+		}
+		rate := float32(q.win) * 100 / (float32(q.win) + float32(q.fail))
+		// log.Debug("当前题目胜率: %v|win: %v|fail: %v", rate, q.win, q.fail)
+		if rand.Intn(100) < int(rate) {
+			return GetRightNumberAnswer(question.RightAnswer, question)
+		}
+		return rand.Intn(4)
+	})
 }
 
 // 检查真实成员是否还存在

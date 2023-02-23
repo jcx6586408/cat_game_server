@@ -62,18 +62,6 @@ func GetAddr() string {
 	return conf.Rank.Port
 }
 
-// func iplocationInit() {
-// 	db, err := ip2location.OpenDB("../../../.././IP2LOCATION-LITE-DB3.IPV6.BIN/IP2LOCATION-LITE-DB3.IPV6.BIN")
-// 	if err != nil {
-// 		// catLog.Log(err)
-// 		db, err = ip2location.OpenDB(IPLocationPath)
-// 		if err != nil {
-// 			return
-// 		}
-// 	}
-// 	DB = db
-// }
-
 func AddWinTable(uid string, score float64) {
 	AddTable(win, uid, score)
 }
@@ -112,6 +100,20 @@ func AddRank(key, uid string, score float64) {
 	}
 }
 
+// 加入服务器列表
+func AddGameServers(key, url string, score float64) {
+	Rdb.ZAdd(ctx, key, &redis.Z{Score: score, Member: url})
+}
+
+func GetTopGameServers(key string) []redis.Z {
+	return GetGameServers(key, 0, 0)
+}
+
+func DeleGameServer(city, url string) {
+	var r = GetSelfCityRank(city, url)
+	Rdb.ZRemRangeByRank(ctx, city, r-1, r-1)
+}
+
 func DeleRank(city, uid string) {
 	var r = GetSelfCityRank(city, uid)
 	if r < Max {
@@ -139,6 +141,10 @@ func UpdateRank(city, uid string, score float64) {
 // 获取排行榜
 func GetRank(key string, start int64, end int64) []redis.Z {
 	return Rdb.ZRevRangeWithScores(ctx, key, start, end).Val()
+}
+
+func GetGameServers(key string, start int64, end int64) []redis.Z {
+	return Rdb.ZRangeWithScores(ctx, key, start, end).Val()
 }
 
 // 获取世界排行

@@ -21,6 +21,7 @@ func (m *Module) OnInit() {
 	// 模块初始化
 	RankInit()
 	ConstInit()
+	CenterInit()
 }
 
 func (m *Module) OnDestroy() {

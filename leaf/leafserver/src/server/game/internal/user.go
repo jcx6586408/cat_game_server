@@ -47,7 +47,7 @@ func AddUser(guid string, u *User) {
 	// 反注册
 	AgentUsers[u.Agent] = guid
 	log.Debug("玩家登录--------------------uuid: %v", guid)
-	log.Debug("下发服务器路径: ", ServerConf.SelfUrl+config.Port)
+	log.Debug("下发服务器路径: %v", ServerConf.SelfUrl+config.Port)
 	u.Pong()
 	// 下发uuid
 	u.Agent.WriteMsg(&msg.Login{
@@ -197,10 +197,10 @@ func (u *User) Query() (*storage.UserStorage, error) {
 	var result *storage.UserStorage
 	if err := c.Find(bson.M{"uid": u.Data.Uid}).One(&result); err != nil {
 		MD.UnRef(s)
-		log.Debug("查找玩家数据失败----: %v", u.Data.Uid)
+		// log.Debug("查找玩家数据失败----: %v", u.Data.Uid)
 		return nil, err
 	}
 	MD.UnRef(s)
-	log.Debug("查找玩家数据++++: %v", u.Data)
+	// log.Debug("查找玩家数据++++: %v", u.Data)
 	return result, nil
 }

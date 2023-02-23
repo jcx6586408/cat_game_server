@@ -9,4 +9,5 @@ use (
 	./httpserver
 	./rank
 	./storage
+	./center
 )

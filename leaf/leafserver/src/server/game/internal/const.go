@@ -33,6 +33,7 @@ var (
 	AnswerLibs       []Answers // 标准题库
 	LowestAnswerLibs Answers   // 文盲题库
 	Scenes           []*Scene
+	Scores           []*Score
 
 	RoomManager   Managerer
 	manager       *Manager
@@ -79,6 +80,8 @@ func ExcelConfigUpdate() {
 	IconLib = ToIconLib()
 	LevelLib = ToLevelLib()
 	Scenes = ToSceneLib()
+	Scores = ToScoreLib()
+	log.Release("分数与时间数量: %v|%v|%v", len(Scores), Scores[0].ID, Scores[1].ID)
 	Questions = &QuestionLib{
 		QuestionMap:      make(map[string]*Question),
 		Question:         make(map[int][]*Question),
@@ -129,6 +132,7 @@ func OnExit() {
 	signal.Notify(ch, syscall.SIGKILL, syscall.SIGINT)
 
 	skeleton.Go(func() {
+
 		s := <-ch
 		close(Questions.Done)
 		switch s {

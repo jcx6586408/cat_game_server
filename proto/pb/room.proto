@@ -218,6 +218,7 @@ message Member {
     int32 State = 13;           // 角色状态（匹配，准备，战斗）
     int32 Level = 14;           // 段位等级
     bool IsAnswered = 15;       // 是否已经答题
+    int32 Score = 16;           // 成员分数
 }
 
 message RoomInfoReply {

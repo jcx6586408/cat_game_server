@@ -5,19 +5,19 @@ services:
    restart: "unless-stopped"
    ports: 
       - 5600:5600
-   command: /bin/sheep/runCenter.sh
+   command: /bin/sheep/runCenter.sh ":5000" ":5600"
   rank:
    image: "sheepserver:v1"
    restart: "unless-stopped"
    ports: 
       - 5200:5200
    command: /bin/sheep/runRank.sh
-  sheep:
+  home:
    image: "sheepserver:v1"
    restart: "unless-stopped"
    ports: 
       - 5601:5601
-   command: /bin/sheep/runSheep.sh
+   command: /bin/sheep/runHome.sh ":5601"
 networks:
  front-tier:
   driver: bridge

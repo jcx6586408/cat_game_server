@@ -2,6 +2,7 @@
 chmod u+x ./bin/leaf
 chmod u+x ./bin/rank
 chmod u+x ./bin/center
+chmod u+x ./bin/home
 chmod u+x ./run.sh
 chmod u+x ./kill.sh
 chmod u+x ./copy.sh

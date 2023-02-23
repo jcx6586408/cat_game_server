@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"sync"
 
-	pmsg "proto/msg"
+	
 
 	"github.com/go-redis/redis/v8"
 	"github.com/labstack/echo"
@@ -73,11 +73,15 @@ var (
 	countName = "Count"
 )
 
+func ConfInit() {
+	Conf = config.Read()
+}
+
 func RankInit() {
 	LevelDBLib = make(map[string]*LevelDB)
 	LevelDbLibBylv = make(map[string]int)
 	LevelDbLibByName = make(map[int]string)
-	Conf = config.Read()
+	ConfInit()
 	tables = excel.Read()
 	LevelLib = ToLevelLib()
 	serversMax = len(Conf.Urls)
@@ -229,14 +233,14 @@ func handleDele(l *sync.RWMutex, ranks *[]*msg.Rank, count int, r *msg.Rank) {
 			return (*ranks)[i].Val > (*ranks)[j].Val
 		})
 
-		(*ranks) = delete((*ranks), oldR)
+		(*ranks) = deleteRank((*ranks), oldR)
 
 		if len((*ranks)) > count {
 			(*ranks) = (*ranks)[:count]
 		}
 	} else {
 
-		(*ranks) = delete((*ranks), oldR)
+		(*ranks) = deleteRank((*ranks), oldR)
 
 	}
 	SaveToDB(r.City)
@@ -382,16 +386,6 @@ func GetSelf(c echo.Context) error {
 	return c.JSON(http.StatusOK, oldR)
 }
 
-func RoomCreate(c echo.Context) error {
-	url := Conf.Urls[curServer]
-	curServer++
-	if curServer >= serversMax {
-		curServer = 0
-	}
-	return c.JSON(http.StatusOK, &pmsg.RoomPreAddReply{
-		Url: url,
-	})
-}
 
 type WXCode struct {
 	Code string
@@ -445,7 +439,7 @@ func ParseNetBody(i interface{}, r io.ReadCloser) {
 	json.Unmarshal(d, i)
 }
 
-func delete(a []*msg.Rank, elem *msg.Rank) []*msg.Rank {
+func deleteRank(a []*msg.Rank, elem *msg.Rank) []*msg.Rank {
 	for i := 0; i < len(a); i++ {
 		if a[i] == elem {
 			a = append(a[:i], a[i+1:]...)

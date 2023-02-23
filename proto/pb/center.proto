@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package msg;
+
+option go_package = "/msg";
+
+service Center {
+    rpc Heartbeat (stream CenterPing) returns (CenterPong){}   // 连接房间服务
+    rpc Connect (CenterConnectRequest) returns (CenterConnectReply) {}    // 连接
+}
+
+message CenterPing {
+    string Url = 1;
+    int32 Count = 2;        // 人数统计
+}
+
+message CenterPong {
+
+}
+
+message CenterConnectRequest {
+    string Url = 1;             // 业务服的地址
+}
+
+message CenterConnectReply {
+
+}
+
+

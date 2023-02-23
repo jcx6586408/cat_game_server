@@ -5,9 +5,12 @@ import (
 	"io/ioutil"
 )
 
-var ConfPath string
-var IPLocationPath string
-var Port string
+var (
+	ConfPath       string
+	IPLocationPath string
+	Port           string
+	CenterUrl      string
+)
 
 type Config struct {
 	Rank           *Rank    `json:"rank"`           // 排行榜配置

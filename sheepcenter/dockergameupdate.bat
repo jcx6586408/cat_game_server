@@ -66,6 +66,7 @@ scp -r ./dockerdele.sh %user%@%gamehost%:%remoteBase%
 scp -r ./runLeaf.sh %user%@%gamehost%:%remoteBase%
 scp -r ./runRank.sh %user%@%gamehost%:%remoteBase%
 scp -r ./runCenter.sh %user%@%gamehost%:%remoteBase%
+scp -r ./runHome.sh %user%@%gamehost%:%remoteBase%
 
 scp -r ./dockerRunLeaf.sh %user%@%gamehost%:%remoteBase%
 scp -r ./dockerRunRank.sh %user%@%gamehost%:%remoteBase%
