@@ -1,0 +1,73 @@
+{
+    "rank": {
+        "Port": ":5200",
+        "RedisUrl": "10.2.0.13:5200",
+        "RedisPassword": "yinghuo@H9w5cV2UEjWMAoRsvpNd",
+        "worldRankCount": 100,
+        "countryRankCount": 100,
+        "provinceRankCount": 100,
+        "cityRankCount": 100,
+        "Max": 1000   
+    },
+    "wx": {
+        "appid": "wx43aafb42439d77c9",
+        "appSecret": "f7f441021fad14b4fd4f37a131c855e4"
+    },
+    "bytedance": {
+        "appid": "tt48373e8ad708d1e302",
+        "appSecret": "082120aa73a6402f34d921bb6305f1b101498bd8"
+    },
+    "MongoDB": {
+        "url": "localhost:27017",
+        "SessionNum": 100,
+        "DB": "sheep",
+        "Collection": "user"
+    },
+    "DB": {
+        "User":"root",
+        "Password": "111111",
+        "Host":"127.0.0.1:3306",
+        "DB": "user",
+        "MinAlive":100,
+        "MaxAlive": 400,
+        "MaxIdle": 5
+    },
+    "Urls": [
+        "wss://kampfiregames.cn:5100",
+        "wss://yinghuo-1.easygame2021.com:5101",
+        "wss://yinghuo-1.easygame2021.com:5102",
+        "wss://yinghuo-1.easygame2021.com:5103",
+        "wss://yinghuo-1.easygame2021.com:5104",
+        "wss://yinghuo-1.easygame2021.com:5105",
+        "wss://yinghuo-1.easygame2021.com:5106",
+        "wss://yinghuo-1.easygame2021.com:5107",
+        "wss://yinghuo-1.easygame2021.com:5108",
+        "wss://yinghuo-1.easygame2021.com:5109",
+        "wss://yinghuo-1.easygame2021.com:5110",
+        "wss://yinghuo-1.easygame2021.com:5111",
+        "wss://yinghuo-1.easygame2021.com:5112",
+        "wss://yinghuo-1.easygame2021.com:5113",
+        "wss://yinghuo-1.easygame2021.com:5114",
+        "wss://yinghuo-1.easygame2021.com:5115",
+        "wss://yinghuo-1.easygame2021.com:5116",
+        "wss://yinghuo-1.easygame2021.com:5117",
+        "wss://yinghuo-1.easygame2021.com:5118",
+        "wss://yinghuo-1.easygame2021.com:5119",
+        "wss://yinghuo-1.easygame2021.com:5120"
+    ],
+    "QuestionTables": [
+        "question-chuantonwenhua",
+        "question-dili",
+        "question-fagui",
+        "question-jiankang",
+        "question-keji",
+        "question-lishi",
+        "question-qita",
+        "question-shenghuochangshi",
+        "question-shengwu",
+        "question-tiyv",
+        "question-yingshi"
+    ],
+    "NewerTable": "question0",
+    "SeverType":"gate"
+}

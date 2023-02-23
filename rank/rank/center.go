@@ -1,6 +1,7 @@
 package rank
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -43,7 +44,7 @@ func (s *Serve) Heartbeat(srv msg.Center_HeartbeatServer) error {
 			println("读取错误", err)
 			return err
 		}
-		// fmt.Printf("在线人数: %v|%v\n", req.Url, req.Count)
+		fmt.Printf("在线人数: %v|%v\n", req.Url, req.Count)
 		redis.AddGameServers(redisKey, req.Url, float64(req.Count))
 		obj, ok := GameServers[req.Url]
 		if ok {
@@ -67,12 +68,12 @@ func CenterInit() {
 			for _, v := range GameServers {
 				v.HeatbeatTime++
 				if v.HeatbeatTime >= 3 {
+					fmt.Printf("删除:----%v\n", v.Url)
 					redis.DeleGameServer(redisKey, v.Url)
 					delete(GameServers, v.Url) // 删除
 				}
 			}
 			time.Sleep(time.Second * time.Duration(5))
-			// fmt.Printf("服务器: %v\n", redis.GetTopGameServers(redisKey)[0].Member)
 		}
 	}()
 	// 创建 Tcp 连接

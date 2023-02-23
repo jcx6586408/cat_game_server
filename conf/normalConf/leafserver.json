@@ -1,0 +1,11 @@
+{
+	"LogLevel": "release",
+	"LogPath": "",
+	"TCPAddr": "",
+	"WSAddr": ":5100",
+	"HttpAddr": ":5600",
+	"ConsolePort": 3333,
+	"CertFile": "./easygame2021.com_nginx/easygame2021.com_bundle.crt",
+	"KeyFile": "./easygame2021.com_nginx/easygame2021.com.key",
+	"MaxConnNum": 100000
+}
