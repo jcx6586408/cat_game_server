@@ -1,8 +1,8 @@
 {
     "PrepareTime": 5,
     "AnswerTime": 15,
-    "MaxMember": 48,
-    "MaxInvite": 12,
+    "MaxMember": 20,
+    "MaxInvite": 10,
     "ReliveWaitTime": 8,
     "QuestionCountMinLimit": 3,
     "QuestionCountDur": 3,

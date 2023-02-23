@@ -4,5 +4,5 @@
 	"TCPAddr": "",
 	"WSAddr": ":3653",
 	"HttpAddr": ":5600",
-	"MaxConnNum": 2000000
+	"MaxConnNum": 100000
 }

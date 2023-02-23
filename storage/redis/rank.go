@@ -111,6 +111,7 @@ func GetTopGameServers(key string) []redis.Z {
 
 func DeleGameServer(city, url string) {
 	var r = GetSelfCityRank(city, url)
+	println("")
 	Rdb.ZRemRangeByRank(ctx, city, r-1, r-1)
 }
 

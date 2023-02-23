@@ -62,8 +62,13 @@ func HearbeatCenter() {
 	// log.Println(res)
 	log.Debug("关闭中心服流: %v", res)
 	CenterConnect = false
-	time.Sleep(time.Second * time.Duration(5))
-	if !CenterConnect {
-		HearbeatCenter()
+	for {
+		time.Sleep(time.Second * time.Duration(5))
+		if !CenterConnect {
+			HearbeatCenter()
+		} else {
+			log.Debug("退出连接监听**********************")
+			break
+		}
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"proto/msg"
 	pmsg "proto/msg"
-	"storage/redis"
+	"sort"
 	"time"
 
 	"github.com/labstack/echo"
@@ -31,6 +31,7 @@ var (
 	GameServers map[string]*GameServer // 游戏服
 	redisKey    string                 = "gameservers"
 	Port        string                 // 端口监听
+	Servers     []*GameServer
 )
 
 func (s *Serve) Heartbeat(srv msg.Center_HeartbeatServer) error {
@@ -45,7 +46,6 @@ func (s *Serve) Heartbeat(srv msg.Center_HeartbeatServer) error {
 			return err
 		}
 		fmt.Printf("在线人数: %v|%v\n", req.Url, req.Count)
-		redis.AddGameServers(redisKey, req.Url, float64(req.Count))
 		obj, ok := GameServers[req.Url]
 		if ok {
 			obj.Count = int(req.Count)
@@ -56,23 +56,34 @@ func (s *Serve) Heartbeat(srv msg.Center_HeartbeatServer) error {
 				Count:        int(req.Count),
 				HeatbeatTime: 0}
 			GameServers[req.Url] = obj
+			Servers = append(Servers, obj)
 		}
 	}
+}
+
+func SortServers() {
+	sort.SliceStable((Servers), func(i, j int) bool {
+		return (Servers)[i].Count < (Servers)[j].Count
+	})
 }
 
 func CenterInit() {
 	println("启动rpc监听")
 	GameServers = make(map[string]*GameServer)
+	Servers = []*GameServer{}
 	go func() {
 		for {
+			lock.Lock()
 			for _, v := range GameServers {
 				v.HeatbeatTime++
 				if v.HeatbeatTime >= 3 {
 					fmt.Printf("删除:----%v\n", v.Url)
-					redis.DeleGameServer(redisKey, v.Url)
 					delete(GameServers, v.Url) // 删除
+					Servers = deleteServer(Servers, v)
 				}
 			}
+			SortServers() // 每隔5秒排序
+			lock.Unlock()
 			time.Sleep(time.Second * time.Duration(5))
 		}
 	}()
@@ -92,7 +103,6 @@ func CenterInit() {
 
 	println("********中心服启动成功********0")
 	// 连接redis
-	redis.ConnectReids()
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		// log.Fatalf("failed to serve: %v", err)
@@ -101,12 +111,30 @@ func CenterInit() {
 }
 
 func RoomCreate(c echo.Context) error {
+	lock.RLock()
+	var url = ""
+	if len(Servers) > 0 {
+		url = Servers[0].Url
+		println("下发路径", url, Servers[0].Count)
+	}
+	lock.RUnlock()
 	// url := Conf.Urls[curServer]
 	// curServer++
 	// if curServer >= serversMax {
 	// 	curServer = 0
 	// }
 	return c.JSON(http.StatusOK, &pmsg.RoomPreAddReply{
-		Url: redis.GetTopGameServers(redisKey)[0].Member.(string),
+		Url: url,
 	})
+}
+
+func deleteServer(a []*GameServer, elem *GameServer) []*GameServer {
+	for i := 0; i < len(a); i++ {
+		if a[i] == elem {
+			a = append(a[:i], a[i+1:]...)
+			i--
+			break
+		}
+	}
+	return a
 }
